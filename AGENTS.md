@@ -5,32 +5,35 @@ This file guides AI agents working with the code in this repository.
 
 ## Project overview
 
-Analytics Context Layer is a dependency-free browser library. It reads `data-analytics-*` attributes the server renders, turns clicks and form interactions into events and sends them to a sink. Releases attach the bundled `build/acl.js`, `build/acl.min.js` and `build/acl.esm.js` as GitHub release assets.
+Analytics Context Layer is a dependency-free browser library. It reads `data-analytics-*` attributes the server renders, turns clicks and form interactions into events and hands them to an adapter. Releases attach every bundle in `build/` as GitHub release assets: 1 per integration and adapter pair, each plain and minified, plus `build/acl.esm.js`.
 
 The attributes in `README.md` are the public contract and follow semver: renaming or removing one is a breaking change.
 
-The library is shared across sites, so keep it free of site-specific class names, values and rules. Site-specific behavior goes in the rendered attributes, in settings or in a custom sink defined by the site.
+The library is shared across sites, so keep it free of site-specific class names, values and rules. Site-specific behavior goes in the rendered attributes, in settings or in an adapter defined by the site. Google-specific code goes in `src/adapters/`, and Drupal-specific code in `src/integrations/drupal.js`.
 
 Field events must never carry what a visitor typed or chose. `tests/privacy.test.js` guards this for every event type.
 
 
 ## Structure
 
-- `src/acl.js` - The `AnalyticsContextLayer` class, `DEFAULT_SETTINGS`, the `TYPES` registry and the shared `init()`.
-- `src/dom.js` - DOM helpers shared by the event types: listeners, text, labels and parameters.
-- `src/sinks.js` - The `dataLayer`, `gtag` and custom-function sinks.
-- `src/types/` - 1 module per event type: `click`, `form_start`, `field_complete` and `form_submit`.
-- `src/index.js` - Bundle entry point. Exposes the class and the shared instance on `window` and initializes it unless `autoInit` is false.
-- `tests/<type>.test.js` - Behavior tests for each event type against `tests/fixtures/<type>.html`.
-- `tests/acl.test.js`, `tests/sinks.test.js` and `tests/privacy.test.js` - Core, sink and privacy tests.
-- `tests/index.test.js` - Entry point tests.
-- `tests/bundle.test.js` - Smoke tests for every built bundle.
+The source has 3 layers, and each folder holds 1 of them:
+
+- `src/core/` - What every bundle shares. It knows nothing about Google or Drupal.
+  - `core.js` - The `AnalyticsContextLayer` class, `DEFAULT_SETTINGS`, the `TYPES` registry and the shared `init()`.
+  - `dom.js` - DOM helpers shared by the event types: listeners, text, labels and parameters.
+  - `event-types/` - 1 module per event type: `click`, `form_start`, `field_complete` and `form_submit`.
+- `src/adapters/` - Where events go. `gtm.js` and `gtag.js`, with the GA4 rules they share in `ga4.js`.
+- `src/integrations/` - How the script starts. `standalone.js` reads `window.analyticsContextLayerSettings` on load; `drupal.js` registers a behavior that reads `drupalSettings.analyticsContextLayer`.
+- `src/index.js` - ES module entry point. Re-exports the core and the adapters.
+- `scripts/bundles.js` - The bundle matrix: every integration paired with every adapter, plus 1 bundle per integration that takes its adapter from `window.analyticsContextLayerAdapter`.
+- `scripts/build.js` - Builds every bundle in the matrix with esbuild, plain and minified, plus `build/acl.esm.js`.
+- `tests/` mirrors `src/`: `core/`, `adapters/` and `integrations/`, with fixtures for the event types in `tests/fixtures/`. `tests/core/privacy.test.js` guards the privacy rule. `tests/bundles.test.js` runs every built bundle and checks that it holds only its own integration and adapter.
 
 
 ## Commands
 
 ```bash
-# Build build/acl.js, build/acl.min.js and build/acl.esm.js with esbuild
+# Build every bundle in the matrix and build/acl.esm.js with esbuild
 npm run build
 
 # Run all linters (ESLint, Prettier)
@@ -51,7 +54,7 @@ npm run test-coverage
 
 - `.github/workflows/test-nodejs.yml` - Lint, build and test on Node.js 22 and 24, with a coverage threshold.
 - `.github/workflows/test-actions.yml` - Lint the workflows with yamllint, actionlint and zizmor.
-- `.github/workflows/release-nodejs.yml` - Build and attach `build/acl.js`, `build/acl.min.js` and `build/acl.esm.js` to the GitHub release.
+- `.github/workflows/release-nodejs.yml` - Build and attach every `build/*.js` bundle to the GitHub release.
 - `.github/workflows/draft-release-notes.yml` - Draft release notes with Release Drafter.
 
 
