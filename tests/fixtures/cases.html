@@ -466,7 +466,8 @@
   window.dataLayer = [];
   window.dataLayer.push = function push(...events) {
     events.forEach((event) => {
-      console.log('[cases]', event);
+      // The console shortens long objects, so the name goes first.
+      console.log('[cases]', event.event, event);
       log.textContent += `${JSON.stringify(event, null, 2)}\n`;
     });
     log.scrollTop = log.scrollHeight;
