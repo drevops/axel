@@ -3,15 +3,13 @@ import { gtm } from '../../../src/adapters/gtm.js';
 import { AnalyticsContextLayer } from '../../../src/core/core.js';
 import { loadFixture } from '../../helpers.js';
 
-function focus(selector) {
-  document.querySelector(selector).dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
-}
-
+// The behavior of each kind of form is covered by the cases in
+// tests/fixtures/cases.html; these tests cover what the page can't express.
 describe('form_start', () => {
   let acl;
 
   beforeEach(() => {
-    loadFixture('form-start');
+    loadFixture();
     window.dataLayer = [];
     window.sessionStorage.clear();
 
@@ -23,67 +21,17 @@ describe('form_start', () => {
     delete window.dataLayer;
   });
 
-  it.each([
-    [
-      'a form with an ID and an address',
-      '#contact-name',
-      {
-        event: 'form_start',
-        form_name: 'contact',
-        form_id: 'contact',
-        form_destination: 'http://localhost:3000/contact',
-        form_type: 'enquiry',
-        section: 'contact',
-      },
-    ],
-    ['a marked wrapper without an ID or address', '#newsletter-email', { event: 'form_start', form_name: 'newsletter' }],
-    ['a form without an address', '#callback-phone', { event: 'form_start', form_name: 'callback', form_id: 'callback' }],
-  ])('sends 1 event for the first focus in %s', (_description, selector, expected) => {
-    focus(selector);
-
-    expect(window.dataLayer).toEqual([expected]);
-  });
-
-  it('sends 1 event per form however many fields are focused', () => {
-    focus('#contact-name');
-    focus('#contact-email');
-    focus('#contact-name');
-    focus('#callback-phone');
-
-    expect(window.dataLayer.map((event) => event.form_name)).toEqual(['contact', 'callback']);
-  });
-
-  it('sends the event for a native focus', () => {
-    document.querySelector('#contact-email').focus();
-
-    expect(window.dataLayer).toHaveLength(1);
-  });
-
-  it('starts the form on the next focus after a skipped field', () => {
-    focus('#contact-skipped');
-
-    expect(window.dataLayer).toHaveLength(0);
-
-    focus('#contact-submit');
-
-    expect(window.dataLayer).toHaveLength(1);
-  });
-
-  it.each([
-    ['a field outside any marked form', '#unmarked-field'],
-    ['the document itself', null],
-  ])('sends no event for focus on %s', (_description, selector) => {
-    const target = selector ? document.querySelector(selector) : document;
-
-    target.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+  it('sends no event for focus dispatched on the document itself', () => {
+    document.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
 
     expect(window.dataLayer).toHaveLength(0);
   });
 
   it('starts a form again once it is replaced', () => {
-    focus('#callback-phone');
-    document.querySelector('#callback').outerHTML = '<form id="callback" data-analytics-form="callback"><input id="callback-phone"></form>';
-    focus('#callback-phone');
+    document.querySelector('#form-start-phone').focus();
+    document.querySelector('#form-start-callback').outerHTML =
+      '<form id="form-start-callback" data-analytics-form="callback"><input id="form-start-phone"></form>';
+    document.querySelector('#form-start-phone').focus();
 
     expect(window.dataLayer).toHaveLength(2);
   });

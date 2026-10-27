@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<!--
+  Every behavior of the library as a case on 1 page.
+
+  Each case is a section with a 'case-' ID, a title, its markup, the steps
+  to run in 'data-steps' and the events it pushes in the 'expected' block.
+  'link_url' and 'form_destination' are resolved against the page URL.
+
+  Steps, separated by ';':
+  - load: no step; the events are pushed when the page loads.
+  - click, middle-click, right-click, focus, change <selector>
+  - fill <selector> = <text>, check <selector>, select <selector> = <value>
+  - insert <selector> = <template selector>: append the template content.
+  - hook <form name> = <JSON params>: call formSubmitted().
+
+  The unit tests run every case in jsdom and the functional tests run every
+  case in a browser. To try a case by hand, run "npm run build" and open this
+  file with "#analytics-debug" appended to the URL to log each event.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Analytics Context Layer cases</title>
+  <style>
+    .case {
+      border: 1px solid #ccc;
+      margin: 1em 0;
+      padding: 0 1em 1em;
+    }
+
+    .expected {
+      background: #f4f4f4;
+      padding: 0.5em;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+<h1>Analytics Context Layer cases</h1>
+
+<h2>click</h2>
+
+<section class="case" id="case-click-outside" data-steps="click #click-outside-link; click #click-outside-button">
+  <h3>A link and a button outside any data-analytics-event send nothing</h3>
+  <a id="click-outside-link" href="/contact">Contact</a>
+  <button id="click-outside-button" type="button">Open</button>
+  <pre class="expected">[]</pre>
+</section>
+
+<section class="case" id="case-click-link" data-steps="click #click-link">
+  <h3>A link sends the event named by its component, with its text, URL and the component parameters</h3>
+  <div data-analytics-event="component_click" data-analytics-param-component="promo">
+    <a id="click-link" href="/sale">See the deals</a>
+  </div>
+  <pre class="expected">[{ "event": "component_click", "link_text": "See the deals", "link_url": "/sale", "component": "promo" }]</pre>
+</section>
+
+<section class="case" id="case-click-phone" data-steps="click #click-phone">
+  <h3>A phone link</h3>
+  <div data-analytics-event="component_click" data-analytics-param-component="promo">
+    <a id="click-phone" href="tel:0200000000">02 0000 0000</a>
+  </div>
+  <pre class="expected">[{ "event": "component_click", "link_text": "02 0000 0000", "link_url": "tel:0200000000", "component": "promo" }]</pre>
+</section>
+
+<section class="case" id="case-click-external" data-steps="click #click-external">
+  <h3>A link to another site</h3>
+  <div data-analytics-event="component_click" data-analytics-param-component="promo">
+    <a id="click-external" href="https://example.com/partner">Visit our partner</a>
+  </div>
+  <pre class="expected">[{ "event": "component_click", "link_text": "Visit our partner", "link_url": "https://example.com/partner", "component": "promo" }]</pre>
+</section>
+
+<section class="case" id="case-click-anchor" data-steps="click #click-anchor">
+  <h3>A link to a section of the page</h3>
+  <div data-analytics-event="component_click" data-analytics-param-component="promo">
+    <a id="click-anchor" href="#form">Jump to the form</a>
+  </div>
+  <pre class="expected">[{ "event": "component_click", "link_text": "Jump to the form", "link_url": "#form", "component": "promo" }]</pre>
+</section>
+
+<section class="case" id="case-click-button" data-steps="click #click-button">
+  <h3>A button sends its text and no URL</h3>
+  <div data-analytics-event="component_click" data-analytics-param-component="promo">
+    <button id="click-button" type="button">Menu</button>
+  </div>
+  <pre class="expected">[{ "event": "component_click", "link_text": "Menu", "component": "promo" }]</pre>
+</section>
+
+<section class="case" id="case-click-input-buttons" data-steps="click #click-submit; click #click-input-button">
+  <h3>A submit input and an input button send their value as the text</h3>
+  <div data-analytics-event="component_click" data-analytics-param-component="promo">
+    <form action="/subscribe">
+      <input id="click-submit" type="submit" value="Subscribe">
+      <input id="click-input-button" type="button" value="Clear">
+    </form>
+  </div>
+  <pre class="expected">[
+  { "event": "component_click", "link_text": "Subscribe", "component": "promo" },
+  { "event": "component_click", "link_text": "Clear", "component": "promo" }
+]</pre>
+</section>
+
+<section class="case" id="case-click-not-interactive" data-steps="click #click-no-href; click #click-text">
+  <h3>An anchor without an address and plain text send nothing</h3>
+  <div data-analytics-event="component_click" data-analytics-param-component="promo">
+    <a id="click-no-href">An anchor without an address</a>
+    <p><span id="click-text">Plain text</span></p>
+  </div>
+  <pre class="expected">[]</pre>
+</section>
+
+<section class="case" id="case-click-mouse-buttons" data-steps="middle-click #click-mouse; right-click #click-mouse">
+  <h3>A middle click sends the event and a right click sends nothing</h3>
+  <div data-analytics-event="component_click">
+    <a id="click-mouse" href="/sale">See the deals</a>
+  </div>
+  <pre class="expected">[{ "event": "component_click", "link_text": "See the deals", "link_url": "/sale" }]</pre>
+</section>
+
+<section class="case" id="case-click-nested" data-steps="click #click-nested-inner .visually-hidden; click #click-nested-outer; click #click-nested-event; click #click-own-event; click #click-text-param">
+  <h3>Nested components: the closest event name and the closest of each parameter win</h3>
+  <div data-analytics-event="component_click" data-analytics-param-component="section" data-analytics-param-layout="grid">
+    <div data-analytics-event="component_click" data-analytics-param-component="card">
+      <a id="click-nested-inner" href="/sale/spring"><span>Read more<span class="visually-hidden">: Spring sale</span></span></a>
+    </div>
+    <a id="click-nested-outer" href="/about">About us</a>
+    <div data-analytics-event="card_click">
+      <a id="click-nested-event" href="/sale/summer">Summer sale</a>
+    </div>
+    <a id="click-own-event" href="/contact" data-analytics-event="contact_click" data-analytics-param-position="2">Get in touch</a>
+    <a id="click-text-param" href="/contact" data-analytics-param-link-text="Custom text">Contact</a>
+  </div>
+  <pre class="expected">[
+  { "event": "component_click", "link_text": "Read more: Spring sale", "link_url": "/sale/spring", "component": "card", "layout": "grid" },
+  { "event": "component_click", "link_text": "About us", "link_url": "/about", "component": "section", "layout": "grid" },
+  { "event": "card_click", "link_text": "Summer sale", "link_url": "/sale/summer", "component": "section", "layout": "grid" },
+  { "event": "contact_click", "link_text": "Get in touch", "link_url": "/contact", "component": "section", "layout": "grid", "position": "2" },
+  { "event": "component_click", "link_text": "Custom text", "link_url": "/contact", "component": "section", "layout": "grid" }
+]</pre>
+</section>
+
+<section class="case" id="case-click-skip" data-steps="click #click-skip-link; click #click-skip-container-link">
+  <h3>A skipped link and a link inside a skipped element send nothing</h3>
+  <div data-analytics-event="component_click" data-analytics-param-component="footer">
+    <a id="click-skip-link" href="/terms" data-analytics-skip>Terms</a>
+    <div data-analytics-skip>
+      <a id="click-skip-container-link" href="/privacy" data-analytics-event="legal_click">Privacy</a>
+    </div>
+  </div>
+  <pre class="expected">[]</pre>
+</section>
+
+<section class="case" id="case-click-link-text" data-steps="click #click-text-hidden; click #click-text-label; click #click-text-title; click #click-text-none">
+  <h3>Link text skips hidden content and comments, then falls back to aria-label and title</h3>
+  <div data-analytics-event="component_click">
+    <a id="click-text-hidden" href="/contact"><span aria-hidden="true">&rarr;</span>
+      Contact
+      us <!-- An HTML comment. --></a>
+    <a id="click-text-label" href="tel:0200000000" aria-label="Call us"><svg aria-hidden="true" width="20" height="20"></svg></a>
+    <a id="click-text-title" href="/contact" title="Contact the team"><svg aria-hidden="true" width="20" height="20"></svg></a>
+    <a id="click-text-none" href="/contact"><svg aria-hidden="true" width="20" height="20"></svg></a>
+  </div>
+  <pre class="expected">[
+  { "event": "component_click", "link_text": "Contact us", "link_url": "/contact" },
+  { "event": "component_click", "link_text": "Call us", "link_url": "tel:0200000000" },
+  { "event": "component_click", "link_text": "Contact the team", "link_url": "/contact" },
+  { "event": "component_click", "link_text": "", "link_url": "/contact" }
+]</pre>
+</section>
+
+<h2>form_start</h2>
+
+<section class="case" id="case-form-start-first-focus" data-steps="focus #form-start-name; focus #form-start-email; focus #form-start-name">
+  <h3>The first focus in a marked form sends 1 event with the form and its ancestors' parameters</h3>
+  <div data-analytics-param-section="contact">
+    <form id="form-start-contact" action="/contact" data-analytics-form="contact" data-analytics-param-form-type="enquiry">
+      <label for="form-start-name">Name</label>
+      <input id="form-start-name" type="text" name="name">
+      <label for="form-start-email">Email</label>
+      <input id="form-start-email" type="email" name="email">
+    </form>
+  </div>
+  <pre class="expected">[{ "event": "form_start", "form_name": "contact", "form_id": "form-start-contact", "form_destination": "/contact", "form_type": "enquiry", "section": "contact" }]</pre>
+</section>
+
+<section class="case" id="case-form-start-wrapper" data-steps="focus #form-start-newsletter-email">
+  <h3>A marked wrapper without an ID or address sends only the form name</h3>
+  <div data-analytics-form="newsletter">
+    <form>
+      <input id="form-start-newsletter-email" type="email" name="email">
+    </form>
+  </div>
+  <pre class="expected">[{ "event": "form_start", "form_name": "newsletter" }]</pre>
+</section>
+
+<section class="case" id="case-form-start-no-address" data-steps="focus #form-start-phone">
+  <h3>A form without an address sends no destination</h3>
+  <form id="form-start-callback" data-analytics-form="callback">
+    <input id="form-start-phone" type="tel" name="phone">
+  </form>
+  <pre class="expected">[{ "event": "form_start", "form_name": "callback", "form_id": "form-start-callback" }]</pre>
+</section>
+
+<section class="case" id="case-form-start-skipped" data-steps="focus #form-start-skipped-field; focus #form-start-after-skip">
+  <h3>A skipped field doesn't start the form; the next focus does</h3>
+  <form id="form-start-quote" data-analytics-form="quote">
+    <input id="form-start-skipped-field" type="text" name="internal" data-analytics-skip>
+    <button id="form-start-after-skip" type="button">Next</button>
+  </form>
+  <pre class="expected">[{ "event": "form_start", "form_name": "quote", "form_id": "form-start-quote" }]</pre>
+</section>
+
+<section class="case" id="case-form-start-unmarked" data-steps="focus #form-start-unmarked-field">
+  <h3>A form without data-analytics-form sends nothing</h3>
+  <form action="/search">
+    <input id="form-start-unmarked-field" type="text" name="keywords">
+  </form>
+  <pre class="expected">[]</pre>
+</section>
+
+<h2>field_complete</h2>
+
+<section class="case" id="case-field-label" data-steps="change #field-name">
+  <h3>A field is named by its label, without hidden content</h3>
+  <form id="field-label-form" action="/apply" data-analytics-form="apply">
+    <label for="field-name">Full <span>name</span> <span aria-hidden="true">*</span></label>
+    <input id="field-name" type="text" name="full_name">
+  </form>
+  <pre class="expected">[{ "event": "field_complete", "form_name": "apply", "form_id": "field-label-form", "form_destination": "/apply", "field_name": "full_name", "field_label": "Full name" }]</pre>
+</section>
+
+<section class="case" id="case-field-wrapping-label" data-steps="change #field-phone">
+  <h3>A field inside its label</h3>
+  <form id="field-wrapping-label-form" data-analytics-form="apply">
+    <label>Phone <input id="field-phone" type="tel" name="phone"></label>
+  </form>
+  <pre class="expected">[{ "event": "field_complete", "form_name": "apply", "form_id": "field-wrapping-label-form", "field_name": "phone", "field_label": "Phone" }]</pre>
+</section>
+
+<section class="case" id="case-field-textarea-select" data-steps="change #field-message; change #field-state">
+  <h3>A textarea and a select are named by their labels, never their content</h3>
+  <form id="field-textarea-select-form" data-analytics-form="apply">
+    <label for="field-message">Message</label>
+    <textarea id="field-message" name="message">Pre-filled text</textarea>
+    <label for="field-state">State</label>
+    <select id="field-state" name="state">
+      <option value="nsw">New South Wales</option>
+      <option value="vic">Victoria</option>
+    </select>
+  </form>
+  <pre class="expected">[
+  { "event": "field_complete", "form_name": "apply", "form_id": "field-textarea-select-form", "field_name": "message", "field_label": "Message" },
+  { "event": "field_complete", "form_name": "apply", "form_id": "field-textarea-select-form", "field_name": "state", "field_label": "State" }
+]</pre>
+</section>
+
+<section class="case" id="case-field-options" data-steps="change #field-method-phone; change #field-callback-yes; change #field-callback-no; change #field-terms">
+  <h3>Radios and checkboxes in a fieldset use its legend; a loose radio never uses its own label</h3>
+  <form id="field-options-form" data-analytics-form="apply">
+    <fieldset>
+      <legend>Contact method</legend>
+      <input id="field-method-email" type="radio" name="method" value="email">
+      <label for="field-method-email">Email</label>
+      <input id="field-method-phone" type="radio" name="method" value="phone">
+      <label for="field-method-phone">Phone</label>
+    </fieldset>
+    <input id="field-callback-yes" type="radio" name="callback" value="1">
+    <label for="field-callback-yes">Yes</label>
+    <input id="field-callback-no" type="radio" name="callback" value="0" aria-label="Callback">
+    <label for="field-callback-no">No</label>
+    <input id="field-terms" type="checkbox" name="terms" value="1">
+    <label for="field-terms">I accept the terms</label>
+  </form>
+  <pre class="expected">[
+  { "event": "field_complete", "form_name": "apply", "form_id": "field-options-form", "field_name": "method", "field_label": "Contact method" },
+  { "event": "field_complete", "form_name": "apply", "form_id": "field-options-form", "field_name": "callback", "field_label": "" },
+  { "event": "field_complete", "form_name": "apply", "form_id": "field-options-form", "field_name": "callback", "field_label": "Callback" },
+  { "event": "field_complete", "form_name": "apply", "form_id": "field-options-form", "field_name": "terms", "field_label": "I accept the terms" }
+]</pre>
+</section>
+
+<section class="case" id="case-field-fallbacks" data-steps="change #field-aria; change #field-param-label; change #field-bare">
+  <h3>A field falls back to aria-label; a label parameter overrides; a bare field sends an empty label</h3>
+  <form id="field-fallbacks-form" data-analytics-form="apply">
+    <input id="field-aria" type="text" name="reference" aria-label="Reference number">
+    <input id="field-param-label" type="text" data-analytics-param-field-label="Custom label">
+    <input id="field-bare" type="text">
+  </form>
+  <pre class="expected">[
+  { "event": "field_complete", "form_name": "apply", "form_id": "field-fallbacks-form", "field_name": "reference", "field_label": "Reference number" },
+  { "event": "field_complete", "form_name": "apply", "form_id": "field-fallbacks-form", "field_label": "Custom label" },
+  { "event": "field_complete", "form_name": "apply", "form_id": "field-fallbacks-form", "field_label": "" }
+]</pre>
+</section>
+
+<section class="case" id="case-field-every-change" data-steps="change #field-repeat; change #field-repeat">
+  <h3>Every change sends an event</h3>
+  <form id="field-every-change-form" data-analytics-form="apply">
+    <label for="field-repeat">Suburb</label>
+    <input id="field-repeat" type="text" name="suburb">
+  </form>
+  <pre class="expected">[
+  { "event": "field_complete", "form_name": "apply", "form_id": "field-every-change-form", "field_name": "suburb", "field_label": "Suburb" },
+  { "event": "field_complete", "form_name": "apply", "form_id": "field-every-change-form", "field_name": "suburb", "field_label": "Suburb" }
+]</pre>
+</section>
+
+<section class="case" id="case-field-ignored" data-steps="change #field-skipped; change #field-unmarked">
+  <h3>A skipped field and a field outside a marked form send nothing</h3>
+  <form data-analytics-form="apply">
+    <input id="field-skipped" type="text" name="internal" data-analytics-skip>
+  </form>
+  <form action="/search">
+    <input id="field-unmarked" type="text" name="keywords">
+  </form>
+  <pre class="expected">[]</pre>
+</section>
+
+<h2>form_submit</h2>
+
+<section class="case" id="case-submit-on-load" data-steps="load">
+  <h3>A confirmation rendered with the page sends the event on load; a skipped one sends nothing</h3>
+  <div data-analytics-form-submitted="contact" data-analytics-param-form-type="enquiry">
+    <p>Thank you for your enquiry.</p>
+  </div>
+  <div data-analytics-skip>
+    <div data-analytics-form-submitted="internal"></div>
+  </div>
+  <pre class="expected">[{ "event": "form_submit", "form_name": "contact", "form_type": "enquiry" }]</pre>
+</section>
+
+<section class="case" id="case-submit-added-later" data-steps="insert #submit-ajax-wrapper = #submit-confirmation; insert #submit-ajax-wrapper = #submit-nested-confirmation; insert #submit-ajax-wrapper = #submit-no-marker">
+  <h3>A confirmation added after load sends the event, even when nested; markup without a marker sends nothing</h3>
+  <div id="submit-ajax-wrapper" data-analytics-param-section="newsletter"></div>
+  <template id="submit-confirmation"><p data-analytics-form-submitted="newsletter">Subscribed.</p></template>
+  <template id="submit-nested-confirmation"><div><p data-analytics-form-submitted="callback">We'll call you.</p></div></template>
+  <template id="submit-no-marker"><p>Saved.</p></template>
+  <pre class="expected">[
+  { "event": "form_submit", "form_name": "newsletter", "section": "newsletter" },
+  { "event": "form_submit", "form_name": "callback", "section": "newsletter" }
+]</pre>
+</section>
+
+<section class="case" id="case-submit-hook" data-steps='hook quote = {"form_step": "2"}'>
+  <h3>The site can report a confirmed submission from its own code</h3>
+  <pre class="expected">[{ "event": "form_submit", "form_name": "quote", "form_step": "2" }]</pre>
+</section>
+
+<h2>Privacy</h2>
+
+<section class="case" id="case-privacy-text" data-steps="fill #privacy-name = Jane Citizen; fill #privacy-email = jane@example.com">
+  <h3>Typed text and email values are never sent</h3>
+  <form id="privacy-text-form" data-analytics-form="private">
+    <label for="privacy-name">Name</label>
+    <input id="privacy-name" type="text" name="name">
+    <label for="privacy-email">Email</label>
+    <input id="privacy-email" type="email" name="email">
+  </form>
+  <pre class="expected">[
+  { "event": "form_start", "form_name": "private", "form_id": "privacy-text-form" },
+  { "event": "field_complete", "form_name": "private", "form_id": "privacy-text-form", "field_name": "name", "field_label": "Name" },
+  { "event": "field_complete", "form_name": "private", "form_id": "privacy-text-form", "field_name": "email", "field_label": "Email" }
+]</pre>
+</section>
+
+<section class="case" id="case-privacy-textarea" data-steps="fill #privacy-message = Jane Citizen typed this">
+  <h3>Textarea content, pre-filled or typed, is never sent</h3>
+  <form id="privacy-textarea-form" data-analytics-form="private">
+    <label for="privacy-message">Message <textarea id="privacy-message" name="message">Jane Citizen pre-filled</textarea></label>
+  </form>
+  <pre class="expected">[
+  { "event": "form_start", "form_name": "private", "form_id": "privacy-textarea-form" },
+  { "event": "field_complete", "form_name": "private", "form_id": "privacy-textarea-form", "field_name": "message", "field_label": "Message" }
+]</pre>
+</section>
+
+<section class="case" id="case-privacy-choices" data-steps="select #privacy-select = jane; check #privacy-radio; check #privacy-checkbox">
+  <h3>The chosen option, radio or checkbox is never sent</h3>
+  <form id="privacy-choices-form" data-analytics-form="private">
+    <label for="privacy-select">Answer</label>
+    <select id="privacy-select" name="answer">
+      <option value="other">Other</option>
+      <option value="jane">Jane Citizen option</option>
+    </select>
+    <fieldset>
+      <legend>Situation</legend>
+      <input id="privacy-radio" type="radio" name="situation" value="1">
+      <label for="privacy-radio">Jane Citizen radio</label>
+    </fieldset>
+    <fieldset>
+      <legend>Needs</legend>
+      <label><input id="privacy-checkbox" type="checkbox" name="needs" value="1">Jane Citizen checkbox</label>
+    </fieldset>
+  </form>
+  <pre class="expected">[
+  { "event": "form_start", "form_name": "private", "form_id": "privacy-choices-form" },
+  { "event": "field_complete", "form_name": "private", "form_id": "privacy-choices-form", "field_name": "answer", "field_label": "Answer" },
+  { "event": "field_complete", "form_name": "private", "form_id": "privacy-choices-form", "field_name": "situation", "field_label": "Situation" },
+  { "event": "field_complete", "form_name": "private", "form_id": "privacy-choices-form", "field_name": "needs", "field_label": "Needs" }
+]</pre>
+</section>
+
+<section class="case" id="case-privacy-link" data-steps="click #privacy-help">
+  <h3>A textarea inside a clicked link adds nothing to the link text</h3>
+  <div data-analytics-event="form_click">
+    <a id="privacy-help" href="/help">Help <textarea>Jane Citizen</textarea></a>
+  </div>
+  <pre class="expected">[{ "event": "form_click", "link_text": "Help", "link_url": "/help" }]</pre>
+</section>
+
+<script>
+  window.analyticsContextLayerSettings = { types: ['click', 'form_start', 'field_complete', 'form_submit'] };
+  // Keep this page open when a link is clicked or a form is submitted.
+  ['click', 'auxclick'].forEach((type) => window.addEventListener(type, (event) => event.target.closest?.('a[href]') && event.preventDefault()));
+  window.addEventListener('submit', (event) => event.preventDefault());
+</script>
+<script src="../../build/acl.gtm.js"></script>
+</body>
+</html>

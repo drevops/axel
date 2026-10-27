@@ -11,7 +11,7 @@ The attributes in `README.md` are the public contract and follow semver: renamin
 
 The library is shared across sites, so keep it free of site-specific class names, values and rules. Site-specific behavior goes in the rendered attributes, in settings or in an adapter defined by the site. Google-specific code goes in `src/adapters/`, and Drupal-specific code in `src/integrations/drupal.js`.
 
-Field events must never carry what a visitor typed or chose. `tests/privacy.test.js` guards this for every event type.
+Field events must never carry what a visitor typed or chose. The privacy cases in `tests/fixtures/cases.html` guard this for every event type.
 
 
 ## Structure
@@ -27,7 +27,10 @@ The source has 3 layers, and each folder holds 1 of them:
 - `src/index.js` - ES module entry point. Re-exports the core and the adapters.
 - `scripts/bundles.js` - The bundle matrix: every integration paired with every adapter, plus 1 bundle per integration that takes its adapter from `window.analyticsContextLayerAdapter`.
 - `scripts/build.js` - Builds every bundle in the matrix with esbuild, plain and minified, plus `build/acl.esm.js`.
-- `tests/` mirrors `src/`: `core/`, `adapters/` and `integrations/`, with fixtures for the event types in `tests/fixtures/`. `tests/core/privacy.test.js` guards the privacy rule. `tests/bundles.test.js` runs every built bundle and checks that it holds only its own integration and adapter.
+- `tests/fixtures/cases.html` - Every behavior of the library as a case on 1 page: markup, steps in `data-steps` and the expected events. Add a case here before adding a test in code.
+- `tests/cases.js` - Reads the cases from the page; `tests/helpers.js` runs their steps in jsdom.
+- `tests/core/cases.test.js` - Runs every case in jsdom. `tests/functional/cases.spec.js` runs every case in Chromium with Playwright against `build/acl.gtm.js`.
+- `tests/` otherwise mirrors `src/`: `core/`, `adapters/` and `integrations/` hold the tests the page can't express. `tests/bundles.test.js` runs every built bundle and checks that it holds only its own integration and adapter.
 
 
 ## Commands
@@ -47,12 +50,16 @@ npm run test
 
 # Build, then run tests with coverage, failing below 100% (reports in .logs/)
 npm run test-coverage
+
+# Build, then run every case in tests/fixtures/cases.html in Chromium
+# (install the browser once with "npx playwright install chromium")
+npm run test-functional
 ```
 
 
 ## CI
 
-- `.github/workflows/test-nodejs.yml` - Lint, build and test on Node.js 22 and 24, with a coverage threshold.
+- `.github/workflows/test-nodejs.yml` - Lint, build, unit test and functional test on Node.js 22 and 24, with a coverage threshold.
 - `.github/workflows/test-actions.yml` - Lint the workflows with yamllint, actionlint and zizmor.
 - `.github/workflows/release-nodejs.yml` - Build and attach every `build/*.js` bundle to the GitHub release.
 - `.github/workflows/draft-release-notes.yml` - Draft release notes with Release Drafter.

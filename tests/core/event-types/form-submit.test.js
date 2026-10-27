@@ -3,11 +3,15 @@ import { gtm } from '../../../src/adapters/gtm.js';
 import { AnalyticsContextLayer } from '../../../src/core/core.js';
 import { flushMutations, loadFixture } from '../../helpers.js';
 
+const CONFIRMATION = '<p data-analytics-form-submitted="newsletter">Subscribed.</p>';
+
+// The behavior of each kind of confirmation is covered by the cases in
+// tests/fixtures/cases.html; these tests cover what the page can't express.
 describe('form_submit', () => {
   let acl;
 
   beforeEach(() => {
-    loadFixture('form-submit');
+    loadFixture();
     window.dataLayer = [];
     window.sessionStorage.clear();
 
@@ -19,33 +23,15 @@ describe('form_submit', () => {
     delete window.dataLayer;
   });
 
-  it('sends 1 event for a marker rendered with the page and none for a skipped one', () => {
-    expect(window.dataLayer).toEqual([{ event: 'form_submit', form_name: 'contact', form_type: 'enquiry' }]);
-  });
-
-  it('sends 1 event for a marker added later', async () => {
-    document.querySelector('#ajax-wrapper').innerHTML = '<p data-analytics-form-submitted="newsletter">Subscribed.</p>';
-    await flushMutations();
-
-    expect(window.dataLayer.at(-1)).toEqual({ event: 'form_submit', form_name: 'newsletter', section: 'newsletter' });
-  });
-
-  it('sends 1 event for a marker nested in added markup', async () => {
-    document.querySelector('#ajax-wrapper').innerHTML = '<div><p data-analytics-form-submitted="newsletter">Subscribed.</p></div>';
-    await flushMutations();
-
-    expect(window.dataLayer.at(-1).form_name).toBe('newsletter');
-  });
-
-  it('ignores added text and markup without a marker', async () => {
-    document.querySelector('#ajax-wrapper').append('Text', document.createElement('p'));
+  it('ignores added text', async () => {
+    document.querySelector('#submit-ajax-wrapper').append('Text');
     await flushMutations();
 
     expect(window.dataLayer).toHaveLength(1);
   });
 
   it('sends 1 event per marker when it is moved', async () => {
-    document.querySelector('#ajax-wrapper').append(document.querySelector('#contact-confirmation'));
+    document.querySelector('#submit-ajax-wrapper').append(document.querySelector('[data-analytics-form-submitted="contact"]'));
     await flushMutations();
 
     expect(window.dataLayer).toHaveLength(1);
@@ -59,22 +45,14 @@ describe('form_submit', () => {
 
   it('stops watching for markers once destroyed', async () => {
     acl.destroy();
-    document.querySelector('#ajax-wrapper').innerHTML = '<p data-analytics-form-submitted="newsletter">Subscribed.</p>';
+    document.querySelector('#submit-ajax-wrapper').innerHTML = CONFIRMATION;
     await flushMutations();
 
     expect(window.dataLayer).toHaveLength(1);
   });
 
-  it('sends the event from the hook the site calls', () => {
-    acl.formSubmitted('callback', { form_step: '2' });
-
-    expect(window.dataLayer.at(-1)).toEqual({ event: 'form_submit', form_name: 'callback', form_step: '2' });
-  });
-
   it('sends the event from the hook when the type is not enabled', () => {
-    const other = new AnalyticsContextLayer({ adapter: gtm, types: [] });
-
-    other.formSubmitted('callback');
+    new AnalyticsContextLayer({ adapter: gtm, types: [] }).formSubmitted('callback');
 
     expect(window.dataLayer.at(-1)).toEqual({ event: 'form_submit', form_name: 'callback' });
   });
