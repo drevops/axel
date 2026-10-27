@@ -8,7 +8,7 @@ Security fixes go into the latest release only. Upgrade to the [latest release](
 
 ## Report a vulnerability
 
-Email the details to [analytics-context-layer@drevops.com](mailto:analytics-context-layer@drevops.com). Report the vulnerability privately: a public issue exposes it before a fix ships.
+Email the details to [alex@drevops.com](mailto:alex@drevops.com). Report the vulnerability privately: a public issue exposes it before a fix ships.
 
 Include these details in your report:
 
