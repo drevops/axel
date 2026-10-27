@@ -72,6 +72,18 @@ describe('privacy', () => {
     expect(JSON.stringify(window.dataLayer)).not.toContain('Jane');
   });
 
+  it('sends no typed value when the click selector matches a text input', () => {
+    acl.destroy();
+    acl = new AnalyticsContextLayer({ adapter: gtm, clickSelector: 'input' }).init();
+
+    const field = document.querySelector('#text');
+
+    field.value = SECRET;
+    field.click();
+
+    expect(window.dataLayer).toEqual([{ event: 'form_click', link_text: '' }]);
+  });
+
   it('sends no textarea content inside a clicked link', () => {
     document.querySelector('#text').closest('label').insertAdjacentHTML('beforeend', '<a id="help" href="/help">Help <textarea>Jane</textarea></a>');
     document.querySelector('#help').click();

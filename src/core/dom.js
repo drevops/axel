@@ -46,7 +46,9 @@ export function getText(node) {
  *   when it has no text.
  */
 export function getLabel(element) {
-  const value = element instanceof HTMLInputElement ? element.value : getText(element);
+  // Only a button input's value is its label; any other input value is typed.
+  const isButton = element instanceof HTMLInputElement && ['submit', 'button', 'reset'].includes(element.type);
+  const value = isButton ? element.value : getText(element);
 
   return value.replace(/\s+/g, ' ').trim() || element.getAttribute('aria-label') || element.getAttribute('title') || '';
 }
