@@ -1,0 +1,59 @@
+{
+    "name": "@drevops/analytics-context-layer",
+    "version": "0.1.0",
+    "description": "Turns clicks and form interactions on elements marked with data-axel-* attributes into analytics events.",
+    "license": "MIT",
+    "author": {
+        "name": "Alex Skrypnyk",
+        "email": "analytics-context-layer@drevops.com",
+        "url": "https://drevops.com"
+    },
+    "contributors": [],
+    "repository": "github:drevops/axel",
+    "bugs": "https://github.com/drevops/axel/issues",
+    "type": "module",
+    "main": "build/axel.esm.js",
+    "module": "build/axel.esm.js",
+    "exports": {
+        ".": "./build/axel.esm.js"
+    },
+    "files": [
+        "build",
+        "src"
+    ],
+    "directories": {
+        "test": "tests"
+    },
+    "scripts": {
+        "build": "node scripts/build.js",
+        "lint": "eslint . && prettier --check \"src/**/*.js\" \"tests/**/*.js\" \"scripts/**/*.js\" \"*.js\"",
+        "lint-fix": "eslint --fix . && prettier --write \"src/**/*.js\" \"tests/**/*.js\" \"scripts/**/*.js\" \"*.js\"",
+        "pretest": "npm run build",
+        "test": "vitest run",
+        "pretest-coverage": "npm run build",
+        "test-coverage": "vitest run --coverage",
+        "pretest-functional": "npm run build",
+        "test-functional": "playwright test",
+        "reset": "rm -Rf node_modules build .logs"
+    },
+    "engines": {
+        "npm": ">=10",
+        "node": ">=22.12.0"
+    },
+    "devDependencies": {
+        "@eslint/js": "^10.0.1",
+        "@playwright/test": "^1.64.1",
+        "@vitest/coverage-v8": "^5.0.5",
+        "esbuild": "^0.28.2",
+        "eslint": "^10.13.0",
+        "eslint-config-prettier": "^10.1.8",
+        "globals": "^17.13.0",
+        "jsdom": "^29.1.1",
+        "prettier": "^3.9.10",
+        "vitest": "^5.0.5"
+    },
+    "prettier": {
+        "singleQuote": true,
+        "printWidth": 160
+    }
+}
