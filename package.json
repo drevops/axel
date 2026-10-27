@@ -1,7 +1,7 @@
 {
     "name": "@drevops/analytics-context-layer",
     "version": "0.1.0",
-    "description": "Extracts contextual data from interactive page elements and pushes it to the analytics data layer.",
+    "description": "Turns clicks and form interactions on elements marked with data-analytics-* attributes into analytics events.",
     "license": "MIT",
     "author": {
         "name": "Alex Skrypnyk",
