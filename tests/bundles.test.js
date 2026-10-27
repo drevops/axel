@@ -10,7 +10,7 @@ const SETTINGS = { properties: { site: 'example' } };
 const MARKERS = {
   standalone: /analyticsContextLayerSettings/,
   drupal: /drupalSettings/,
-  gtm: /push\(\{\s*event:/,
+  gtm: /,\s*event:\s*\w+\s*\}\)/,
   gtag: /window\.gtag/,
 };
 

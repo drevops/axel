@@ -7,7 +7,7 @@ import { getDataLayer, validate, withDebugMode } from './ga4.js';
 
 export const gtm = {
   send(name, params, { debug, settings }) {
-    getDataLayer(settings).push({ event: name, ...withDebugMode(params, debug) });
+    getDataLayer(settings).push({ ...withDebugMode(params, debug), event: name });
   },
   validate,
 };

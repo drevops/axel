@@ -170,7 +170,7 @@ An adapter sends each event to its destination. The library ships 2 adapters for
 
 | Adapter | Sends each event as                                                                      | Use it when                         |
 |---------|------------------------------------------------------------------------------------------|-------------------------------------|
-| `gtm`   | `window.dataLayer.push({ event: name, ...params })`                                      | Google Tag Manager routes your events |
+| `gtm`   | `window.dataLayer.push({ ...params, event: name })`                                      | Google Tag Manager routes your events |
 | `gtag`  | `gtag('event', name, params)`, queued in `window.dataLayer` until the Google tag loads   | The page loads the Google tag directly |
 
 Google Tag Manager reads plain objects from `window.dataLayer`. The Google tag reads only what its own `gtag()` function queues there, so pick the adapter that matches the script your page loads.

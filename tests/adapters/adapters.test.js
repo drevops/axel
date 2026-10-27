@@ -33,6 +33,12 @@ describe('adapters', () => {
       expect(window.dataLayer).toBeUndefined();
     });
 
+    it('keeps the event name when a parameter is called event', () => {
+      gtm.send('cta_click', { event: 'other' }, CONTEXT);
+
+      expect(window.dataLayer).toEqual([{ event: 'cta_click' }]);
+    });
+
     it('flags events for GA4 DebugView in debug mode', () => {
       gtm.send('cta_click', PARAMS, DEBUG);
 

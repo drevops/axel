@@ -109,7 +109,7 @@ Each event type decides whether an interaction counts and derives its own parame
 
 `track()` lets `data-analytics-param-*` values override derived parameters, and `send()` puts the `properties` setting underneath both. `isDebug()` reads the debug hash and `sessionStorage` on every send, so debug mode survives navigation within a tab and falls back to the hash when storage is blocked.
 
-The `gtm` adapter pushes `{ event, ...params }` to the data layer. The `gtag` adapter calls `window.gtag('event', name, params)` when the Google tag is present, and otherwise pushes an `arguments` object to the data layer, the shape the Google tag reads when it loads.
+The `gtm` adapter pushes `{ ...params, event }` to the data layer, so a parameter named `event` can't replace the event name. The `gtag` adapter calls `window.gtag('event', name, params)` when the Google tag is present, and otherwise pushes an `arguments` object to the data layer, the shape the Google tag reads when it loads.
 
 
 ## Regenerating this document
