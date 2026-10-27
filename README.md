@@ -57,8 +57,8 @@ The module's `init()` creates 1 shared instance on its first call. Later calls r
 To report the clicks inside a component, set `data-analytics-event` on the component:
 
 ```html
-<section data-analytics-event="component_click" data-analytics-param-component="hero">
-  <a href="/same-day-review">Get your contract reviewed</a>
+<section data-analytics-event="component_click" data-analytics-param-component="promo">
+  <a href="/sale">See the deals</a>
 </section>
 ```
 
@@ -67,9 +67,9 @@ A click on the link pushes this object to `window.dataLayer`:
 ```js
 {
   event: 'component_click',
-  link_text: 'Get your contract reviewed',
-  link_url: 'https://example.com/same-day-review',
-  component: 'hero',
+  link_text: 'See the deals',
+  link_url: 'https://example.com/sale',
+  component: 'promo',
 }
 ```
 

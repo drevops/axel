@@ -10,18 +10,18 @@
 </head>
 <body>
 <h1>Elements outside any enrolled element</h1>
-<a id="outside-link" href="/contact">Contact us</a>
+<a id="outside-link" href="/contact">Contact</a>
 <button id="outside-button" type="button">Open</button>
 
 <h1>An enrolled element</h1>
-<section data-analytics-event="component_click" data-analytics-param-component="hero">
-  <a id="enrolled-link" href="/same-day-review">Get your contract reviewed</a>
-  <a id="enrolled-phone" href="tel:0395343422">(03) 9534 3422</a>
-  <a id="enrolled-other-site" href="https://example.com/book">Book a call</a>
-  <a id="enrolled-section" href="#form">Send an enquiry</a>
+<section data-analytics-event="component_click" data-analytics-param-component="promo">
+  <a id="enrolled-link" href="/sale">See the deals</a>
+  <a id="enrolled-phone" href="tel:0200000000">02 0000 0000</a>
+  <a id="enrolled-other-site" href="https://example.com/partner">Visit our partner</a>
+  <a id="enrolled-section" href="#form">Jump to the form</a>
   <button id="enrolled-button" type="button">Menu</button>
-  <form action="/contact">
-    <input id="enrolled-submit" type="submit" value="Send">
+  <form action="/subscribe">
+    <input id="enrolled-submit" type="submit" value="Subscribe">
     <input id="enrolled-input-button" type="button" value="Clear">
   </form>
   <a id="enrolled-no-address">An anchor without an address</a>
@@ -29,15 +29,15 @@
 </section>
 
 <h1>Nested enrolled elements</h1>
-<section data-analytics-event="component_click" data-analytics-param-component="section" data-analytics-param-layout="grid_left">
-  <a id="nested-outer" href="/contact">Ask a Question</a>
-  <div data-analytics-event="component_click" data-analytics-param-component="icon_card">
-    <a id="nested-inner" href="/services/buying"><span>Request Fixed-Fee Quote<span class="visually-hidden">: Buying a Property</span></span></a>
+<section data-analytics-event="component_click" data-analytics-param-component="section" data-analytics-param-layout="grid">
+  <a id="nested-outer" href="/about">About us</a>
+  <div data-analytics-event="component_click" data-analytics-param-component="card">
+    <a id="nested-inner" href="/sale/spring"><span>Read more<span class="visually-hidden">: Spring sale</span></span></a>
   </div>
   <div data-analytics-event="card_click">
-    <a id="nested-event" href="/services/selling">Selling</a>
+    <a id="nested-event" href="/sale/summer">Summer sale</a>
   </div>
-  <a id="element-event" href="/contact" data-analytics-event="enquiry_click" data-analytics-param-position="2">Enquire Now</a>
+  <a id="element-event" href="/contact" data-analytics-event="contact_click" data-analytics-param-position="2">Get in touch</a>
   <a id="element-text-param" href="/contact" data-analytics-param-link-text="Custom text">Contact</a>
 </section>
 
@@ -45,7 +45,7 @@
 <footer data-analytics-event="component_click" data-analytics-param-component="footer">
   <a id="skip-link" href="/terms" data-analytics-skip>Terms</a>
   <div data-analytics-skip>
-    <a id="skip-container-link" href="/disclaimer" data-analytics-event="legal_click">Disclaimer</a>
+    <a id="skip-container-link" href="/privacy" data-analytics-event="legal_click">Privacy</a>
   </div>
 </footer>
 
@@ -54,8 +54,8 @@
   <a id="text-hidden" href="/contact"><span aria-hidden="true">&rarr;</span>
     Contact
     us <!-- An HTML comment. --></a>
-  <a id="text-label" href="tel:0395343422" aria-label="Call the office"><svg aria-hidden="true"></svg></a>
-  <a id="text-title" href="/contact" title="Contact the office"><svg aria-hidden="true"></svg></a>
+  <a id="text-label" href="tel:0200000000" aria-label="Call us"><svg aria-hidden="true"></svg></a>
+  <a id="text-title" href="/contact" title="Contact the team"><svg aria-hidden="true"></svg></a>
   <a id="text-none" href="/contact"><svg aria-hidden="true"></svg></a>
 </div>
 
