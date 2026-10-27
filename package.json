@@ -29,7 +29,7 @@
         "test": "vitest run",
         "pretest-coverage": "npm run build",
         "test-coverage": "vitest run --coverage",
-        "reset": "rm -Rf node_modules package-lock.json build"
+        "reset": "rm -Rf node_modules build .logs"
     },
     "engines": {
         "npm": ">=10",
