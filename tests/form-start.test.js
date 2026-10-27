@@ -26,7 +26,14 @@ describe('form_start', () => {
     [
       'a form with an ID and an address',
       '#contact-name',
-      { event: 'form_start', form_name: 'contact', form_id: 'contact', form_destination: 'http://localhost:3000/contact', form_type: 'enquiry', section: 'contact' },
+      {
+        event: 'form_start',
+        form_name: 'contact',
+        form_id: 'contact',
+        form_destination: 'http://localhost:3000/contact',
+        form_type: 'enquiry',
+        section: 'contact',
+      },
     ],
     ['a marked wrapper without an ID or address', '#newsletter-email', { event: 'form_start', form_name: 'newsletter' }],
     ['a form without an address', '#callback-phone', { event: 'form_start', form_name: 'callback', form_id: 'callback' }],

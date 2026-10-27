@@ -169,7 +169,12 @@ describe('AnalyticsContextLayer', () => {
 
     it.each([
       ['an event within the limits', 'cta_click', { a: 'x'.repeat(LIMITS.paramValue) }, []],
-      ['a long event name', 'x'.repeat(LIMITS.eventName + 1), {}, [`[analytics] ${'x'.repeat(LIMITS.eventName + 1)}: event name is longer than 40 characters.`]],
+      [
+        'a long event name',
+        'x'.repeat(LIMITS.eventName + 1),
+        {},
+        [`[analytics] ${'x'.repeat(LIMITS.eventName + 1)}: event name is longer than 40 characters.`],
+      ],
       [
         'too many parameters',
         'cta_click',

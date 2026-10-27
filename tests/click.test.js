@@ -29,7 +29,12 @@ describe('click', () => {
       { link_text: 'Get your contract reviewed', link_url: 'http://localhost:3000/same-day-review', component: 'hero' },
     ],
     ['a phone link', '#enrolled-phone', 'component_click', { link_text: '(03) 9534 3422', link_url: 'tel:0395343422', component: 'hero' }],
-    ['a link to another site', '#enrolled-other-site', 'component_click', { link_text: 'Book a call', link_url: 'https://example.com/book', component: 'hero' }],
+    [
+      'a link to another site',
+      '#enrolled-other-site',
+      'component_click',
+      { link_text: 'Book a call', link_url: 'https://example.com/book', component: 'hero' },
+    ],
     [
       'a link to a section of the page',
       '#enrolled-section',
@@ -74,7 +79,12 @@ describe('click', () => {
       'component_click',
       { link_text: 'Custom text', link_url: 'http://localhost:3000/contact', component: 'section', layout: 'grid_left' },
     ],
-    ['a link whose text spans lines around a hidden icon and a comment', '#text-hidden', 'component_click', { link_text: 'Contact us', link_url: 'http://localhost:3000/contact' }],
+    [
+      'a link whose text spans lines around a hidden icon and a comment',
+      '#text-hidden',
+      'component_click',
+      { link_text: 'Contact us', link_url: 'http://localhost:3000/contact' },
+    ],
     ['a link named by its label', '#text-label', 'component_click', { link_text: 'Call the office', link_url: 'tel:0395343422' }],
     ['a link named by its title', '#text-title', 'component_click', { link_text: 'Contact the office', link_url: 'http://localhost:3000/contact' }],
     ['a link with no text or label', '#text-none', 'component_click', { link_text: '', link_url: 'http://localhost:3000/contact' }],
