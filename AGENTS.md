@@ -5,24 +5,38 @@ This file guides AI agents working with the code in this repository.
 
 ## Project overview
 
-Analytics Context Layer is a dependency-free browser library. It binds to interactive elements inside components marked with `data-component` and pushes a description of each interaction to the analytics data layer. Releases attach the bundled `build/acl.js` and `build/acl.min.js` as GitHub release assets.
+Analytics Context Layer is a dependency-free browser library. It reads `data-analytics-*` attributes the server renders, turns clicks and form interactions into events and hands them to an adapter. Releases attach every bundle in `build/` as GitHub release assets: 1 per integration and adapter pair, each plain and minified, plus `build/acl.esm.js`.
 
-The library is shared across sites, so keep it free of site-specific class names, values and collectors. Site-specific behavior goes in settings or in collector functions defined by the site.
+The attributes in `README.md` are the public contract and follow semver: renaming or removing one is a breaking change.
+
+The library is shared across sites, so keep it free of site-specific class names, values and rules. Site-specific behavior goes in the rendered attributes, in settings or in an adapter defined by the site. Google-specific code goes in `src/adapters/`, and Drupal-specific code in `src/integrations/drupal.js`.
+
+Field events must never carry what a visitor typed or chose. The privacy cases in `tests/fixtures/cases.html` guard this for every event type.
 
 
 ## Structure
 
-- `src/acl.js` - The `AnalyticsContextLayer` class and `DEFAULT_SETTINGS`.
-- `src/index.js` - Bundle entry point. Exposes the class and a shared instance on `window`, and attaches when the DOM is ready.
-- `tests/acl.test.js` - Behavior tests against `tests/fixtures/analytics.html`.
-- `tests/index.test.js` - Entry point tests.
-- `tests/bundle.test.js` - Smoke tests for both built bundles.
+The source has 3 layers, and each folder holds 1 of them:
+
+- `src/core/` - What every bundle shares. It knows nothing about Google or Drupal.
+  - `core.js` - The `AnalyticsContextLayer` class, `DEFAULT_SETTINGS`, the `TYPES` registry and the shared `init()`.
+  - `dom.js` - DOM helpers shared by the event types: listeners, text, labels and parameters.
+  - `event-types/` - 1 module per event type: `click`, `form_start`, `field_complete` and `form_submit`.
+- `src/adapters/` - Where events go. `gtm.js` and `gtag.js`, with the GA4 rules they share in `ga4.js`.
+- `src/integrations/` - How the script starts. `standalone.js` reads `window.analyticsContextLayerSettings` on load; `drupal.js` registers a behavior that reads `drupalSettings.analyticsContextLayer`.
+- `src/index.js` - ES module entry point. Re-exports the core and the adapters.
+- `scripts/bundles.js` - The bundle matrix: every integration paired with every adapter, plus 1 bundle per integration that takes its adapter from `window.analyticsContextLayerAdapter`.
+- `scripts/build.js` - Builds every bundle in the matrix with esbuild, plain and minified, plus `build/acl.esm.js`.
+- `tests/fixtures/cases.html` - Every behavior of the library as a case on 1 page: markup, steps in `data-steps` and the expected events. Add a case here before adding a test in code.
+- `tests/cases.js` - Reads the cases from the page; `tests/helpers.js` runs their steps in jsdom.
+- `tests/core/cases.test.js` - Runs every case in jsdom. `tests/functional/cases.spec.js` runs every case in Chromium with Playwright against `build/acl.gtm.js`.
+- `tests/` otherwise mirrors `src/`: `core/`, `adapters/` and `integrations/` hold the tests the page can't express. `tests/bundles.test.js` runs every built bundle and checks that it holds only its own integration and adapter.
 
 
 ## Commands
 
 ```bash
-# Build build/acl.js and build/acl.min.js with esbuild
+# Build every bundle in the matrix and build/acl.esm.js with esbuild
 npm run build
 
 # Run all linters (ESLint, Prettier)
@@ -34,16 +48,20 @@ npm run lint-fix
 # Build, then run all tests with Vitest and jsdom
 npm run test
 
-# Build, then run tests with coverage (reports in .logs/)
+# Build, then run tests with coverage, failing below 100% (reports in .logs/)
 npm run test-coverage
+
+# Build, then run every case in tests/fixtures/cases.html in Chromium
+# (install the browser once with "npx playwright install chromium")
+npm run test-functional
 ```
 
 
 ## CI
 
-- `.github/workflows/test-nodejs.yml` - Lint, build and test on Node.js 22 and 24, with a coverage threshold.
+- `.github/workflows/test-nodejs.yml` - Lint, build, unit test and functional test on Node.js 22 and 24, with a coverage threshold.
 - `.github/workflows/test-actions.yml` - Lint the workflows with yamllint, actionlint and zizmor.
-- `.github/workflows/release-nodejs.yml` - Build and attach `build/acl.js` and `build/acl.min.js` to the GitHub release.
+- `.github/workflows/release-nodejs.yml` - Build and attach every `build/*.js` bundle to the GitHub release.
 - `.github/workflows/draft-release-notes.yml` - Draft release notes with Release Drafter.
 
 
