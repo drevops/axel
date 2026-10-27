@@ -1,0 +1,198 @@
+<!--
+  Open this fixture in a browser after running "npm run build" to debug the
+  library manually. Append "#analytics-debug" to the URL to log pushed data.
+-->
+<html lang="en">
+<head>
+  <title>Analytics Context Layer test</title>
+  <style>
+    [data-component] {
+      border: 1px solid blue;
+      margin: 1em;
+      padding: 1em;
+    }
+
+    [data-component] > * {
+      margin-bottom: 1em;
+    }
+
+    [data-group-title] {
+      font-weight: bold;
+    }
+
+    .demo-container {
+      border: 1px solid green;
+      margin: 1em;
+      padding: 1em;
+    }
+  </style>
+</head>
+<body>
+<h2 id="el-1">Heading #1 text outside <span>with inner HTML</span><!-- and comments --></h2>
+<div data-component="generic">
+  First line of text
+  <a href="https://example.com" id="el-2">Link #2 text <span>with inner HTML</span><!-- and comments --></a>
+  <a class="button" href="https://example.com" id="el-3">Button #3 text <span>with inner HTML</span><!-- and comments --></a>
+  <button class="button" id="el-4">Button #4 text <span>with inner HTML</span><!-- and comments --></button>
+
+  <h2 id="el-5">Heading #5 text <span>with inner HTML</span><!-- and comments --></h2>
+  <a href="https://example.com" id="el-6" data-event="custom-link-click" data-element-name="custom-link">Link #6 text <span>with inner HTML</span><!-- and comments --></a>
+  <button class="button" id="el-7" data-event="custom-button-click" data-element-name="custom-button">Button #7 text <span>with inner HTML</span><!-- and comments --></button>
+
+  <div id="el-8" class="someheading" data-group-title>Heading #8 text <span>with inner HTML</span><!-- and comments --></div>
+  <a href="https://example.com" id="el-9">Link #9 text <span>with inner HTML</span><!-- and comments --></a>
+  <button class="button" id="el-10">Button #10 text <span>with inner HTML</span><!-- and comments --></button>
+
+  <div class="someheading" id="el-11" data-group-title>Heading #11 text <span>with inner HTML</span><!-- and comments --></div>
+  <div class="somegroup" data-group data-descendants-element-name="generic-custom-name" data-descendants-event="generic-custom-event">
+    <div class="someheading" id="el-12" data-group-title>Heading #12 text group <span>with inner HTML</span><!-- and comments --></div>
+    <a href="https://example.com" id="el-13">Link #13 text <span>with inner HTML</span><!-- and comments --></a>
+    <button class="button" id="el-14">Button #14 text <span>with inner HTML</span><!-- and comments --></button>
+  </div>
+</div>
+
+<label for="el-15">Custom select</label>
+<select id="el-15" data-component="genericself" data-event="custom-select-click" data-element-name="custom-select">
+  <option value="1">Option 1</option>
+  <option value="2">Option 2</option>
+  <option value="3">Option 3</option>
+</select>
+
+<div data-component="genericform">
+  <form action="http://example.com">
+    <button class="button" id="el-16">Button #16 text <span>with inner HTML</span><!-- and comments --></button>
+    <input type="submit" class="button" id="el-17" value="Button #17 text"/>
+  </form>
+</div>
+
+<div data-component="genericdialog">
+  <button id="el-18" class="icon-button" type="button" aria-expanded="true">
+    <span class="icon" aria-hidden="true">close</span>
+    <span class="sr-only">Close message</span>
+  </button>
+</div>
+
+<div data-component="genericdelayed" data-delayed-init="delayedval">
+  <em class="note">Wait for 2 seconds for the below elements to be updated</em>
+  <div data-group-title>
+    Panel 1
+  </div>
+
+  <div>
+    <a href="https://example.com" id="el-21">Link #21 text <span>with inner HTML</span><!-- and comments --></a>
+  </div>
+</div>
+
+<div data-component="genericparent" class="generic-parent">
+  <h2 id="el-22">Heading #22 text as a parent of the component <span>with inner HTML</span><!-- and comments --></h2>
+
+  <div data-component="genericchild" data-lookup-selector=".generic-parent">
+    <div>
+      <a href="https://example.com" id="el-23">Link #23 text <span>with inner HTML</span><!-- and comments --></a>
+      <button class="button" id="el-24">Button #24 text <span>with inner HTML</span><!-- and comments --></button>
+    </div>
+  </div>
+</div>
+
+<div data-component="genericwithdescendants" data-descendants-event="genericwithdescendants-custom-event" data-descendants-element-name="genericwithdescendants-custom-element-name" data-descendants-click-type="genericwithdescendants-custom-click-type">
+  <div>
+    <a href="https://example.com" id="el-25">Link #25 text <span>with inner HTML</span><!-- and comments --></a>
+    <button class="button" id="el-26">Button #26 text <span>with inner HTML</span><!-- and comments --></button>
+    <h2 id="el-27">Heading #27 text <span>with inner HTML</span><!-- and comments --></h2>
+    <div data-group>
+      <h2 id="el-28" data-group-title="">Heading #28 text group title of the component <span>with inner HTML</span><!-- and comments --></h2>
+      <a href="https://example.com" id="el-29">Link #29 text <span>with inner HTML</span><!-- and comments --></a>
+      <button class="button" id="el-30">Button #30 text <span>with inner HTML</span><!-- and comments --></button>
+      <div data-subgroup>
+        <h2 id="el-31" data-subgroup-title>Heading #31 text sub-group title of the component <span>with inner HTML</span><!-- and comments --></h2>
+        <a href="https://example.com" id="el-32">Link #32 text <span>with inner HTML</span><!-- and comments --></a>
+        <button class="button" id="el-33">Button #33 text <span>with inner HTML</span><!-- and comments --></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div data-component="genericskipped">
+  <h2 id="el-34" data-skip>Heading #34 text skipped</h2>
+  <a href="https://example.com" id="el-35">Link #35 text</a>
+</div>
+
+<div class="demo-container">
+  <div data-component="search-form" data-descendants-event="click_search" data-collector="testCollectors.search">
+    <form action="http://example.com">
+      <input type="text" id="search-keywords" name="keywords" value="keyword1 keyword2"/>
+      <input type="submit" class="button" id="el-40" value="Button #40 Search"/>
+    </form>
+  </div>
+
+  <div data-component="search-filter" data-descendants-event="click_search_filter" data-collector="testCollectors.search">
+    <form action="http://example.com">
+      <fieldset data-subcomponent="filter-types">
+        <input type="radio" id="el-41" name="search_type" value="type1"/>
+        <label for="el-41">Type 41</label>
+        <input type="radio" id="el-42" name="search_type" value="type2" checked/>
+        <label for="el-42">Type 42</label>
+        <input type="radio" id="el-43" name="search_type" value="type3"/>
+        <label for="el-43">Type 43</label>
+      </fieldset>
+
+      <fieldset data-subcomponent="filter-tags">
+        <input type="checkbox" id="el-44" name="tags[44]" value="tags_44"/>
+        <label for="el-44">Tag 44</label>
+        <input type="checkbox" id="el-45" name="tags[45]" value="tags_45" checked/>
+        <label for="el-45">Tag 45 </label>
+        <input type="checkbox" id="el-46" name="tags[46]" value="tags_46"/>
+        <label for="el-46">Tag 46</label>
+        <input type="checkbox" id="el-47" name="tags[47]" value="tags_47"/>
+        <label>Tag 47 - missing `for`</label>
+      </fieldset>
+
+      <button id="el-50" type="submit">Apply filters #50</button>
+    </form>
+  </div>
+
+  <div data-component="search-missing-collector" data-collector="testCollectors.missing">
+    <a href="https://example.com" id="el-51">Link #51 text</a>
+  </div>
+</div>
+
+<script>
+  window.analyticsContextLayerSettings = {
+    properties: {
+      site_type: 'example',
+    },
+  };
+
+  window.testCollectors = {
+    search(obj, element, component, acl) {
+      delete obj.group_title;
+      obj.search_term = acl.getFieldText('#search-keywords') || 'none';
+      obj.filter_types_selected = acl.getFieldText('[data-subcomponent=filter-types] input') || 'none';
+      obj.filter_tags_selected = acl.getFieldText('[data-subcomponent=filter-tags] input') || 'none';
+    },
+  };
+
+  // Simulates a component whose elements are created by a third-party script.
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+      document.querySelectorAll('[data-component="genericdelayed"]').forEach((component) => {
+        const title = component.querySelector('[data-group-title]');
+        const button = document.createElement('button');
+
+        button.type = 'button';
+        button.setAttribute('id', 'el-20');
+        button.textContent = title.textContent;
+
+        title.textContent = '';
+        title.appendChild(button);
+
+        component.dataset.once = `${component.dataset.once || ''} delayedval`.trim();
+        component.querySelector('.note').remove();
+      });
+    }, 2000);
+  });
+</script>
+
+<script src="../../build/acl.js"></script>
+</body>
+</html>

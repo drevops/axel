@@ -1,0 +1,53 @@
+{
+    "name": "@drevops/analytics-context-layer",
+    "version": "0.1.0",
+    "description": "Extracts contextual data from interactive page elements and pushes it to the analytics data layer.",
+    "license": "GPL-3.0-or-later",
+    "author": {
+        "name": "Alex Skrypnyk",
+        "email": "analytics-context-layer@drevops.com",
+        "url": "https://drevops.com"
+    },
+    "contributors": [],
+    "repository": "github:drevops/analytics-context-layer",
+    "bugs": "https://github.com/drevops/analytics-context-layer/issues",
+    "type": "module",
+    "main": "build/acl.js",
+    "module": "src/acl.js",
+    "files": [
+        "build",
+        "src"
+    ],
+    "directories": {
+        "test": "tests"
+    },
+    "scripts": {
+        "build": "esbuild src/index.js --bundle --format=iife --target=es2018 --outfile=build/acl.js && esbuild src/index.js --bundle --format=iife --target=es2018 --minify --outfile=build/acl.min.js",
+        "lint": "eslint . && prettier --check \"src/**/*.js\" \"tests/**/*.js\" \"*.js\"",
+        "lint-fix": "eslint --fix . && prettier --write \"src/**/*.js\" \"tests/**/*.js\" \"*.js\"",
+        "pretest": "npm run build",
+        "test": "vitest run",
+        "pretest-coverage": "npm run build",
+        "test-coverage": "vitest run --coverage",
+        "reset": "rm -Rf node_modules package-lock.json build"
+    },
+    "engines": {
+        "npm": ">=10",
+        "node": ">=22.12.0"
+    },
+    "devDependencies": {
+        "@eslint/js": "^10.0.1",
+        "@vitest/coverage-v8": "^5.0.5",
+        "esbuild": "^0.28.2",
+        "eslint": "^10.13.0",
+        "eslint-config-prettier": "^10.1.8",
+        "globals": "^17.13.0",
+        "jsdom": "^29.1.1",
+        "prettier": "^3.9.10",
+        "vitest": "^5.0.5"
+    },
+    "prettier": {
+        "singleQuote": true,
+        "printWidth": 160
+    }
+}
