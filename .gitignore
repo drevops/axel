@@ -2,7 +2,6 @@
 # https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files#configuring-ignored-files-for-all-repositories-on-your-computer
 
 /node_modules
-/package-lock.json
 /yarn.lock
 
 # Bundles are built in CI and attached to releases.
