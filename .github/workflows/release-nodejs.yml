@@ -52,3 +52,4 @@ jobs:
           files: |
             build/acl.js
             build/acl.min.js
+            build/acl.esm.js

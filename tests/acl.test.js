@@ -1,562 +1,204 @@
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { AnalyticsContextLayer, DEFAULT_SETTINGS } from '../src/acl.js';
+import { AnalyticsContextLayer, DEFAULT_SETTINGS, LIMITS, init } from '../src/acl.js';
 
-const fixture = readFileSync(join(import.meta.dirname, 'fixtures/analytics.html'), 'utf8');
-
-function loadFixture() {
-  const match = fixture.match(/<body[^>]*>([\s\S]*)<\/body>/i);
-
-  document.body.innerHTML = match ? match[1] : fixture;
-}
-
-function trigger(selector) {
-  const element = document.querySelector(selector);
-
-  element.dispatchEvent(new Event(element.tagName === 'SELECT' ? 'change' : 'click'));
-}
-
-function flushMutations() {
-  return new Promise((resolve) => setTimeout(resolve, 0));
-}
+const MARKUP = '<div data-analytics-event="cta_click" data-analytics-param-component="hero"><a id="link" href="/a">Go</a></div>';
 
 describe('AnalyticsContextLayer', () => {
   let acl;
 
   beforeEach(() => {
+    document.body.innerHTML = MARKUP;
     window.dataLayer = [];
-    window.localStorage.clear();
-    window.location.hash = '';
-
-    window.testCollectors = {
-      search(obj, element, component, instance) {
-        delete obj.group_title;
-        obj.search_term = instance.getFieldText('#search-keywords') || 'none';
-        obj.filter_types_selected = instance.getFieldText('[data-subcomponent=filter-types] input') || 'none';
-        obj.filter_tags_selected = instance.getFieldText('[data-subcomponent=filter-tags] input') || 'none';
-      },
-    };
-
-    loadFixture();
-
-    acl = new AnalyticsContextLayer({ properties: { site_type: 'example' } });
-    acl.attach(document);
+    window.history.pushState({}, '', '/');
+    window.sessionStorage.clear();
   });
 
   afterEach(() => {
+    acl?.destroy();
+    acl = null;
+    delete window.dataLayer;
     vi.restoreAllMocks();
-    delete window.testCollectors;
   });
 
-  it.each([
-    [
-      'Link, No heading',
-      '#el-2',
-      {
-        event: 'click_secondary_interaction',
-        element_name: 'generic-link',
-        click_type: 'link',
-        click_text: 'Link #2 text with inner HTML',
-        link_url: 'https://example.com',
-        component_name: 'generic',
-        group_title: '',
-        site_type: 'example',
-      },
-    ],
-    [
-      'Link as Button, No heading',
-      '#el-3',
-      {
-        event: 'click_secondary_interaction',
-        element_name: 'generic-cta',
-        click_type: 'button',
-        click_text: 'Button #3 text with inner HTML',
-        link_url: 'https://example.com',
-        component_name: 'generic',
-        group_title: '',
-        site_type: 'example',
-      },
-    ],
-    [
-      'Button, No heading',
-      '#el-4',
-      {
-        event: 'click_secondary_interaction',
-        element_name: 'generic-cta',
-        click_type: 'button',
-        click_text: 'Button #4 text with inner HTML',
-        link_url: '',
-        component_name: 'generic',
-        group_title: '',
-        site_type: 'example',
-      },
-    ],
-    [
-      'Link, Heading, custom event and element_name',
-      '#el-6',
-      {
-        event: 'custom-link-click',
-        element_name: 'custom-link',
-        click_type: 'link',
-        click_text: 'Link #6 text with inner HTML',
-        link_url: 'https://example.com',
-        component_name: 'generic',
-        group_title: 'Heading #5 text with inner HTML',
-        site_type: 'example',
-      },
-    ],
-    [
-      'Button, Heading, custom event and element_name',
-      '#el-7',
-      {
-        event: 'custom-button-click',
-        element_name: 'custom-button',
-        click_type: 'button',
-        click_text: 'Button #7 text with inner HTML',
-        link_url: '',
-        component_name: 'generic',
-        group_title: 'Heading #5 text with inner HTML',
-        site_type: 'example',
-      },
-    ],
-    [
-      'Link, Heading by data attribute',
-      '#el-9',
-      {
-        event: 'click_secondary_interaction',
-        element_name: 'generic-link',
-        click_type: 'link',
-        click_text: 'Link #9 text with inner HTML',
-        link_url: 'https://example.com',
-        component_name: 'generic',
-        group_title: 'Heading #8 text with inner HTML',
-        site_type: 'example',
-      },
-    ],
-    [
-      'Button, Heading by data attribute',
-      '#el-10',
-      {
-        event: 'click_secondary_interaction',
-        element_name: 'generic-cta',
-        click_type: 'button',
-        click_text: 'Button #10 text with inner HTML',
-        link_url: '',
-        component_name: 'generic',
-        group_title: 'Heading #8 text with inner HTML',
-        site_type: 'example',
-      },
-    ],
-    [
-      'Link, Heading by data attribute within a group',
-      '#el-13',
-      {
-        event: 'generic-custom-event',
-        element_name: 'generic-custom-name',
-        click_type: 'link',
-        click_text: 'Link #13 text with inner HTML',
-        link_url: 'https://example.com',
-        component_name: 'generic',
-        group_title: 'Heading #12 text group with inner HTML',
-        site_type: 'example',
-      },
-    ],
-    [
-      'Button, Heading by data attribute within a group',
-      '#el-14',
-      {
-        event: 'generic-custom-event',
-        element_name: 'generic-custom-name',
-        click_type: 'button',
-        click_text: 'Button #14 text with inner HTML',
-        link_url: '',
-        component_name: 'generic',
-        group_title: 'Heading #12 text group with inner HTML',
-        site_type: 'example',
-      },
-    ],
-    [
-      'Select, Component is an element itself',
-      '#el-15',
-      {
-        event: 'custom-select-click',
-        element_name: 'custom-select',
-        click_type: 'button',
-        click_text: 'Option 1',
-        link_url: '',
-        component_name: 'genericself',
-        group_title: '',
-        site_type: 'example',
-      },
-    ],
-    [
-      'Form submit, button',
-      '#el-16',
-      {
-        event: 'click_secondary_interaction',
-        element_name: 'genericform-cta',
-        click_type: 'button',
-        click_text: 'Button #16 text with inner HTML',
-        link_url: 'http://example.com',
-        component_name: 'genericform',
-        group_title: '',
-        site_type: 'example',
-      },
-    ],
-    [
-      'Form submit, input',
-      '#el-17',
-      {
-        event: 'click_secondary_interaction',
-        element_name: 'genericform-cta',
-        click_type: 'button',
-        click_text: 'Button #17 text',
-        link_url: 'http://example.com',
-        component_name: 'genericform',
-        group_title: '',
-        site_type: 'example',
-      },
-    ],
-    [
-      'Icon button',
-      '#el-18',
-      {
-        event: 'click_secondary_interaction',
-        element_name: 'genericdialog-icon',
-        click_type: 'button',
-        click_text: 'Close message icon',
-        link_url: '',
-        component_name: 'genericdialog',
-        group_title: '',
-        site_type: 'example',
-      },
-    ],
-    [
-      'Parent lookup, link',
-      '#el-23',
-      {
-        event: 'click_secondary_interaction',
-        element_name: 'genericchild-link',
-        click_type: 'link',
-        click_text: 'Link #23 text with inner HTML',
-        link_url: 'https://example.com',
-        component_name: 'genericchild',
-        group_title: 'Heading #22 text as a parent of the component with inner HTML',
-        site_type: 'example',
-      },
-    ],
-    [
-      'Parent lookup, button',
-      '#el-24',
-      {
-        event: 'click_secondary_interaction',
-        element_name: 'genericchild-cta',
-        click_type: 'button',
-        click_text: 'Button #24 text with inner HTML',
-        link_url: '',
-        component_name: 'genericchild',
-        group_title: 'Heading #22 text as a parent of the component with inner HTML',
-        site_type: 'example',
-      },
-    ],
-    [
-      'Descendants, link',
-      '#el-25',
-      {
-        event: 'genericwithdescendants-custom-event',
-        element_name: 'genericwithdescendants-custom-element-name',
-        click_type: 'genericwithdescendants-custom-click-type',
-        click_text: 'Link #25 text with inner HTML',
-        link_url: 'https://example.com',
-        component_name: 'genericwithdescendants',
-        group_title: '',
-        site_type: 'example',
-      },
-    ],
-    [
-      'Descendants, button',
-      '#el-26',
-      {
-        event: 'genericwithdescendants-custom-event',
-        element_name: 'genericwithdescendants-custom-element-name',
-        click_type: 'genericwithdescendants-custom-click-type',
-        click_text: 'Button #26 text with inner HTML',
-        link_url: '',
-        component_name: 'genericwithdescendants',
-        group_title: '',
-        site_type: 'example',
-      },
-    ],
-    [
-      'Group and subgroup, group, link',
-      '#el-29',
-      {
-        event: 'genericwithdescendants-custom-event',
-        element_name: 'genericwithdescendants-custom-element-name',
-        click_type: 'genericwithdescendants-custom-click-type',
-        click_text: 'Link #29 text with inner HTML',
-        link_url: 'https://example.com',
-        component_name: 'genericwithdescendants',
-        group_title: 'Heading #28 text group title of the component with inner HTML',
-        site_type: 'example',
-      },
-    ],
-    [
-      'Group and subgroup, group, button',
-      '#el-30',
-      {
-        event: 'genericwithdescendants-custom-event',
-        element_name: 'genericwithdescendants-custom-element-name',
-        click_type: 'genericwithdescendants-custom-click-type',
-        click_text: 'Button #30 text with inner HTML',
-        link_url: '',
-        component_name: 'genericwithdescendants',
-        group_title: 'Heading #28 text group title of the component with inner HTML',
-        site_type: 'example',
-      },
-    ],
-    [
-      'Group and subgroup, subgroup, link',
-      '#el-32',
-      {
-        event: 'genericwithdescendants-custom-event',
-        element_name: 'genericwithdescendants-custom-element-name',
-        click_type: 'genericwithdescendants-custom-click-type',
-        click_text: 'Link #32 text with inner HTML',
-        link_url: 'https://example.com',
-        component_name: 'genericwithdescendants',
-        group_title: 'Heading #31 text sub-group title of the component with inner HTML',
-        subgroup_title: 'Heading #31 text sub-group title of the component with inner HTML',
-        site_type: 'example',
-      },
-    ],
-    [
-      'Group and subgroup, subgroup, button',
-      '#el-33',
-      {
-        event: 'genericwithdescendants-custom-event',
-        element_name: 'genericwithdescendants-custom-element-name',
-        click_type: 'genericwithdescendants-custom-click-type',
-        click_text: 'Button #33 text with inner HTML',
-        link_url: '',
-        component_name: 'genericwithdescendants',
-        group_title: 'Heading #31 text sub-group title of the component with inner HTML',
-        subgroup_title: 'Heading #31 text sub-group title of the component with inner HTML',
-        site_type: 'example',
-      },
-    ],
-    [
-      'Skipped heading',
-      '#el-35',
-      {
-        event: 'click_secondary_interaction',
-        element_name: 'genericskipped-link',
-        click_type: 'link',
-        click_text: 'Link #35 text',
-        link_url: 'https://example.com',
-        component_name: 'genericskipped',
-        group_title: '',
-        site_type: 'example',
-      },
-    ],
-    [
-      'Collector, search form',
-      '#el-40',
-      {
-        event: 'click_search',
-        element_name: 'search-form-cta',
-        click_type: 'button',
-        click_text: 'Button #40 Search',
-        link_url: 'http://example.com',
-        component_name: 'search form',
-        site_type: 'example',
-        search_term: 'keyword1 keyword2',
-        filter_types_selected: 'Type 42',
-        filter_tags_selected: 'Tag 45',
-      },
-    ],
-    [
-      'Collector, filters with defaults',
-      '#el-50',
-      {
-        event: 'click_search_filter',
-        element_name: 'search-filter-cta',
-        click_type: 'button',
-        click_text: 'Apply filters #50',
-        link_url: 'http://example.com',
-        component_name: 'search filter',
-        site_type: 'example',
-        search_term: 'keyword1 keyword2',
-        filter_types_selected: 'Type 42',
-        filter_tags_selected: 'Tag 45',
-      },
-    ],
-    [
-      'Collector, filters with mixed labels and values',
-      '#el-50',
-      {
-        event: 'click_search_filter',
-        element_name: 'search-filter-cta',
-        click_type: 'button',
-        click_text: 'Apply filters #50',
-        link_url: 'http://example.com',
-        component_name: 'search filter',
-        site_type: 'example',
-        search_term: 'keyword1 keyword2',
-        filter_types_selected: 'Type 43',
-        filter_tags_selected: 'Tag 45, Tag 46, tags_47',
-      },
-      () => {
-        ['#el-43', '#el-46', '#el-47'].forEach((selector) => {
-          document.querySelector(selector).checked = true;
-        });
-      },
-    ],
-  ])('tracks interaction for: %s', (_name, selector, expected, setup) => {
-    if (setup) {
-      setup();
-    }
+  it('tracks clicks only by default', () => {
+    acl = new AnalyticsContextLayer().init();
 
-    trigger(selector);
-
-    expect(window.dataLayer).toEqual([expected]);
+    expect(acl.settings.types).toEqual(['click']);
+    expect(acl.settings).toEqual(DEFAULT_SETTINGS);
   });
 
-  it('pushes the object when the collector is missing', () => {
-    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+  it('pushes to the data layer by default', () => {
+    acl = new AnalyticsContextLayer().init();
+    document.querySelector('#link').click();
 
-    trigger('#el-51');
-
-    expect(error).toHaveBeenCalledWith('Function testCollectors.missing not found or not callable.');
-    expect(window.dataLayer).toHaveLength(1);
-    expect(window.dataLayer[0].element_name).toBe('search-missing-collector-link');
+    expect(window.dataLayer).toEqual([{ event: 'cta_click', link_text: 'Go', link_url: 'http://localhost:3000/a', component: 'hero' }]);
   });
 
-  it('binds delayed components once the expected value is set', async () => {
-    const component = document.querySelector('[data-component="genericdelayed"]');
+  it('adds properties that every other parameter overrides', () => {
+    acl = new AnalyticsContextLayer({ properties: { site: 'example', component: 'default', link_text: 'default' } }).init();
+    document.querySelector('#link').click();
 
-    trigger('#el-21');
-    component.setAttribute('data-once', 'other');
-    await flushMutations();
-    trigger('#el-21');
-
-    expect(window.dataLayer).toHaveLength(0);
-
-    component.setAttribute('data-once', 'other delayedval');
-    await flushMutations();
-    trigger('#el-21');
-
-    expect(window.dataLayer).toEqual([
-      {
-        event: 'click_secondary_interaction',
-        element_name: 'genericdelayed-link',
-        click_type: 'link',
-        click_text: 'Link #21 text with inner HTML',
-        link_url: 'https://example.com',
-        component_name: 'genericdelayed',
-        group_title: 'Panel 1',
-        site_type: 'example',
-      },
-    ]);
+    expect(window.dataLayer).toEqual([{ event: 'cta_click', site: 'example', component: 'hero', link_text: 'Go', link_url: 'http://localhost:3000/a' }]);
   });
 
-  it('ignores delayed components with no data-once value', async () => {
-    const component = document.querySelector('[data-component="genericdelayed"]');
+  it('binds once however many times it is initialized', () => {
+    acl = new AnalyticsContextLayer();
 
-    component.setAttribute('data-once', '');
-    component.removeAttribute('data-once');
-    await flushMutations();
-    trigger('#el-21');
+    expect(acl.init()).toBe(acl);
+    expect(acl.init()).toBe(acl);
 
-    expect(window.dataLayer).toHaveLength(0);
-  });
-
-  it('binds each component only once', () => {
-    acl.attach(document);
-    acl.attach(document.body);
-
-    trigger('#el-2');
+    document.querySelector('#link').click();
 
     expect(window.dataLayer).toHaveLength(1);
   });
 
-  it('preserves an existing data layer', () => {
-    window.dataLayer = [{ event: 'existing' }];
+  it('can be initialized again after it is destroyed', () => {
+    acl = new AnalyticsContextLayer().init();
+    acl.destroy();
+    acl.destroy();
+    acl.init();
+    document.querySelector('#link').click();
 
-    loadFixture();
-    new AnalyticsContextLayer().attach(document);
-    trigger('#el-2');
-
-    expect(window.dataLayer).toHaveLength(2);
-    expect(window.dataLayer[0]).toEqual({ event: 'existing' });
+    expect(window.dataLayer).toHaveLength(1);
   });
 
-  it('applies custom settings', () => {
-    document.body.innerHTML = '<div data-component="custom"><a href="/a" class="btn" id="a">A</a><a href="/b" id="b">B</a></div>';
-    delete window.customLayer;
+  it('tracks every enabled type', () => {
+    document.body.innerHTML = `${MARKUP}<form data-analytics-form="contact"><input id="field" name="email"></form><p data-analytics-form-submitted="contact"></p>`;
+    acl = new AnalyticsContextLayer({ types: ['click', 'form_start', 'field_complete', 'form_submit'] }).init();
 
-    new AnalyticsContextLayer({ dataLayerName: 'customLayer', defaultEvent: 'interaction', buttonSelector: '.btn' }).attach();
-    trigger('#a');
-    trigger('#b');
+    document.querySelector('#link').click();
+    document.querySelector('#field').dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+    document.querySelector('#field').dispatchEvent(new Event('change', { bubbles: true }));
 
-    expect(window.customLayer.map(({ event, element_name, click_type }) => ({ event, element_name, click_type }))).toEqual([
-      { event: 'interaction', element_name: 'custom-cta', click_type: 'button' },
-      { event: 'interaction', element_name: 'custom-link', click_type: 'link' },
-    ]);
-  });
-
-  it('enables debug from the URL hash and logs pushed data', () => {
-    const log = vi.spyOn(console, 'log').mockImplementation(() => {});
-    window.location.hash = DEFAULT_SETTINGS.debugHash;
-
-    loadFixture();
-    const debugAcl = new AnalyticsContextLayer();
-    debugAcl.attach(document);
-    trigger('#el-2');
-
-    expect(debugAcl.isDebug).toBe(true);
-    expect(window.localStorage.getItem('analytics-debug')).toBe('1');
-    expect(log).toHaveBeenCalledWith('[analytics] Debug enabled');
-    expect(log).toHaveBeenCalledWith('[analytics] Data pushed to dataLayer', expect.stringContaining('"element_name": "generic-link"'));
-  });
-
-  it('keeps debug enabled from local storage without announcing it', () => {
-    const log = vi.spyOn(console, 'log').mockImplementation(() => {});
-    window.localStorage.setItem('analytics-debug', '1');
-
-    const debugAcl = new AnalyticsContextLayer();
-    debugAcl.attach(document);
-
-    expect(debugAcl.isDebug).toBe(true);
-    expect(log).not.toHaveBeenCalledWith('[analytics] Debug enabled');
+    expect(window.dataLayer.map((event) => event.event)).toEqual(['form_submit', 'cta_click', 'form_start', 'field_complete']);
   });
 
   it.each([
-    ['missing function', 'missing', {}],
-    ['missing namespace', 'a.b.fn', {}],
-    ['not a function', 'a.fn', { a: { fn: 'string' } }],
-  ])('throws on exec of a %s', (_name, path, context) => {
-    expect(() => acl.exec(path, context)).toThrow(`Function ${path} not found or not callable.`);
+    ['an unknown type', { types: ['click', 'scroll'] }, 'Unknown analytics event type "scroll".'],
+    ['an inherited property as a type', { types: ['toString'] }, 'Unknown analytics event type "toString".'],
+    ['an unknown sink', { sink: 'segment' }, 'Unknown analytics sink "segment".'],
+  ])('throws on %s', (_description, settings, message) => {
+    expect(() => new AnalyticsContextLayer(settings)).toThrow(message);
   });
 
-  it('calls a function by its path', () => {
-    const context = { a: { fn: (x, y) => x + y } };
+  describe('init()', () => {
+    it('returns 1 shared instance and ignores later settings', () => {
+      acl = init({ properties: { site: 'first' } });
 
-    expect(acl.exec('a.fn', context, 1, 2)).toBe(3);
+      expect(init({ properties: { site: 'second' } })).toBe(acl);
+      expect(acl.settings.properties).toEqual({ site: 'first' });
+
+      document.querySelector('#link').click();
+
+      expect(window.dataLayer).toHaveLength(1);
+    });
+
+    it('creates a new shared instance once the previous one is destroyed', () => {
+      const first = init();
+
+      first.destroy();
+      acl = init();
+
+      expect(acl).not.toBe(first);
+    });
+
+    it('keeps the shared instance when another instance is destroyed', () => {
+      acl = init();
+      new AnalyticsContextLayer().init().destroy();
+
+      expect(init()).toBe(acl);
+    });
   });
 
-  it('returns null field text when no fields match', () => {
-    expect(acl.getFieldText('.does-not-exist')).toBeNull();
-  });
+  describe('debug', () => {
+    let log;
 
-  it('returns no group title for the container itself', () => {
-    const container = document.querySelector('[data-component="generic"]');
+    beforeEach(() => {
+      log = vi.spyOn(console, 'log').mockImplementation(() => {});
+    });
 
-    expect(acl.findGroupTitle(container, container)).toBe('');
-  });
+    it('logs and flags events for the rest of the session once the debug hash is opened', () => {
+      acl = new AnalyticsContextLayer().init();
+      const params = { link_text: 'Go', link_url: 'http://localhost:3000/a', component: 'hero', debug_mode: true };
 
-  it('returns null for an attribute absent from all ancestors', () => {
-    expect(acl.getAttributeFromParent('data-does-not-exist', document.querySelector('#el-2'))).toBeNull();
+      window.history.pushState({}, '', '/#analytics-debug');
+      document.querySelector('#link').click();
+      window.history.pushState({}, '', '/about');
+      document.querySelector('#link').click();
+
+      expect(log).toHaveBeenCalledTimes(2);
+      expect(log).toHaveBeenLastCalledWith('[analytics]', 'cta_click', params);
+      expect(window.dataLayer.at(-1)).toEqual({ event: 'cta_click', ...params });
+    });
+
+    it('does not log without the debug hash', () => {
+      acl = new AnalyticsContextLayer().init();
+      document.querySelector('#link').click();
+
+      expect(log).not.toHaveBeenCalled();
+      expect(window.dataLayer[0].debug_mode).toBeUndefined();
+    });
+
+    it('uses custom debug settings', () => {
+      acl = new AnalyticsContextLayer({ debugHash: '#debug', debugStorageKey: 'custom' }).init();
+      window.history.pushState({}, '', '/#debug');
+      document.querySelector('#link').click();
+
+      expect(log).toHaveBeenCalledTimes(1);
+      expect(window.sessionStorage.getItem('custom')).toBe('1');
+    });
+
+    it.each([
+      [1, 'with the debug hash', '/#analytics-debug'],
+      [0, 'without the debug hash', '/'],
+    ])('logs %i event(s) %s when the browser blocks storage', (logs, _description, url) => {
+      acl = new AnalyticsContextLayer().init();
+
+      vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+        throw new Error('Storage is blocked.');
+      });
+      vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+        throw new Error('Storage is blocked.');
+      });
+      window.history.pushState({}, '', url);
+      document.querySelector('#link').click();
+
+      expect(log).toHaveBeenCalledTimes(logs);
+      expect(window.dataLayer).toHaveLength(1);
+    });
+
+    it.each([
+      ['an event within the limits', 'cta_click', { a: 'x'.repeat(LIMITS.paramValue) }, []],
+      ['a long event name', 'x'.repeat(LIMITS.eventName + 1), {}, [`[analytics] ${'x'.repeat(LIMITS.eventName + 1)}: event name is longer than 40 characters.`]],
+      [
+        'too many parameters',
+        'cta_click',
+        Object.fromEntries(Array.from({ length: LIMITS.params }, (_value, index) => [`p${index}`, index])),
+        ['[analytics] cta_click: more than 25 parameters.'],
+      ],
+      [
+        'long parameter values',
+        'cta_click',
+        { a: 'x'.repeat(LIMITS.paramValue + 1), b: 1, c: 'y'.repeat(LIMITS.paramValue + 1) },
+        ['[analytics] cta_click: "a" is longer than 100 characters.', '[analytics] cta_click: "c" is longer than 100 characters.'],
+      ],
+    ])('warns about %s', (_description, name, params, warnings) => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+      acl = new AnalyticsContextLayer();
+      window.history.pushState({}, '', '/#analytics-debug');
+      acl.send(name, params);
+
+      expect(warn.mock.calls.map(([message]) => message)).toEqual(warnings);
+    });
+
+    it('does not check the limits without the debug hash', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+      acl = new AnalyticsContextLayer();
+      acl.send('x'.repeat(LIMITS.eventName + 1), {});
+
+      expect(warn).not.toHaveBeenCalled();
+    });
   });
 });

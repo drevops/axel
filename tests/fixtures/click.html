@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<!--
+  The elements click.test.js clicks. Run "npm run build" and open this file
+  with "#analytics-debug" appended to the URL to log each event.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Click fixture</title>
+</head>
+<body>
+<h1>Elements outside any enrolled element</h1>
+<a id="outside-link" href="/contact">Contact us</a>
+<button id="outside-button" type="button">Open</button>
+
+<h1>An enrolled element</h1>
+<section data-analytics-event="component_click" data-analytics-param-component="hero">
+  <a id="enrolled-link" href="/same-day-review">Get your contract reviewed</a>
+  <a id="enrolled-phone" href="tel:0395343422">(03) 9534 3422</a>
+  <a id="enrolled-other-site" href="https://example.com/book">Book a call</a>
+  <a id="enrolled-section" href="#form">Send an enquiry</a>
+  <button id="enrolled-button" type="button">Menu</button>
+  <form action="/contact">
+    <input id="enrolled-submit" type="submit" value="Send">
+    <input id="enrolled-input-button" type="button" value="Clear">
+  </form>
+  <a id="enrolled-no-address">An anchor without an address</a>
+  <p id="enrolled-text"><span>Plain text</span></p>
+</section>
+
+<h1>Nested enrolled elements</h1>
+<section data-analytics-event="component_click" data-analytics-param-component="section" data-analytics-param-layout="grid_left">
+  <a id="nested-outer" href="/contact">Ask a Question</a>
+  <div data-analytics-event="component_click" data-analytics-param-component="icon_card">
+    <a id="nested-inner" href="/services/buying"><span>Request Fixed-Fee Quote<span class="visually-hidden">: Buying a Property</span></span></a>
+  </div>
+  <div data-analytics-event="card_click">
+    <a id="nested-event" href="/services/selling">Selling</a>
+  </div>
+  <a id="element-event" href="/contact" data-analytics-event="enquiry_click" data-analytics-param-position="2">Enquire Now</a>
+  <a id="element-text-param" href="/contact" data-analytics-param-link-text="Custom text">Contact</a>
+</section>
+
+<h1>Skipped elements</h1>
+<footer data-analytics-event="component_click" data-analytics-param-component="footer">
+  <a id="skip-link" href="/terms" data-analytics-skip>Terms</a>
+  <div data-analytics-skip>
+    <a id="skip-container-link" href="/disclaimer" data-analytics-event="legal_click">Disclaimer</a>
+  </div>
+</footer>
+
+<h1>Link text</h1>
+<div data-analytics-event="component_click">
+  <a id="text-hidden" href="/contact"><span aria-hidden="true">&rarr;</span>
+    Contact
+    us <!-- An HTML comment. --></a>
+  <a id="text-label" href="tel:0395343422" aria-label="Call the office"><svg aria-hidden="true"></svg></a>
+  <a id="text-title" href="/contact" title="Contact the office"><svg aria-hidden="true"></svg></a>
+  <a id="text-none" href="/contact"><svg aria-hidden="true"></svg></a>
+</div>
+
+<script>
+  window.analyticsContextLayerSettings = { types: ['click'] };
+  // Keep this page open when a link is clicked.
+  window.addEventListener('click', (event) => event.preventDefault());
+</script>
+<script src="../../build/acl.js"></script>
+</body>
+</html>

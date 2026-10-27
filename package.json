@@ -12,8 +12,11 @@
     "repository": "github:drevops/analytics-context-layer",
     "bugs": "https://github.com/drevops/analytics-context-layer/issues",
     "type": "module",
-    "main": "build/acl.js",
-    "module": "src/acl.js",
+    "main": "build/acl.esm.js",
+    "module": "build/acl.esm.js",
+    "exports": {
+        ".": "./build/acl.esm.js"
+    },
     "files": [
         "build",
         "src"
@@ -22,7 +25,7 @@
         "test": "tests"
     },
     "scripts": {
-        "build": "esbuild src/index.js --bundle --format=iife --target=es2018 --outfile=build/acl.js && esbuild src/index.js --bundle --format=iife --target=es2018 --minify --outfile=build/acl.min.js",
+        "build": "esbuild src/index.js --bundle --format=iife --target=es2018 --outfile=build/acl.js && esbuild src/index.js --bundle --format=iife --target=es2018 --minify --outfile=build/acl.min.js && esbuild src/acl.js --bundle --format=esm --target=es2018 --outfile=build/acl.esm.js",
         "lint": "eslint . && prettier --check \"src/**/*.js\" \"tests/**/*.js\" \"*.js\"",
         "lint-fix": "eslint --fix . && prettier --write \"src/**/*.js\" \"tests/**/*.js\" \"*.js\"",
         "pretest": "npm run build",
