@@ -47,6 +47,19 @@ test('sends the events of the cases rendered with the page on load', async ({ pa
   expect(await dataLayer(page)).toEqual(expected);
 });
 
+test('shows pushed events in the panel and runs the steps of the form_submit buttons', async ({ page }) => {
+  await expect(page.locator('#events-missing-build')).toBeHidden();
+  await expect(page.locator('#events-log')).toContainText('"form_name": "contact"');
+
+  await page.locator('#events-clear').click();
+  await page.getByRole('button', { name: 'Add the confirmation' }).click();
+  await page.getByRole('button', { name: 'Call formSubmitted()' }).click();
+
+  await expect(page.locator('#events-log')).toContainText('"form_name": "newsletter"');
+  await expect(page.locator('#events-log')).toContainText('"form_name": "quote"');
+  await expect(page.locator('#events-log')).not.toContainText('"form_name": "contact"');
+});
+
 const LISTED = listCases(readFileSync(FIXTURE, 'utf8'));
 
 test('lists every case on the page', async ({ page }) => {

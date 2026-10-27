@@ -15,28 +15,65 @@
 
   The unit tests run every case in jsdom and the functional tests run every
   case in a browser. To try a case by hand, run "npm run build" and open this
-  file with "#analytics-debug" appended to the URL to log each event.
+  file: the "Events" panel and the console list every pushed event, and the
+  buttons in the form_submit cases run their insert and hook steps.
 -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <title>Analytics Context Layer cases</title>
   <style>
+    body {
+      font-family: sans-serif;
+      margin-right: 30em;
+    }
+
     .case {
       border: 1px solid #ccc;
       margin: 1em 0;
       padding: 0 1em 1em;
     }
 
-    .expected {
+    .expected,
+    #events-log {
       background: #f4f4f4;
+      font-size: 0.85em;
       padding: 0.5em;
       white-space: pre-wrap;
+    }
+
+    #events {
+      border-left: 1px solid #ccc;
+      bottom: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 0 1em;
+      position: fixed;
+      right: 0;
+      top: 0;
+      width: 27em;
+    }
+
+    #events-log {
+      flex: 1;
+      margin: 0 0 1em;
+      overflow-y: auto;
+    }
+
+    #events-missing-build {
+      background: #fdd;
+      padding: 1em;
     }
   </style>
 </head>
 <body>
+<aside id="events">
+  <h2>Events <button id="events-clear" type="button">Clear</button></h2>
+  <pre id="events-log"></pre>
+</aside>
+
 <h1>Analytics Context Layer cases</h1>
+<p id="events-missing-build" hidden>The library didn't load. Run "npm run build" and reload this page.</p>
 
 <h2>click</h2>
 
@@ -332,6 +369,11 @@
 
 <section class="case" id="case-submit-added-later" data-steps="insert #submit-ajax-wrapper = #submit-confirmation; insert #submit-ajax-wrapper = #submit-nested-confirmation; insert #submit-ajax-wrapper = #submit-no-marker">
   <h3>A confirmation added after load sends the event, even when nested; markup without a marker sends nothing</h3>
+  <p>
+    <button type="button" data-insert="#submit-confirmation" data-into="#submit-ajax-wrapper">Add the confirmation</button>
+    <button type="button" data-insert="#submit-nested-confirmation" data-into="#submit-ajax-wrapper">Add the nested confirmation</button>
+    <button type="button" data-insert="#submit-no-marker" data-into="#submit-ajax-wrapper">Add markup without a marker</button>
+  </p>
   <div id="submit-ajax-wrapper" data-analytics-param-section="newsletter"></div>
   <template id="submit-confirmation"><p data-analytics-form-submitted="newsletter">Subscribed.</p></template>
   <template id="submit-nested-confirmation"><div><p data-analytics-form-submitted="callback">We'll call you.</p></div></template>
@@ -344,6 +386,7 @@
 
 <section class="case" id="case-submit-hook" data-steps='hook quote = {"form_step": "2"}'>
   <h3>The site can report a confirmed submission from its own code</h3>
+  <p><button type="button" data-hook="quote" data-hook-params='{"form_step": "2"}'>Call formSubmitted()</button></p>
   <pre class="expected">[{ "event": "form_submit", "form_name": "quote", "form_step": "2" }]</pre>
 </section>
 
@@ -411,10 +454,44 @@
 
 <script>
   window.analyticsContextLayerSettings = { types: ['click', 'form_start', 'field_complete', 'form_submit'] };
+
   // Keep this page open when a link is clicked or a form is submitted.
   ['click', 'auxclick'].forEach((type) => window.addEventListener(type, (event) => event.target.closest?.('a[href]') && event.preventDefault()));
   window.addEventListener('submit', (event) => event.preventDefault());
+
+  // Show every pushed event in the panel and the console. The data layer
+  // still receives each event unchanged.
+  const log = document.querySelector('#events-log');
+
+  window.dataLayer = [];
+  window.dataLayer.push = function push(...events) {
+    events.forEach((event) => {
+      console.log('[cases]', event);
+      log.textContent += `${JSON.stringify(event, null, 2)}\n`;
+    });
+    log.scrollTop = log.scrollHeight;
+
+    return Array.prototype.push.apply(this, events);
+  };
+
+  document.querySelector('#events-clear').addEventListener('click', () => {
+    log.textContent = '';
+  });
+
+  // The buttons run the insert and hook steps of the form_submit cases.
+  document.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-insert], [data-hook]');
+
+    if (button?.dataset.insert) {
+      document.querySelector(button.dataset.into).append(document.querySelector(button.dataset.insert).content.cloneNode(true));
+    } else if (button) {
+      window.analyticsContextLayer.formSubmitted(button.dataset.hook, JSON.parse(button.dataset.hookParams));
+    }
+  });
 </script>
 <script src="../../build/acl.gtm.js"></script>
+<script>
+  document.querySelector('#events-missing-build').hidden = Boolean(window.AnalyticsContextLayer);
+</script>
 </body>
 </html>

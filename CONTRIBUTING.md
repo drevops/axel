@@ -26,4 +26,4 @@ Before the first functional run, install Chromium for Playwright:
 
     npx playwright install chromium
 
-To add a case, add a section to the page. Both suites pick it up. To try a case by hand, run `npm run build` and open `tests/fixtures/cases.html#analytics-debug` to log each event.
+To add a case, add a section to the page. Both suites pick it up. To try a case by hand, run `npm run build` and open `tests/fixtures/cases.html` in a browser. The **Events** panel and the console list every event the page pushes, and the buttons in the `form_submit` cases run their insert and hook steps. Add `#analytics-debug` to the URL to also see the library's own log and GA4 limit warnings.
