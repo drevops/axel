@@ -30,6 +30,8 @@ describe('field_complete', () => {
     ['a textarea', '#apply-message', { field_name: 'message', field_label: 'Message' }],
     ['a select', '#apply-state', { field_name: 'state', field_label: 'State' }],
     ['a radio in a fieldset', '#apply-method-phone', { field_name: 'method', field_label: 'Contact method' }],
+    ['a radio outside a fieldset', '#apply-callback-yes', { field_name: 'callback', field_label: '' }],
+    ['a radio outside a fieldset with an ARIA label', '#apply-callback-labelled', { field_name: 'callback', field_label: 'Callback' }],
     ['a checkbox outside a fieldset', '#apply-terms', { field_name: 'terms', field_label: 'I accept the terms' }],
     ['a field named by its ARIA label', '#apply-aria', { field_name: 'reference', field_label: 'Reference number' }],
     ['a field with a label parameter and no name', '#apply-unnamed', { field_label: 'Custom label' }],

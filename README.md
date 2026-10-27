@@ -109,7 +109,7 @@ The script derives each parameter as follows:
 - `link_text` is the visible text of the link or button with whitespace collapsed. It skips `aria-hidden="true"` content and falls back to `aria-label`, then `title`. For an input button, it's the button's `value`.
 - `link_url` is the absolute address of the link.
 - `form_id` is the `id` of the marked element. `form_destination` is the absolute `action` address, when the marked element is a `<form>` with an `action` attribute.
-- `field_label` is the text of the field's `<label>`, or its `aria-label`. For a radio button or checkbox inside a `<fieldset>`, it's the fieldset's `<legend>`, because the option's own label is the visitor's answer.
+- `field_label` is the text of the field's `<label>`, or its `aria-label`. For a radio button or checkbox inside a `<fieldset>`, it's the fieldset's `<legend>`, because the option's own label is the visitor's answer. A radio button outside a fieldset reports only its `aria-label`.
 
 Only the server knows that a submission succeeded, so `form_submit` waits for a confirmation it renders. Render `data-analytics-form-submitted` into the confirmation message:
 

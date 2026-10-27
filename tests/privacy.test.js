@@ -22,6 +22,8 @@ const MARKUP = `
         <input id="radio" type="radio" name="situation" value="1">
         <label for="radio">${SECRET} radio</label>
       </fieldset>
+      <input id="radio-loose" type="radio" name="loose" value="1">
+      <label for="radio-loose">${SECRET} loose radio</label>
       <fieldset>
         <legend>Needs</legend>
         <label><input id="checkbox" type="checkbox" name="needs[]" value="1">${SECRET} checkbox</label>
@@ -53,6 +55,7 @@ describe('privacy', () => {
     ['a textarea', '#message', (field) => (field.value = `${SECRET} typed`)],
     ['a select', '#select', (field) => (field.selectedIndex = 1)],
     ['a radio', '#radio', (field) => (field.checked = true)],
+    ['a radio outside a fieldset', '#radio-loose', (field) => (field.checked = true)],
     ['a checkbox', '#checkbox', (field) => (field.checked = true)],
   ])('sends no value typed or chosen in %s', (_description, selector, fill) => {
     const field = document.querySelector(selector);
