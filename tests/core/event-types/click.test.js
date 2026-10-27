@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { AnalyticsContextLayer } from '../src/acl.js';
-import { loadFixture } from './helpers.js';
+import { gtm } from '../../../src/adapters/gtm.js';
+import { AnalyticsContextLayer } from '../../../src/core/core.js';
+import { loadFixture } from '../../helpers.js';
 
 const ORIGIN = 'http://localhost:3000';
 
@@ -17,7 +18,7 @@ describe('click', () => {
     window.history.pushState({}, '', '/page');
     window.sessionStorage.clear();
 
-    acl = new AnalyticsContextLayer().init();
+    acl = new AnalyticsContextLayer({ adapter: gtm }).init();
   });
 
   afterEach(() => {
@@ -26,7 +27,11 @@ describe('click', () => {
   });
 
   it.each([
-    ['a link in an enrolled element', '#enrolled-link', { event: 'component_click', link_text: 'See the deals', link_url: `${ORIGIN}/sale`, component: 'promo' }],
+    [
+      'a link in an enrolled element',
+      '#enrolled-link',
+      { event: 'component_click', link_text: 'See the deals', link_url: `${ORIGIN}/sale`, component: 'promo' },
+    ],
     ['a phone link', '#enrolled-phone', { event: 'component_click', link_text: '02 0000 0000', link_url: 'tel:0200000000', component: 'promo' }],
     [
       'a link to another site',
@@ -46,7 +51,11 @@ describe('click', () => {
       '#nested-inner',
       { event: 'component_click', link_text: 'Read more: Spring sale', link_url: `${ORIGIN}/sale/spring`, component: 'card', layout: 'grid' },
     ],
-    ['a link in the outer element', '#nested-outer', { event: 'component_click', link_text: 'About us', link_url: `${ORIGIN}/about`, component: 'section', layout: 'grid' }],
+    [
+      'a link in the outer element',
+      '#nested-outer',
+      { event: 'component_click', link_text: 'About us', link_url: `${ORIGIN}/about`, component: 'section', layout: 'grid' },
+    ],
     [
       'a link in a nested element that names another event',
       '#nested-event',
@@ -62,7 +71,11 @@ describe('click', () => {
       '#element-text-param',
       { event: 'component_click', link_text: 'Custom text', link_url: `${ORIGIN}/contact`, component: 'section', layout: 'grid' },
     ],
-    ['a link whose text spans lines around a hidden icon and a comment', '#text-hidden', { event: 'component_click', link_text: 'Contact us', link_url: `${ORIGIN}/contact` }],
+    [
+      'a link whose text spans lines around a hidden icon and a comment',
+      '#text-hidden',
+      { event: 'component_click', link_text: 'Contact us', link_url: `${ORIGIN}/contact` },
+    ],
     ['a link named by its label', '#text-label', { event: 'component_click', link_text: 'Call us', link_url: 'tel:0200000000' }],
     ['a link named by its title', '#text-title', { event: 'component_click', link_text: 'Contact the team', link_url: `${ORIGIN}/contact` }],
     ['a link with no text or label', '#text-none', { event: 'component_click', link_text: '', link_url: `${ORIGIN}/contact` }],
@@ -118,7 +131,7 @@ describe('click', () => {
 
   it('tracks elements matching a custom click selector', () => {
     acl.destroy();
-    acl = new AnalyticsContextLayer({ clickSelector: 'p' }).init();
+    acl = new AnalyticsContextLayer({ adapter: gtm, clickSelector: 'p' }).init();
 
     document.querySelector('#enrolled-text span').click();
     document.querySelector('#enrolled-link').click();

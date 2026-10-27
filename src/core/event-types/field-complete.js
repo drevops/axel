@@ -24,7 +24,7 @@ function getFieldLabel(field) {
 /**
  * Track changes to fields inside marked forms.
  *
- * @param {import('../acl.js').AnalyticsContextLayer} acl - The instance.
+ * @param {import('../core.js').AnalyticsContextLayer} acl - The instance.
  * @return {Function} A function that stops tracking.
  */
 export function fieldComplete(acl) {

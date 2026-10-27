@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { AnalyticsContextLayer } from '../src/acl.js';
-import { loadFixture } from './helpers.js';
+import { gtm } from '../../../src/adapters/gtm.js';
+import { AnalyticsContextLayer } from '../../../src/core/core.js';
+import { loadFixture } from '../../helpers.js';
 
 function focus(selector) {
   document.querySelector(selector).dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
@@ -14,7 +15,7 @@ describe('form_start', () => {
     window.dataLayer = [];
     window.sessionStorage.clear();
 
-    acl = new AnalyticsContextLayer({ types: ['form_start'] }).init();
+    acl = new AnalyticsContextLayer({ adapter: gtm, types: ['form_start'] }).init();
   });
 
   afterEach(() => {

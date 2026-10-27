@@ -8,7 +8,7 @@ import { getLabel, isSkipped, listen } from '../dom.js';
 /**
  * Track clicks and middle clicks.
  *
- * @param {import('../acl.js').AnalyticsContextLayer} acl - The instance.
+ * @param {import('../core.js').AnalyticsContextLayer} acl - The instance.
  * @return {Function} A function that stops tracking.
  */
 export function click(acl) {

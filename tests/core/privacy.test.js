@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { AnalyticsContextLayer, TYPES } from '../src/acl.js';
+import { gtm } from '../../src/adapters/gtm.js';
+import { AnalyticsContextLayer, TYPES } from '../../src/core/core.js';
 
 const SECRET = 'Jane Citizen 0412 345 678';
 
@@ -41,7 +42,7 @@ describe('privacy', () => {
     window.dataLayer = [];
     window.sessionStorage.clear();
 
-    acl = new AnalyticsContextLayer({ types: Object.keys(TYPES) }).init();
+    acl = new AnalyticsContextLayer({ adapter: gtm, types: Object.keys(TYPES) }).init();
   });
 
   afterEach(() => {

@@ -1,17 +1,17 @@
 /**
  * @file
- * Analytics Context Layer.
+ * Analytics Context Layer core.
  *
  * Turns interactions with elements marked with 'data-analytics-*' attributes
- * into events and sends them to a sink. README.md describes the attributes.
+ * into events and hands them to an adapter. README.md describes the attributes
+ * and the adapter contract.
  */
 
 import { collectParams } from './dom.js';
-import { createSink } from './sinks.js';
-import { click } from './types/click.js';
-import { fieldComplete } from './types/field-complete.js';
-import { formStart } from './types/form-start.js';
-import { formSubmit } from './types/form-submit.js';
+import { click } from './event-types/click.js';
+import { fieldComplete } from './event-types/field-complete.js';
+import { formStart } from './event-types/form-start.js';
+import { formSubmit } from './event-types/form-submit.js';
 
 export const TYPES = {
   click,
@@ -20,26 +20,19 @@ export const TYPES = {
   form_submit: formSubmit,
 };
 
-// GA4 collection limits, checked in debug mode only.
-export const LIMITS = {
-  eventName: 40,
-  params: 25,
-  paramValue: 100,
-};
-
 export const DEFAULT_SETTINGS = {
   // Event types to track, as keys of TYPES.
   types: ['click'],
-  // 'dataLayer', 'gtag' or a function that receives the name and parameters.
-  sink: 'dataLayer',
-  dataLayerName: 'dataLayer',
+  // An object with send(name, params, context) and an optional
+  // validate(name, params), or a function used as send().
+  adapter: null,
   // Static parameters added to every event, overridden by all others.
   properties: {},
   // Elements whose clicks are tracked.
   clickSelector: 'a[href], button, input[type="submit"], input[type="button"]',
   debugHash: '#analytics-debug',
   debugStorageKey: 'analyticsDebug',
-  // Used by the browser bundle only.
+  // Used by the standalone integration only.
   autoInit: true,
 };
 
@@ -49,7 +42,14 @@ export class AnalyticsContextLayer {
    */
   constructor(settings = {}) {
     this.settings = { ...DEFAULT_SETTINGS, ...settings };
-    this.sink = createSink(this.settings.sink, this.settings.dataLayerName);
+
+    const { adapter } = this.settings;
+
+    this.adapter = typeof adapter === 'function' ? { send: adapter } : adapter;
+
+    if (typeof this.adapter?.send !== 'function') {
+      throw new Error('The analytics adapter must be a function or an object with a send() function.');
+    }
 
     this.settings.types.forEach((type) => {
       if (!Object.keys(TYPES).includes(type)) {
@@ -110,22 +110,21 @@ export class AnalyticsContextLayer {
   }
 
   /**
-   * Send an event to the sink.
+   * Send an event to the adapter.
    *
    * @param {string} name   - The event name.
    * @param {object} params - The event parameters.
    */
   send(name, params) {
     const event = { ...this.settings.properties, ...params };
+    const debug = this.isDebug();
 
-    if (this.isDebug()) {
-      // GA4 lists events flagged with 'debug_mode' in its DebugView.
-      event.debug_mode = true;
+    if (debug) {
       console.log('[analytics]', name, event);
-      this.warnLimits(name, event);
+      (this.adapter.validate?.(name, event) || []).forEach((warning) => console.warn(`[analytics] ${name}: ${warning}`));
     }
 
-    this.sink(name, event);
+    this.adapter.send(name, event, { debug, settings: this.settings });
   }
 
   /**
@@ -150,28 +149,6 @@ export class AnalyticsContextLayer {
       // A browser that blocks storage throws on access.
       return requested;
     }
-  }
-
-  /**
-   * Warn about an event that exceeds the GA4 limits.
-   *
-   * @param {string} name   - The event name.
-   * @param {object} params - The event parameters.
-   */
-  warnLimits(name, params) {
-    const warn = (message) => console.warn(`[analytics] ${name}: ${message}`);
-
-    if (name.length > LIMITS.eventName) {
-      warn(`event name is longer than ${LIMITS.eventName} characters.`);
-    }
-
-    if (Object.keys(params).length > LIMITS.params) {
-      warn(`more than ${LIMITS.params} parameters.`);
-    }
-
-    Object.entries(params)
-      .filter(([, value]) => String(value).length > LIMITS.paramValue)
-      .forEach(([key]) => warn(`"${key}" is longer than ${LIMITS.paramValue} characters.`));
   }
 }
 

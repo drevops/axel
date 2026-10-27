@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { AnalyticsContextLayer } from '../src/acl.js';
-import { flushMutations, loadFixture } from './helpers.js';
+import { gtm } from '../../../src/adapters/gtm.js';
+import { AnalyticsContextLayer } from '../../../src/core/core.js';
+import { flushMutations, loadFixture } from '../../helpers.js';
 
 describe('form_submit', () => {
   let acl;
@@ -10,7 +11,7 @@ describe('form_submit', () => {
     window.dataLayer = [];
     window.sessionStorage.clear();
 
-    acl = new AnalyticsContextLayer({ types: ['form_submit'] }).init();
+    acl = new AnalyticsContextLayer({ adapter: gtm, types: ['form_submit'] }).init();
   });
 
   afterEach(() => {
@@ -71,7 +72,7 @@ describe('form_submit', () => {
   });
 
   it('sends the event from the hook when the type is not enabled', () => {
-    const other = new AnalyticsContextLayer({ types: [] });
+    const other = new AnalyticsContextLayer({ adapter: gtm, types: [] });
 
     other.formSubmitted('callback');
 

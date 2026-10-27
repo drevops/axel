@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { AnalyticsContextLayer } from '../src/acl.js';
-import { loadFixture } from './helpers.js';
+import { gtm } from '../../../src/adapters/gtm.js';
+import { AnalyticsContextLayer } from '../../../src/core/core.js';
+import { loadFixture } from '../../helpers.js';
 
 function change(selector) {
   document.querySelector(selector).dispatchEvent(new Event('change', { bubbles: true }));
@@ -16,7 +17,7 @@ describe('field_complete', () => {
     window.dataLayer = [];
     window.sessionStorage.clear();
 
-    acl = new AnalyticsContextLayer({ types: ['field_complete'] }).init();
+    acl = new AnalyticsContextLayer({ adapter: gtm, types: ['field_complete'] }).init();
   });
 
   afterEach(() => {

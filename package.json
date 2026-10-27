@@ -25,9 +25,9 @@
         "test": "tests"
     },
     "scripts": {
-        "build": "esbuild src/index.js --bundle --format=iife --target=es2018 --outfile=build/acl.js && esbuild src/index.js --bundle --format=iife --target=es2018 --minify --outfile=build/acl.min.js && esbuild src/acl.js --bundle --format=esm --target=es2018 --outfile=build/acl.esm.js && esbuild src/drupal.js --bundle --format=iife --target=es2018 --outfile=build/acl.drupal.js && esbuild src/drupal.js --bundle --format=iife --target=es2018 --minify --outfile=build/acl.drupal.min.js",
-        "lint": "eslint . && prettier --check \"src/**/*.js\" \"tests/**/*.js\" \"*.js\"",
-        "lint-fix": "eslint --fix . && prettier --write \"src/**/*.js\" \"tests/**/*.js\" \"*.js\"",
+        "build": "node scripts/build.js",
+        "lint": "eslint . && prettier --check \"src/**/*.js\" \"tests/**/*.js\" \"scripts/**/*.js\" \"*.js\"",
+        "lint-fix": "eslint --fix . && prettier --write \"src/**/*.js\" \"tests/**/*.js\" \"scripts/**/*.js\" \"*.js\"",
         "pretest": "npm run build",
         "test": "vitest run",
         "pretest-coverage": "npm run build",

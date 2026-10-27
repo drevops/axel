@@ -10,7 +10,7 @@ const MARKER = '[data-analytics-form-submitted]';
 /**
  * Track confirmation markers present at start and added later.
  *
- * @param {import('../acl.js').AnalyticsContextLayer} acl - The instance.
+ * @param {import('../core.js').AnalyticsContextLayer} acl - The instance.
  * @return {Function} A function that stops tracking.
  */
 export function formSubmit(acl) {

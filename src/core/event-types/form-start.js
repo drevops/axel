@@ -8,7 +8,7 @@ import { formParams, isSkipped, listen } from '../dom.js';
 /**
  * Track the first focus inside each marked form.
  *
- * @param {import('../acl.js').AnalyticsContextLayer} acl - The instance.
+ * @param {import('../core.js').AnalyticsContextLayer} acl - The instance.
  * @return {Function} A function that stops tracking.
  */
 export function formStart(acl) {
