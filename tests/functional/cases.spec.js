@@ -7,7 +7,6 @@ import { FIXTURE } from '../helpers.js';
 // The page loads build/acl.gtm.js, so run "npm run build" first.
 const PAGE = pathToFileURL(FIXTURE).href;
 
-// Each step is a real browser interaction.
 const ACTIONS = {
   click: (page, target) => page.locator(target).click(),
   'middle-click': (page, target) => page.locator(target).click({ button: 'middle' }),
