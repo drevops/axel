@@ -18,6 +18,15 @@ export default [
     },
   },
   {
+    files: ['src/drupal.js'],
+    languageOptions: {
+      globals: {
+        Drupal: 'readonly',
+        drupalSettings: 'readonly',
+      },
+    },
+  },
+  {
     files: ['tests/**/*.js', '*.js'],
     languageOptions: {
       ecmaVersion: 2022,

@@ -53,3 +53,5 @@ jobs:
             build/acl.js
             build/acl.min.js
             build/acl.esm.js
+            build/acl.drupal.js
+            build/acl.drupal.min.js

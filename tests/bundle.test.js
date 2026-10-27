@@ -29,6 +29,21 @@ describe('Built bundles', () => {
     expect(window.dataLayer).toEqual(EXPECTED);
   });
 
+  it.each(['acl.drupal.js', 'acl.drupal.min.js'])('%s tracks clicks after the behavior attaches', (file) => {
+    const code = readFileSync(join(import.meta.dirname, '../build', file), 'utf8');
+
+    window.Drupal = { behaviors: {} };
+    window.drupalSettings = { analyticsContextLayer: { properties: { site: 'example' } } };
+    new Function(code)();
+    window.Drupal.behaviors.analyticsContextLayer.attach(document);
+    document.querySelector('#link').click();
+    delete window.Drupal;
+    delete window.drupalSettings;
+
+    expect(window.AnalyticsContextLayer).toBeTypeOf('function');
+    expect(window.dataLayer).toEqual(EXPECTED);
+  });
+
   it('acl.esm.js exports init() that tracks clicks', async () => {
     const { init, AnalyticsContextLayer } = await import('../build/acl.esm.js');
     const acl = init({ properties: { site: 'example' } });
