@@ -5,15 +5,15 @@
 
 import { isSkipped } from '../dom.js';
 
-const MARKER = '[data-acl-form-submitted]';
+const MARKER = '[data-axel-form-submitted]';
 
 /**
  * Track confirmation markers present at start and added later.
  *
- * @param {import('../core.js').Acl} acl - The instance.
+ * @param {import('../core.js').Axel} axel - The instance.
  * @return {Function} A function that stops tracking.
  */
-export function formSubmit(acl) {
+export function formSubmit(axel) {
   const seen = new WeakSet();
 
   const report = (marker) => {
@@ -22,7 +22,7 @@ export function formSubmit(acl) {
     }
 
     seen.add(marker);
-    acl.track('form_submit', marker, { form_name: marker.getAttribute('data-acl-form-submitted') });
+    axel.track('form_submit', marker, { form_name: marker.getAttribute('data-axel-form-submitted') });
   };
 
   const scan = (root) => {

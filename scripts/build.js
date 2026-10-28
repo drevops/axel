@@ -22,6 +22,6 @@ const builds = BUNDLES.flatMap((bundle) =>
   ),
 );
 
-builds.push(build({ ...options, entryPoints: ['src/index.js'], format: 'esm', outfile: 'build/acl.esm.js' }));
+builds.push(build({ ...options, entryPoints: ['src/index.js'], format: 'esm', outfile: 'build/axel.esm.js' }));
 
 await Promise.all(builds);

@@ -1,25 +1,25 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { gtm } from '../../../src/adapters/gtm.js';
-import { Acl } from '../../../src/core/core.js';
+import { Axel } from '../../../src/core/core.js';
 import { flushMutations, loadFixture } from '../../helpers.js';
 
-const CONFIRMATION = '<p data-acl-form-submitted="newsletter">Subscribed.</p>';
+const CONFIRMATION = '<p data-axel-form-submitted="newsletter">Subscribed.</p>';
 
 // The behavior of each kind of confirmation is covered by the cases in
 // tests/fixtures/cases.html; these tests cover what the page can't express.
 describe('form_submit', () => {
-  let acl;
+  let axel;
 
   beforeEach(() => {
     loadFixture();
     window.dataLayer = [];
     window.sessionStorage.clear();
 
-    acl = new Acl({ adapter: gtm, types: ['form_submit'] }).init();
+    axel = new Axel({ adapter: gtm, types: ['form_submit'] }).init();
   });
 
   afterEach(() => {
-    acl.destroy();
+    axel.destroy();
     delete window.dataLayer;
   });
 
@@ -31,20 +31,20 @@ describe('form_submit', () => {
   });
 
   it('sends 1 event per marker when it is moved', async () => {
-    document.querySelector('#submit-ajax-wrapper').append(document.querySelector('[data-acl-form-submitted="contact"]'));
+    document.querySelector('#submit-ajax-wrapper').append(document.querySelector('[data-axel-form-submitted="contact"]'));
     await flushMutations();
 
     expect(window.dataLayer).toHaveLength(1);
   });
 
   it('sends 1 event per marker when initialized again', () => {
-    acl.init();
+    axel.init();
 
     expect(window.dataLayer).toHaveLength(1);
   });
 
   it('stops watching for markers once destroyed', async () => {
-    acl.destroy();
+    axel.destroy();
     document.querySelector('#submit-ajax-wrapper').innerHTML = CONFIRMATION;
     await flushMutations();
 
@@ -52,7 +52,7 @@ describe('form_submit', () => {
   });
 
   it('sends the event from the hook when the type is not enabled', () => {
-    new Acl({ adapter: gtm, types: [] }).formSubmitted('callback');
+    new Axel({ adapter: gtm, types: [] }).formSubmitted('callback');
 
     expect(window.dataLayer.at(-1)).toEqual({ event: 'form_submit', form_name: 'callback' });
   });

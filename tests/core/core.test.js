@@ -1,11 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { Acl, DEFAULT_SETTINGS, init } from '../../src/core/core.js';
+import { Axel, DEFAULT_SETTINGS, init } from '../../src/core/core.js';
 
-const MARKUP = '<div data-acl-event="cta_click" data-acl-param-component="hero"><a id="link" href="/a">Go</a></div>';
+const MARKUP = '<div data-axel-event="cta_click" data-axel-param-component="hero"><a id="link" href="/a">Go</a></div>';
 const PARAMS = { link_text: 'Go', click_type: 'link', link_url: 'http://localhost:3000/a', component: 'hero' };
 
-describe('Acl', () => {
-  let acl;
+describe('Axel', () => {
+  let axel;
   let adapter;
 
   beforeEach(() => {
@@ -16,8 +16,8 @@ describe('Acl', () => {
   });
 
   afterEach(() => {
-    acl?.destroy();
-    acl = null;
+    axel?.destroy();
+    axel = null;
     vi.restoreAllMocks();
   });
 
@@ -26,40 +26,40 @@ describe('Acl', () => {
   }
 
   it('tracks clicks only by default', () => {
-    acl = new Acl({ adapter });
+    axel = new Axel({ adapter });
 
-    expect(acl.settings).toEqual({ ...DEFAULT_SETTINGS, adapter });
-    expect(acl.settings.types).toEqual(['click']);
+    expect(axel.settings).toEqual({ ...DEFAULT_SETTINGS, adapter });
+    expect(axel.settings.types).toEqual(['click']);
   });
 
   it('sends the event name, the parameters and the context to the adapter', () => {
-    acl = new Acl({ adapter }).init();
+    axel = new Axel({ adapter }).init();
     document.querySelector('#link').click();
 
-    expect(adapter.send).toHaveBeenCalledWith('cta_click', PARAMS, { debug: false, settings: acl.settings });
+    expect(adapter.send).toHaveBeenCalledWith('cta_click', PARAMS, { debug: false, settings: axel.settings });
   });
 
   it('uses a function as the adapter send()', () => {
     const send = vi.fn();
 
-    acl = new Acl({ adapter: send }).init();
+    axel = new Axel({ adapter: send }).init();
     document.querySelector('#link').click();
 
     expect(send).toHaveBeenCalledWith('cta_click', PARAMS, expect.any(Object));
   });
 
   it('adds properties that every other parameter overrides', () => {
-    acl = new Acl({ adapter, properties: { site: 'example', component: 'default', link_text: 'default' } }).init();
+    axel = new Axel({ adapter, properties: { site: 'example', component: 'default', link_text: 'default' } }).init();
     document.querySelector('#link').click();
 
     expect(sent()).toEqual([['cta_click', { site: 'example', ...PARAMS }]]);
   });
 
   it('binds once however many times it is initialized', () => {
-    acl = new Acl({ adapter });
+    axel = new Axel({ adapter });
 
-    expect(acl.init()).toBe(acl);
-    expect(acl.init()).toBe(acl);
+    expect(axel.init()).toBe(axel);
+    expect(axel.init()).toBe(axel);
 
     document.querySelector('#link').click();
 
@@ -67,18 +67,18 @@ describe('Acl', () => {
   });
 
   it('can be initialized again after it is destroyed', () => {
-    acl = new Acl({ adapter }).init();
-    acl.destroy();
-    acl.destroy();
-    acl.init();
+    axel = new Axel({ adapter }).init();
+    axel.destroy();
+    axel.destroy();
+    axel.init();
     document.querySelector('#link').click();
 
     expect(adapter.send).toHaveBeenCalledTimes(1);
   });
 
   it('tracks every enabled type', () => {
-    document.body.innerHTML = `${MARKUP}<form data-acl-form="contact"><input id="field" name="email"></form><p data-acl-form-submitted="contact"></p>`;
-    acl = new Acl({ adapter, types: ['click', 'form_start', 'field_complete', 'form_submit'] }).init();
+    document.body.innerHTML = `${MARKUP}<form data-axel-form="contact"><input id="field" name="email"></form><p data-axel-form-submitted="contact"></p>`;
+    axel = new Axel({ adapter, types: ['click', 'form_start', 'field_complete', 'form_submit'] }).init();
 
     document.querySelector('#link').click();
     document.querySelector('#field').dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
@@ -98,21 +98,21 @@ describe('Acl', () => {
       'The analytics collector "position" must be a function.',
     ],
   ])('throws on %s', (_description, settings, message) => {
-    expect(() => new Acl(settings)).toThrow(message);
+    expect(() => new Axel(settings)).toThrow(message);
   });
 
   describe('collectors', () => {
     let error;
 
     beforeEach(() => {
-      document.body.innerHTML = `<div data-acl-collector="outer"><div id="source" data-acl-collector="position">${MARKUP}</div></div>`;
+      document.body.innerHTML = `<div data-axel-collector="outer"><div id="source" data-axel-collector="position">${MARKUP}</div></div>`;
       error = vi.spyOn(console, 'error').mockImplementation(() => {});
     });
 
     it('merges what the closest collector returns over the other parameters', () => {
       const collectors = { outer: vi.fn(), position: vi.fn(() => ({ position: '1', component: 'collected' })) };
 
-      acl = new Acl({ adapter, collectors }).init();
+      axel = new Axel({ adapter, collectors }).init();
       document.querySelector('#link').click();
 
       expect(collectors.outer).not.toHaveBeenCalled();
@@ -128,17 +128,17 @@ describe('Acl', () => {
         params.link_text = 'changed';
       };
 
-      acl = new Acl({ adapter, collectors: { position } }).init();
+      axel = new Axel({ adapter, collectors: { position } }).init();
       document.querySelector('#link').click();
 
       expect(sent()).toEqual([['cta_click', PARAMS]]);
     });
 
     it('runs the collector for every event type tracked from inside it', () => {
-      document.body.innerHTML = `<div data-acl-collector="position">${MARKUP}<form data-acl-form="contact"><input id="field" name="email"></form><p data-acl-form-submitted="contact"></p></div>`;
+      document.body.innerHTML = `<div data-axel-collector="position">${MARKUP}<form data-axel-form="contact"><input id="field" name="email"></form><p data-axel-form-submitted="contact"></p></div>`;
       const position = vi.fn(() => ({ position: '1' }));
 
-      acl = new Acl({ adapter, types: ['click', 'form_start', 'field_complete', 'form_submit'], collectors: { position } }).init();
+      axel = new Axel({ adapter, types: ['click', 'form_start', 'field_complete', 'form_submit'], collectors: { position } }).init();
       document.querySelector('#link').click();
       document.querySelector('#field').dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
       document.querySelector('#field').dispatchEvent(new Event('change', { bubbles: true }));
@@ -148,8 +148,8 @@ describe('Acl', () => {
     });
 
     it.each([
-      ['an unknown collector', 'missing', {}, ['[acl] Unknown analytics collector "missing".']],
-      ['an inherited property as a collector', 'toString', {}, ['[acl] Unknown analytics collector "toString".']],
+      ['an unknown collector', 'missing', {}, ['[axel] Unknown analytics collector "missing".']],
+      ['an inherited property as a collector', 'toString', {}, ['[axel] Unknown analytics collector "toString".']],
       [
         'a collector that throws',
         'position',
@@ -158,14 +158,14 @@ describe('Acl', () => {
             throw new Error('Broken.');
           },
         },
-        ['[acl] Broken.'],
+        ['[axel] Broken.'],
       ],
-      ['a collector that returns a string', 'position', { position: () => 'position' }, ['[acl] The analytics collector "position" must return an object.']],
-      ['a collector that returns an array', 'position', { position: () => ['1'] }, ['[acl] The analytics collector "position" must return an object.']],
+      ['a collector that returns a string', 'position', { position: () => 'position' }, ['[axel] The analytics collector "position" must return an object.']],
+      ['a collector that returns an array', 'position', { position: () => ['1'] }, ['[axel] The analytics collector "position" must return an object.']],
       ['a collector that returns null', 'position', { position: () => null }, []],
     ])('sends the event without collected parameters for %s', (_description, collectorName, collectors, errors) => {
-      document.querySelector('#source').setAttribute('data-acl-collector', collectorName);
-      acl = new Acl({ adapter, collectors }).init();
+      document.querySelector('#source').setAttribute('data-axel-collector', collectorName);
+      axel = new Axel({ adapter, collectors }).init();
       document.querySelector('#link').click();
 
       expect(sent()).toEqual([['cta_click', PARAMS]]);
@@ -175,10 +175,10 @@ describe('Acl', () => {
 
   describe('init()', () => {
     it('returns 1 shared instance and ignores later settings', () => {
-      acl = init({ adapter, properties: { site: 'first' } });
+      axel = init({ adapter, properties: { site: 'first' } });
 
-      expect(init({ adapter, properties: { site: 'second' } })).toBe(acl);
-      expect(acl.settings.properties).toEqual({ site: 'first' });
+      expect(init({ adapter, properties: { site: 'second' } })).toBe(axel);
+      expect(axel.settings.properties).toEqual({ site: 'first' });
 
       document.querySelector('#link').click();
 
@@ -189,16 +189,16 @@ describe('Acl', () => {
       const first = init({ adapter });
 
       first.destroy();
-      acl = init({ adapter });
+      axel = init({ adapter });
 
-      expect(acl).not.toBe(first);
+      expect(axel).not.toBe(first);
     });
 
     it('keeps the shared instance when another instance is destroyed', () => {
-      acl = init({ adapter });
-      new Acl({ adapter }).init().destroy();
+      axel = init({ adapter });
+      new Axel({ adapter }).init().destroy();
 
-      expect(init()).toBe(acl);
+      expect(init()).toBe(axel);
     });
   });
 
@@ -212,27 +212,27 @@ describe('Acl', () => {
     });
 
     it('logs events and tells the adapter for the rest of the session once the debug hash is opened', () => {
-      acl = new Acl({ adapter }).init();
+      axel = new Axel({ adapter }).init();
 
-      window.history.pushState({}, '', '/#acl-debug');
+      window.history.pushState({}, '', '/#axel-debug');
       document.querySelector('#link').click();
       window.history.pushState({}, '', '/about');
       document.querySelector('#link').click();
 
       expect(log).toHaveBeenCalledTimes(2);
-      expect(log).toHaveBeenLastCalledWith('[acl]', 'cta_click', PARAMS);
-      expect(adapter.send).toHaveBeenLastCalledWith('cta_click', PARAMS, { debug: true, settings: acl.settings });
+      expect(log).toHaveBeenLastCalledWith('[axel]', 'cta_click', PARAMS);
+      expect(adapter.send).toHaveBeenLastCalledWith('cta_click', PARAMS, { debug: true, settings: axel.settings });
     });
 
     it('does not log without the debug hash', () => {
-      acl = new Acl({ adapter }).init();
+      axel = new Axel({ adapter }).init();
       document.querySelector('#link').click();
 
       expect(log).not.toHaveBeenCalled();
     });
 
     it('uses custom debug settings', () => {
-      acl = new Acl({ adapter, debugHash: '#debug', debugStorageKey: 'custom' }).init();
+      axel = new Axel({ adapter, debugHash: '#debug', debugStorageKey: 'custom' }).init();
       window.history.pushState({}, '', '/#debug');
       document.querySelector('#link').click();
 
@@ -241,10 +241,10 @@ describe('Acl', () => {
     });
 
     it.each([
-      [1, 'with the debug hash', '/#acl-debug'],
+      [1, 'with the debug hash', '/#axel-debug'],
       [0, 'without the debug hash', '/'],
     ])('logs %i event(s) %s when the browser blocks storage', (logs, _description, url) => {
-      acl = new Acl({ adapter }).init();
+      axel = new Axel({ adapter }).init();
 
       vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
         throw new Error('Storage is blocked.');
@@ -260,22 +260,22 @@ describe('Acl', () => {
     });
 
     it.each([
-      ['the adapter validation warnings', ['first.', 'second.'], ['[acl] cta_click: first.', '[acl] cta_click: second.']],
+      ['the adapter validation warnings', ['first.', 'second.'], ['[axel] cta_click: first.', '[axel] cta_click: second.']],
       ['no warnings when the adapter validation passes', [], []],
     ])('prints %s', (_description, warnings, expected) => {
       adapter.validate = vi.fn(() => warnings);
-      acl = new Acl({ adapter });
-      window.history.pushState({}, '', '/#acl-debug');
-      acl.send('cta_click', { a: 1 });
+      axel = new Axel({ adapter });
+      window.history.pushState({}, '', '/#axel-debug');
+      axel.send('cta_click', { a: 1 });
 
       expect(adapter.validate).toHaveBeenCalledWith('cta_click', { a: 1 });
       expect(warn.mock.calls.map(([message]) => message)).toEqual(expected);
     });
 
     it('sends without validation when the adapter has none', () => {
-      acl = new Acl({ adapter });
-      window.history.pushState({}, '', '/#acl-debug');
-      acl.send('cta_click', {});
+      axel = new Axel({ adapter });
+      window.history.pushState({}, '', '/#axel-debug');
+      axel.send('cta_click', {});
 
       expect(warn).not.toHaveBeenCalled();
       expect(adapter.send).toHaveBeenCalledTimes(1);
@@ -283,8 +283,8 @@ describe('Acl', () => {
 
     it('does not validate without the debug hash', () => {
       adapter.validate = vi.fn(() => ['first.']);
-      acl = new Acl({ adapter });
-      acl.send('cta_click', {});
+      axel = new Axel({ adapter });
+      axel.send('cta_click', {});
 
       expect(adapter.validate).not.toHaveBeenCalled();
     });

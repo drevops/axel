@@ -2,7 +2,7 @@
  * @file
  * The bundle matrix: every integration paired with every adapter.
  *
- * A bundle without an adapter takes it from 'window.aclAdapter'.
+ * A bundle without an adapter takes it from 'window.axelAdapter'.
  */
 
 export const INTEGRATIONS = [
@@ -17,7 +17,7 @@ export const ADAPTERS = [
 ];
 
 export const BUNDLES = INTEGRATIONS.flatMap((integration) =>
-  ADAPTERS.map((adapter) => ({ file: `acl${integration.suffix}${adapter.suffix}`, integration: integration.name, adapter: adapter.name })),
+  ADAPTERS.map((adapter) => ({ file: `axel${integration.suffix}${adapter.suffix}`, integration: integration.name, adapter: adapter.name })),
 );
 
 /**

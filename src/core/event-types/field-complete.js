@@ -24,13 +24,13 @@ function getFieldLabel(field) {
 /**
  * Track changes to fields inside marked forms.
  *
- * @param {import('../core.js').Acl} acl - The instance.
+ * @param {import('../core.js').Axel} axel - The instance.
  * @return {Function} A function that stops tracking.
  */
-export function fieldComplete(acl) {
+export function fieldComplete(axel) {
   return listen('change', (event) => {
     const field = event.target;
-    const form = field instanceof Element ? field.closest('[data-acl-form]') : null;
+    const form = field instanceof Element ? field.closest('[data-axel-form]') : null;
 
     if (!form || isSkipped(field)) {
       return;
@@ -44,6 +44,6 @@ export function fieldComplete(acl) {
 
     params.field_label = getFieldLabel(field);
 
-    acl.track('field_complete', field, params);
+    axel.track('field_complete', field, params);
   });
 }

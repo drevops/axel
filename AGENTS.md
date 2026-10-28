@@ -5,7 +5,7 @@ This file guides AI agents working with the code in this repository.
 
 ## Project overview
 
-Analytics Context Layer is a dependency-free browser library. It reads `data-acl-*` attributes the server renders, turns clicks and form interactions into events and hands them to an adapter. Releases attach every bundle in `build/` as GitHub release assets: 1 per integration and adapter pair, each plain and minified, plus `build/acl.esm.js`.
+Axel, the Analytics Context Layer, is a dependency-free browser library. It reads `data-axel-*` attributes the server renders, turns clicks and form interactions into events and hands them to an adapter. Releases attach every bundle in `build/` as GitHub release assets: 1 per integration and adapter pair, each plain and minified, plus `build/axel.esm.js`.
 
 The attributes in `README.md` are the public contract and follow semver: renaming or removing one is a breaking change.
 
@@ -19,24 +19,24 @@ Field events must never carry what a visitor typed or chose. The privacy cases i
 The source has 3 layers, and each folder holds 1 of them:
 
 - `src/core/` - What every bundle shares. It knows nothing about Google or Drupal.
-  - `core.js` - The `Acl` class, `DEFAULT_SETTINGS`, the `TYPES` registry and the shared `init()`.
+  - `core.js` - The `Axel` class, `DEFAULT_SETTINGS`, the `TYPES` registry and the shared `init()`.
   - `dom.js` - DOM helpers shared by the event types: listeners, text, labels and parameters.
   - `event-types/` - 1 module per event type: `click`, `form_start`, `field_complete` and `form_submit`.
 - `src/adapters/` - Where events go. `gtm.js` and `gtag.js`, with the GA4 rules they share in `ga4.js`.
-- `src/integrations/` - How the script starts. `standalone.js` reads `window.aclSettings` on load; `drupal.js` registers a behavior that reads `drupalSettings.acl`.
+- `src/integrations/` - How the script starts. `standalone.js` reads `window.axelSettings` on load; `drupal.js` registers a behavior that reads `drupalSettings.axel`.
 - `src/index.js` - ES module entry point. Re-exports the core and the adapters.
-- `scripts/bundles.js` - The bundle matrix: every integration paired with every adapter, plus 1 bundle per integration that takes its adapter from `window.aclAdapter`.
-- `scripts/build.js` - Builds every bundle in the matrix with esbuild, plain and minified, plus `build/acl.esm.js`.
+- `scripts/bundles.js` - The bundle matrix: every integration paired with every adapter, plus 1 bundle per integration that takes its adapter from `window.axelAdapter`.
+- `scripts/build.js` - Builds every bundle in the matrix with esbuild, plain and minified, plus `build/axel.esm.js`.
 - `tests/fixtures/cases.html` - Every behavior of the library as a case on 1 page: markup, steps in `data-steps` and the expected events. Add a case here before adding a test in code.
 - `tests/cases.js` - Reads the cases from the page; `tests/helpers.js` runs their steps in jsdom.
-- `tests/core/cases.test.js` - Runs every case in jsdom. `tests/functional/cases.spec.js` runs every case in Chromium with Playwright against `build/acl.gtm.js`.
+- `tests/core/cases.test.js` - Runs every case in jsdom. `tests/functional/cases.spec.js` runs every case in Chromium with Playwright against `build/axel.gtm.js`.
 - `tests/` otherwise mirrors `src/`: `core/`, `adapters/` and `integrations/` hold the tests the page can't express. `tests/bundles.test.js` runs every built bundle and checks that it holds only its own integration and adapter.
 
 
 ## Commands
 
 ```bash
-# Build every bundle in the matrix and build/acl.esm.js with esbuild
+# Build every bundle in the matrix and build/axel.esm.js with esbuild
 npm run build
 
 # Run all linters (ESLint, Prettier)

@@ -1,23 +1,23 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { gtm } from '../../../src/adapters/gtm.js';
-import { Acl } from '../../../src/core/core.js';
+import { Axel } from '../../../src/core/core.js';
 import { loadFixture } from '../../helpers.js';
 
 // The behavior of each kind of element is covered by the cases in
 // tests/fixtures/cases.html; these tests cover what the page can't express.
 describe('click', () => {
-  let acl;
+  let axel;
 
   beforeEach(() => {
     loadFixture();
     window.dataLayer = [];
     window.sessionStorage.clear();
 
-    acl = new Acl({ adapter: gtm }).init();
+    axel = new Axel({ adapter: gtm }).init();
   });
 
   afterEach(() => {
-    acl.destroy();
+    axel.destroy();
     delete window.dataLayer;
   });
 
@@ -38,8 +38,8 @@ describe('click', () => {
   });
 
   it('tracks elements matching a custom click selector', () => {
-    acl.destroy();
-    acl = new Acl({ adapter: gtm, clickSelector: 'p' }).init();
+    axel.destroy();
+    axel = new Axel({ adapter: gtm, clickSelector: 'p' }).init();
 
     document.querySelector('#click-text').click();
     document.querySelector('#click-link').click();
@@ -48,8 +48,8 @@ describe('click', () => {
   });
 
   it('titles a group with headings matching a custom group title selector', () => {
-    acl.destroy();
-    acl = new Acl({ adapter: gtm, groupTitleSelector: 'h5' }).init();
+    axel.destroy();
+    axel = new Axel({ adapter: gtm, groupTitleSelector: 'h5' }).init();
 
     document.querySelector('#group-closest-h5').click();
     document.querySelector('#group-marker-link').click();
@@ -58,7 +58,7 @@ describe('click', () => {
   });
 
   it('stops sending events once destroyed', () => {
-    acl.destroy();
+    axel.destroy();
     document.querySelector('#click-link').click();
     document.querySelector('#click-mouse').dispatchEvent(new MouseEvent('auxclick', { bubbles: true, cancelable: true, button: 1 }));
 

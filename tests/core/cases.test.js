@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { gtm } from '../../src/adapters/gtm.js';
-import { Acl, TYPES } from '../../src/core/core.js';
+import { Axel, TYPES } from '../../src/core/core.js';
 import { readCases } from '../cases.js';
 import { flushMutations, loadFixture, runStep } from '../helpers.js';
 
@@ -9,20 +9,20 @@ loadFixture();
 const CASES = readCases(document);
 
 describe('cases.html', () => {
-  let acl;
+  let axel;
 
   beforeEach(() => {
     loadFixture();
     window.dataLayer = [];
     window.sessionStorage.clear();
 
-    acl = new Acl({ adapter: gtm, types: Object.keys(TYPES) }).init();
-    window.acl = acl;
+    axel = new Axel({ adapter: gtm, types: Object.keys(TYPES) }).init();
+    window.axel = axel;
   });
 
   afterEach(() => {
-    acl.destroy();
-    delete window.acl;
+    axel.destroy();
+    delete window.axel;
     delete window.dataLayer;
   });
 

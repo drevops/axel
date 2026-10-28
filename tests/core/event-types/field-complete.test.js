@@ -1,23 +1,23 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { gtm } from '../../../src/adapters/gtm.js';
-import { Acl } from '../../../src/core/core.js';
+import { Axel } from '../../../src/core/core.js';
 import { loadFixture } from '../../helpers.js';
 
 // The behavior of each kind of field is covered by the cases in
 // tests/fixtures/cases.html; these tests cover what the page can't express.
 describe('field_complete', () => {
-  let acl;
+  let axel;
 
   beforeEach(() => {
     loadFixture();
     window.dataLayer = [];
     window.sessionStorage.clear();
 
-    acl = new Acl({ adapter: gtm, types: ['field_complete'] }).init();
+    axel = new Axel({ adapter: gtm, types: ['field_complete'] }).init();
   });
 
   afterEach(() => {
-    acl.destroy();
+    axel.destroy();
     delete window.dataLayer;
   });
 
@@ -28,7 +28,7 @@ describe('field_complete', () => {
   });
 
   it('stops sending events once destroyed', () => {
-    acl.destroy();
+    axel.destroy();
     document.querySelector('#field-name').dispatchEvent(new Event('change', { bubbles: true }));
 
     expect(window.dataLayer).toHaveLength(0);

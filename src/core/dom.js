@@ -3,7 +3,7 @@
  * DOM helpers shared by the event types.
  */
 
-const PARAM_PREFIX = 'data-acl-param-';
+const PARAM_PREFIX = 'data-axel-param-';
 
 /**
  * Add a capture-phase listener to the document.
@@ -54,7 +54,7 @@ export function getLabel(element) {
 }
 
 /**
- * Collect the 'data-acl-param-*' values of the element and its ancestors.
+ * Collect the 'data-axel-param-*' values of the element and its ancestors.
  *
  * @param {Element} element - The element to start from.
  * @return {object} The parameters, the closest of each name winning.
@@ -84,7 +84,7 @@ export function collectParams(element) {
  * @return {boolean} TRUE if the element is skipped.
  */
 export function isSkipped(element) {
-  return element.closest('[data-acl-skip]') !== null;
+  return element.closest('[data-axel-skip]') !== null;
 }
 
 /**
@@ -104,11 +104,11 @@ export function resolveUrl(element, attribute) {
 /**
  * Get the parameters that describe a marked form.
  *
- * @param {Element} form - The element with 'data-acl-form'.
+ * @param {Element} form - The element with 'data-axel-form'.
  * @return {object} The form name, and the form ID and destination when known.
  */
 export function formParams(form) {
-  const params = { form_name: form.getAttribute('data-acl-form') };
+  const params = { form_name: form.getAttribute('data-axel-form') };
   const id = form.getAttribute('id');
 
   if (id) {
