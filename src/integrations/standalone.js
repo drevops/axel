@@ -9,11 +9,16 @@ import { AnalyticsContextLayer, init } from '../core/core.js';
  * Initialize from 'window.analyticsContextLayerSettings' unless 'autoInit' is
  * false, and expose the class and the instance on 'window'.
  *
+ * The collectors in 'window.analyticsContextLayerCollectors' are added to the
+ * collectors in the settings.
+ *
  * @param {object} [adapter] - The adapter. Defaults to
  *   'window.analyticsContextLayerAdapter'.
  */
 export function start(adapter) {
-  const settings = { ...window.analyticsContextLayerSettings, adapter: adapter || window.analyticsContextLayerAdapter };
+  const pageSettings = window.analyticsContextLayerSettings;
+  const collectors = { ...window.analyticsContextLayerCollectors, ...pageSettings?.collectors };
+  const settings = { ...pageSettings, collectors, adapter: adapter || window.analyticsContextLayerAdapter };
 
   window.AnalyticsContextLayer = AnalyticsContextLayer;
 

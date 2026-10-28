@@ -88,6 +88,20 @@ export function isSkipped(element) {
 }
 
 /**
+ * Resolve a URL attribute of an element against the page.
+ *
+ * The attribute is read directly because a form field named like a form
+ * property, such as 'action' or 'id', shadows that property on the form.
+ *
+ * @param {Element} element   - The element.
+ * @param {string}  attribute - The attribute name.
+ * @return {string} The absolute URL.
+ */
+export function resolveUrl(element, attribute) {
+  return new URL(element.getAttribute(attribute), element.baseURI).href;
+}
+
+/**
  * Get the parameters that describe a marked form.
  *
  * @param {Element} form - The element with 'data-analytics-form'.
@@ -95,13 +109,14 @@ export function isSkipped(element) {
  */
 export function formParams(form) {
   const params = { form_name: form.getAttribute('data-analytics-form') };
+  const id = form.getAttribute('id');
 
-  if (form.id) {
-    params.form_id = form.id;
+  if (id) {
+    params.form_id = id;
   }
 
   if (form instanceof HTMLFormElement && form.hasAttribute('action')) {
-    params.form_destination = form.action;
+    params.form_destination = resolveUrl(form, 'action');
   }
 
   return params;

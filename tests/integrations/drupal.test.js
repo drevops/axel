@@ -21,6 +21,7 @@ describe('Drupal integration', () => {
     delete window.Drupal;
     delete window.drupalSettings;
     delete window.analyticsContextLayerAdapter;
+    delete window.analyticsContextLayerCollectors;
     delete window.analyticsContextLayer;
     delete window.AnalyticsContextLayer;
   });
@@ -44,7 +45,11 @@ describe('Drupal integration', () => {
 
     expect(window.analyticsContextLayer).toBe(init());
     expect(adapter.send).toHaveBeenCalledTimes(1);
-    expect(adapter.send).toHaveBeenCalledWith('cta_click', { site: 'example', link_text: 'Link', link_url: 'https://example.com/' }, expect.any(Object));
+    expect(adapter.send).toHaveBeenCalledWith(
+      'cta_click',
+      { site: 'example', link_text: 'Link', click_type: 'link', link_url: 'https://example.com/' },
+      expect.any(Object),
+    );
   });
 
   it('initializes with default settings when drupalSettings has none', () => {
@@ -52,6 +57,16 @@ describe('Drupal integration', () => {
     attach();
 
     expect(window.analyticsContextLayer.settings.types).toEqual(['click']);
+  });
+
+  it('uses the page collectors defined before the behavior attaches', () => {
+    const page = vi.fn();
+
+    start(adapter);
+    window.analyticsContextLayerCollectors = { page };
+    attach();
+
+    expect(window.analyticsContextLayer.settings.collectors).toEqual({ page });
   });
 
   it('uses the page adapter defined before the behavior attaches', () => {

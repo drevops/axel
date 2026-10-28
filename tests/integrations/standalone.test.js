@@ -18,6 +18,7 @@ describe('standalone integration', () => {
     window.analyticsContextLayer?.destroy();
     delete window.analyticsContextLayerSettings;
     delete window.analyticsContextLayerAdapter;
+    delete window.analyticsContextLayerCollectors;
     delete window.analyticsContextLayer;
     delete window.AnalyticsContextLayer;
   });
@@ -31,7 +32,11 @@ describe('standalone integration', () => {
 
     expect(window.AnalyticsContextLayer).toBe(AnalyticsContextLayer);
     expect(window.analyticsContextLayer).toBe(init());
-    expect(adapter.send).toHaveBeenCalledWith('cta_click', { site: 'example', link_text: 'Link', link_url: 'https://example.com/' }, expect.any(Object));
+    expect(adapter.send).toHaveBeenCalledWith(
+      'cta_click',
+      { site: 'example', link_text: 'Link', click_type: 'link', link_url: 'https://example.com/' },
+      expect.any(Object),
+    );
   });
 
   it('keeps the built-in adapter over one in the settings', () => {
@@ -49,6 +54,18 @@ describe('standalone integration', () => {
     document.querySelector('#link').click();
 
     expect(adapter.send).toHaveBeenCalledTimes(1);
+  });
+
+  it('adds the page collectors to the collectors in the settings', () => {
+    const page = vi.fn();
+    const own = vi.fn();
+
+    window.analyticsContextLayerCollectors = { page, own: vi.fn() };
+    window.analyticsContextLayerSettings = { collectors: { own } };
+
+    start(adapter);
+
+    expect(window.analyticsContextLayer.settings.collectors).toEqual({ page, own });
   });
 
   it('throws when no adapter is built in or defined by the page', () => {

@@ -17,7 +17,7 @@ flowchart TB
     subgraph core[src/core - shared by every bundle]
         coreJs[core.js<br>AnalyticsContextLayer, TYPES, init]
         eventTypes[event-types/<br>click, form-start, field-complete, form-submit]
-        dom[dom.js<br>listen, getText, getLabel, collectParams, isSkipped, formParams]
+        dom[dom.js<br>listen, getText, getLabel, collectParams, isSkipped, resolveUrl, formParams]
     end
     subgraph adapters[src/adapters - where events go]
         gtm[gtm.js]
@@ -41,7 +41,7 @@ The source splits into 3 layers, and no layer imports another layer's siblings:
 - `src/adapters/` delivers events. An adapter is an object with `send(name, params, context)` and an optional `validate(name, params)`, or a function used as `send()`. `gtm.js` and `gtag.js` share `ga4.js`, which adds `debug_mode` in debug mode, checks the GA4 limits and finds the data layer by `dataLayerName`.
 - `src/integrations/` starts the core. Each exports `start(adapter)`, which falls back to `window.analyticsContextLayerAdapter` when no adapter is passed.
 
-The constructor in `core.js` merges the settings over `DEFAULT_SETTINGS`, wraps a function adapter as `{ send }` and throws on a missing adapter or a type name missing from `TYPES`.
+The constructor in `core.js` merges the settings over `DEFAULT_SETTINGS`, wraps a function adapter as `{ send }` and throws on a missing adapter, a type name missing from `TYPES` or a `collectors` entry that isn't a function.
 
 
 ## Bundles
@@ -68,7 +68,7 @@ The standalone `start()` reads `window.analyticsContextLayerSettings`, exposes t
 
 The Drupal `start()` exposes the class and registers `Drupal.behaviors.analyticsContextLayer`. Its `attach()` calls `init()` with `drupalSettings.analyticsContextLayer` and the adapter. `init()` creates the shared instance on the first call and returns it on later calls, so AJAX attaches change nothing.
 
-Both integrations override any `adapter` key in the settings with their own adapter.
+Both integrations override any `adapter` key in the settings with their own adapter. Both also merge `window.analyticsContextLayerCollectors` under the `collectors` setting, because `drupalSettings` is JSON and can't carry functions.
 
 
 ## Lifecycle
@@ -81,16 +81,21 @@ The `click`, `form_start` and `field_complete` modules add capture-phase listene
 ## From interaction to adapter
 
 ```mermaid
-%% Traced from: src/core/event-types/*.js, src/core/core.js track() and send(), src/core/dom.js collectParams(), src/adapters/ga4.js.
+%% Traced from: src/core/event-types/*.js, src/core/core.js track(), collect() and send(), src/core/dom.js collectParams(), src/adapters/ga4.js.
 sequenceDiagram
     participant Page as document
     participant Type as event type module
     participant ACL as AnalyticsContextLayer
+    participant Collector as collector
     participant Adapter as adapter
     Page->>Type: click, auxclick, focusin, change or added marker
     Type->>Type: find the target, skip data-analytics-skip, dedupe
     Type->>ACL: track(name, element, derived params)
     ACL->>ACL: derived params, then data-analytics-param-* from element up
+    opt closest data-analytics-collector
+        ACL->>Collector: collect(): collectors[name](name, copy of params, { element, source })
+        Collector-->>ACL: params merged over the others, or an error logged
+    end
     ACL->>ACL: send(): properties first, then the params
     alt debug mode
         ACL->>ACL: log the event
@@ -102,12 +107,12 @@ sequenceDiagram
 
 Each event type decides whether an interaction counts and derives its own parameters:
 
-- `click` takes the closest `clickSelector` match of the target, needs an ancestor with `data-analytics-event` for the name and derives `link_text` and `link_url`. It handles `auxclick` only for the middle button.
+- `click` takes the closest `clickSelector` match of the target, needs an ancestor with `data-analytics-event` for the name and derives `link_text`, `click_type` and `link_url`. `getSubmitDestination()` gives a submit button its `formaction` or its form's `action` as `link_url`. Inside the closest `data-analytics-group` or `data-analytics-subgroup`, `getGroupTitle()` adds `group_title` or `subgroup_title`. It searches the group, or the ancestor its `-scope` selector matches, with `findTitle()`: the last match that precedes the element in document order, isn't its ancestor and isn't skipped. A `data-analytics-group-title` marker is tried before `groupTitleSelector`. It handles `auxclick` only for the middle button.
 - `form_start` takes the closest `data-analytics-form` and records it in a `WeakSet`, so each form element starts once.
 - `field_complete` sends on every `change` inside a marked form, with the form parameters, `field_name` and a `field_label` that never reads a value. A radio never reports its own label.
 - `form_submit` records each marker in a `WeakSet` and sends its `form_name`. `formSubmitted()` sends the same event directly, whatever the configured types.
 
-`track()` lets `data-analytics-param-*` values override derived parameters, and `send()` puts the `properties` setting underneath both. `isDebug()` reads the debug hash and `sessionStorage` on every send, so debug mode survives navigation within a tab and falls back to the hash when storage is blocked.
+`track()` lets `data-analytics-param-*` values override derived parameters, then merges what `collect()` returns over both. `collect()` looks the closest `data-analytics-collector` name up with `Object.hasOwn()`, so a name such as `toString` can't reach the prototype. An unknown name, a throw or a non-object result logs `console.error` and adds nothing, so the event still goes out. `send()` puts the `properties` setting underneath everything. `isDebug()` reads the debug hash and `sessionStorage` on every send, so debug mode survives navigation within a tab and falls back to the hash when storage is blocked.
 
 The `gtm` adapter pushes `{ ...params, event }` to the data layer, so a parameter named `event` can't replace the event name. The `gtag` adapter calls `window.gtag('event', name, params)` when the Google tag is present, and otherwise pushes an `arguments` object to the data layer, the shape the Google tag reads when it loads.
 

@@ -29,7 +29,11 @@ export const DEFAULT_SETTINGS = {
   // Static parameters added to every event, overridden by all others.
   properties: {},
   // Elements whose clicks are tracked.
-  clickSelector: 'a[href], button, input[type="submit"], input[type="button"]',
+  clickSelector: 'a[href], button, input[type="submit"], input[type="button"], input[type="reset"]',
+  // Headings that title a data-analytics-group when it has no marker.
+  groupTitleSelector: 'h2, h3, h4',
+  // Functions named by data-analytics-collector, as name => function.
+  collectors: {},
   debugHash: '#analytics-debug',
   debugStorageKey: 'analyticsDebug',
   // Used by the standalone integration only.
@@ -54,6 +58,12 @@ export class AnalyticsContextLayer {
     this.settings.types.forEach((type) => {
       if (!Object.keys(TYPES).includes(type)) {
         throw new Error(`Unknown analytics event type "${type}".`);
+      }
+    });
+
+    Object.entries(this.settings.collectors).forEach(([name, collector]) => {
+      if (typeof collector !== 'function') {
+        throw new Error(`The analytics collector "${name}" must be a function.`);
       }
     });
 
@@ -96,7 +106,52 @@ export class AnalyticsContextLayer {
    *   'data-analytics-param-*' attributes override.
    */
   track(name, element, derived = {}) {
-    this.send(name, { ...derived, ...collectParams(element) });
+    const params = { ...derived, ...collectParams(element) };
+
+    this.send(name, { ...params, ...this.collect(name, params, element) });
+  }
+
+  /**
+   * Run the collector named by the closest 'data-analytics-collector'.
+   *
+   * A failing collector adds nothing, so the event is still sent.
+   *
+   * @param {string}  name    - The event name.
+   * @param {object}  params  - The event parameters, passed as a copy.
+   * @param {Element} element - The element the event is about.
+   * @return {object} The parameters the collector returns.
+   */
+  collect(name, params, element) {
+    const source = element.closest('[data-analytics-collector]');
+
+    if (!source) {
+      return {};
+    }
+
+    const collectorName = source.getAttribute('data-analytics-collector');
+
+    try {
+      // Only own keys, so a name such as 'toString' can't reach the prototype.
+      if (!Object.hasOwn(this.settings.collectors, collectorName)) {
+        throw new Error(`Unknown analytics collector "${collectorName}".`);
+      }
+
+      const collected = this.settings.collectors[collectorName](name, { ...params }, { element, source });
+
+      if (collected === undefined || collected === null) {
+        return {};
+      }
+
+      if (typeof collected !== 'object' || Array.isArray(collected)) {
+        throw new Error(`The analytics collector "${collectorName}" must return an object.`);
+      }
+
+      return collected;
+    } catch (error) {
+      console.error(`[analytics] ${error.message}`);
+
+      return {};
+    }
   }
 
   /**
