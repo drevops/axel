@@ -11,11 +11,11 @@ This document is generated and maintained by an AI agent via the `update-archite
 %% Traced from: src/core/*.js, src/core/event-types/*.js, src/adapters/*.js, src/integrations/*.js, src/index.js.
 flowchart TB
     subgraph integrations[src/integrations - how it starts]
-        standalone[standalone.js<br>window.analyticsContextLayerSettings]
+        standalone[standalone.js<br>window.aclSettings]
         drupal[drupal.js<br>Drupal.behaviors + drupalSettings]
     end
     subgraph core[src/core - shared by every bundle]
-        coreJs[core.js<br>AnalyticsContextLayer, TYPES, init]
+        coreJs[core.js<br>Acl, TYPES, init]
         eventTypes[event-types/<br>click, form-start, field-complete, form-submit]
         dom[dom.js<br>listen, getText, getLabel, collectParams, isSkipped, resolveUrl, formParams]
     end
@@ -37,9 +37,9 @@ flowchart TB
 
 The source splits into 3 layers, and no layer imports another layer's siblings:
 
-- `src/core/` turns interactions into events. It holds no Google or Drupal code. `core.js` holds the `AnalyticsContextLayer` class and the `TYPES` registry, which maps each event type name to its module in `event-types/`.
+- `src/core/` turns interactions into events. It holds no Google or Drupal code. `core.js` holds the `Acl` class and the `TYPES` registry, which maps each event type name to its module in `event-types/`.
 - `src/adapters/` delivers events. An adapter is an object with `send(name, params, context)` and an optional `validate(name, params)`, or a function used as `send()`. `gtm.js` and `gtag.js` share `ga4.js`, which adds `debug_mode` in debug mode, checks the GA4 limits and finds the data layer by `dataLayerName`.
-- `src/integrations/` starts the core. Each exports `start(adapter)`, which falls back to `window.analyticsContextLayerAdapter` when no adapter is passed.
+- `src/integrations/` starts the core. Each exports `start(adapter)`, which falls back to `window.aclAdapter` when no adapter is passed.
 
 The constructor in `core.js` merges the settings over `DEFAULT_SETTINGS`, wraps a function adapter as `{ send }` and throws on a missing adapter, a type name missing from `TYPES` or a `collectors` entry that isn't a function.
 
@@ -64,18 +64,18 @@ flowchart LR
 
 ## Starting
 
-The standalone `start()` reads `window.analyticsContextLayerSettings`, exposes the class as `window.AnalyticsContextLayer` and initializes the shared instance straight away, unless `autoInit` is false. Delegated listeners don't need the DOM to be ready, so the script can load in `<head>`.
+The standalone `start()` reads `window.aclSettings`, exposes the class as `window.Acl` and initializes the shared instance straight away, unless `autoInit` is false. Delegated listeners don't need the DOM to be ready, so the script can load in `<head>`.
 
-The Drupal `start()` exposes the class and registers `Drupal.behaviors.analyticsContextLayer`. Its `attach()` calls `init()` with `drupalSettings.analyticsContextLayer` and the adapter. `init()` creates the shared instance on the first call and returns it on later calls, so AJAX attaches change nothing.
+The Drupal `start()` exposes the class and registers `Drupal.behaviors.acl`. Its `attach()` calls `init()` with `drupalSettings.acl` and the adapter. `init()` creates the shared instance on the first call and returns it on later calls, so AJAX attaches change nothing.
 
-Both integrations override any `adapter` key in the settings with their own adapter. Both also merge `window.analyticsContextLayerCollectors` under the `collectors` setting, because `drupalSettings` is JSON and can't carry functions.
+Both integrations override any `adapter` key in the settings with their own adapter. Both also merge `window.aclCollectors` under the `collectors` setting, because `drupalSettings` is JSON and can't carry functions.
 
 
 ## Lifecycle
 
 `init()` on an instance calls each configured event type module once and stores the cleanup functions it returns. While they are stored, `init()` does nothing, so an instance never binds twice. `destroy()` runs the cleanups, clears them and releases the shared instance when it is the one destroyed, so `init()` can start again.
 
-The `click`, `form_start` and `field_complete` modules add capture-phase listeners on `document` through `listen()`. Capture runs before page handlers can stop propagation, and delegation covers markup added after load. `form_submit` scans the document for `data-analytics-form-submitted` markers and watches it with a `MutationObserver` for markers added later.
+The `click`, `form_start` and `field_complete` modules add capture-phase listeners on `document` through `listen()`. Capture runs before page handlers can stop propagation, and delegation covers markup added after load. `form_submit` scans the document for `data-acl-form-submitted` markers and watches it with a `MutationObserver` for markers added later.
 
 
 ## From interaction to adapter
@@ -85,14 +85,14 @@ The `click`, `form_start` and `field_complete` modules add capture-phase listene
 sequenceDiagram
     participant Page as document
     participant Type as event type module
-    participant ACL as AnalyticsContextLayer
+    participant ACL as Acl
     participant Collector as collector
     participant Adapter as adapter
     Page->>Type: click, auxclick, focusin, change or added marker
-    Type->>Type: find the target, skip data-analytics-skip, dedupe
+    Type->>Type: find the target, skip data-acl-skip, dedupe
     Type->>ACL: track(name, element, derived params)
-    ACL->>ACL: derived params, then data-analytics-param-* from element up
-    opt closest data-analytics-collector
+    ACL->>ACL: derived params, then data-acl-param-* from element up
+    opt closest data-acl-collector
         ACL->>Collector: collect(): collectors[name](name, copy of params, { element, source })
         Collector-->>ACL: params merged over the others, or an error logged
     end
@@ -107,12 +107,12 @@ sequenceDiagram
 
 Each event type decides whether an interaction counts and derives its own parameters:
 
-- `click` takes the closest `clickSelector` match of the target, needs an ancestor with `data-analytics-event` for the name and derives `link_text`, `click_type` and `link_url`. `getSubmitDestination()` gives a submit button its `formaction` or its form's `action` as `link_url`. Inside the closest `data-analytics-group` or `data-analytics-subgroup`, `getGroupTitle()` adds `group_title` or `subgroup_title`. It searches the group, or the ancestor its `-scope` selector matches, with `findTitle()`: the last match that precedes the element in document order, isn't its ancestor and isn't skipped. A `data-analytics-group-title` marker is tried before `groupTitleSelector`. It handles `auxclick` only for the middle button.
-- `form_start` takes the closest `data-analytics-form` and records it in a `WeakSet`, so each form element starts once.
+- `click` takes the closest `clickSelector` match of the target, needs an ancestor with `data-acl-event` for the name and derives `link_text`, `click_type` and `link_url`. `getSubmitDestination()` gives a submit button its `formaction` or its form's `action` as `link_url`. Inside the closest `data-acl-group` or `data-acl-subgroup`, `getGroupTitle()` adds `group_title` or `subgroup_title`. It searches the group, or the ancestor its `-scope` selector matches, with `findTitle()`: the last match that precedes the element in document order, isn't its ancestor and isn't skipped. A `data-acl-group-title` marker is tried before `groupTitleSelector`. It handles `auxclick` only for the middle button.
+- `form_start` takes the closest `data-acl-form` and records it in a `WeakSet`, so each form element starts once.
 - `field_complete` sends on every `change` inside a marked form, with the form parameters, `field_name` and a `field_label` that never reads a value. A radio never reports its own label.
 - `form_submit` records each marker in a `WeakSet` and sends its `form_name`. `formSubmitted()` sends the same event directly, whatever the configured types.
 
-`track()` lets `data-analytics-param-*` values override derived parameters, then merges what `collect()` returns over both. `collect()` looks the closest `data-analytics-collector` name up with `Object.hasOwn()`, so a name such as `toString` can't reach the prototype. An unknown name, a throw or a non-object result logs `console.error` and adds nothing, so the event still goes out. `send()` puts the `properties` setting underneath everything. `isDebug()` reads the debug hash and `sessionStorage` on every send, so debug mode survives navigation within a tab and falls back to the hash when storage is blocked.
+`track()` lets `data-acl-param-*` values override derived parameters, then merges what `collect()` returns over both. `collect()` looks the closest `data-acl-collector` name up with `Object.hasOwn()`, so a name such as `toString` can't reach the prototype. An unknown name, a throw or a non-object result logs `console.error` and adds nothing, so the event still goes out. `send()` puts the `properties` setting underneath everything. `isDebug()` reads the debug hash and `sessionStorage` on every send, so debug mode survives navigation within a tab and falls back to the hash when storage is blocked.
 
 The `gtm` adapter pushes `{ ...params, event }` to the data layer, so a parameter named `event` can't replace the event name. The `gtag` adapter calls `window.gtag('event', name, params)` when the Google tag is present, and otherwise pushes an `arguments` object to the data layer, the shape the Google tag reads when it loads.
 

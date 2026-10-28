@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const MARKUP = '<div data-analytics-event="cta_click"><a href="https://example.com/" id="link">Link</a></div>';
+const MARKUP = '<div data-acl-event="cta_click"><a href="https://example.com/" id="link">Link</a></div>';
 
 describe('standalone integration', () => {
   let start;
@@ -15,23 +15,23 @@ describe('standalone integration', () => {
   });
 
   afterEach(() => {
-    window.analyticsContextLayer?.destroy();
-    delete window.analyticsContextLayerSettings;
-    delete window.analyticsContextLayerAdapter;
-    delete window.analyticsContextLayerCollectors;
-    delete window.analyticsContextLayer;
-    delete window.AnalyticsContextLayer;
+    window.acl?.destroy();
+    delete window.aclSettings;
+    delete window.aclAdapter;
+    delete window.aclCollectors;
+    delete window.acl;
+    delete window.Acl;
   });
 
   it('exposes the class and an initialized shared instance configured from settings', async () => {
-    window.analyticsContextLayerSettings = { properties: { site: 'example' } };
+    window.aclSettings = { properties: { site: 'example' } };
 
     start(adapter);
-    const { AnalyticsContextLayer, init } = await import('../../src/core/core.js');
+    const { Acl, init } = await import('../../src/core/core.js');
     document.querySelector('#link').click();
 
-    expect(window.AnalyticsContextLayer).toBe(AnalyticsContextLayer);
-    expect(window.analyticsContextLayer).toBe(init());
+    expect(window.Acl).toBe(Acl);
+    expect(window.acl).toBe(init());
     expect(adapter.send).toHaveBeenCalledWith(
       'cta_click',
       { site: 'example', link_text: 'Link', click_type: 'link', link_url: 'https://example.com/' },
@@ -40,15 +40,15 @@ describe('standalone integration', () => {
   });
 
   it('keeps the built-in adapter over one in the settings', () => {
-    window.analyticsContextLayerSettings = { adapter: vi.fn() };
+    window.aclSettings = { adapter: vi.fn() };
 
     start(adapter);
 
-    expect(window.analyticsContextLayer.adapter).toBe(adapter);
+    expect(window.acl.adapter).toBe(adapter);
   });
 
   it('uses the page adapter when none is built in', () => {
-    window.analyticsContextLayerAdapter = adapter;
+    window.aclAdapter = adapter;
 
     start();
     document.querySelector('#link').click();
@@ -60,12 +60,12 @@ describe('standalone integration', () => {
     const page = vi.fn();
     const own = vi.fn();
 
-    window.analyticsContextLayerCollectors = { page, own: vi.fn() };
-    window.analyticsContextLayerSettings = { collectors: { own } };
+    window.aclCollectors = { page, own: vi.fn() };
+    window.aclSettings = { collectors: { own } };
 
     start(adapter);
 
-    expect(window.analyticsContextLayer.settings.collectors).toEqual({ page, own });
+    expect(window.acl.settings.collectors).toEqual({ page, own });
   });
 
   it('throws when no adapter is built in or defined by the page', () => {
@@ -73,14 +73,14 @@ describe('standalone integration', () => {
   });
 
   it('waits for the site to initialize when auto-init is disabled', () => {
-    window.analyticsContextLayerSettings = { autoInit: false };
+    window.aclSettings = { autoInit: false };
 
     start(adapter);
     document.querySelector('#link').click();
 
     expect(adapter.send).not.toHaveBeenCalled();
 
-    window.analyticsContextLayer.init();
+    window.acl.init();
     document.querySelector('#link').click();
 
     expect(adapter.send).toHaveBeenCalledTimes(1);

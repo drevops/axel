@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { AnalyticsContextLayer, DEFAULT_SETTINGS, init } from '../../src/core/core.js';
+import { Acl, DEFAULT_SETTINGS, init } from '../../src/core/core.js';
 
-const MARKUP = '<div data-analytics-event="cta_click" data-analytics-param-component="hero"><a id="link" href="/a">Go</a></div>';
+const MARKUP = '<div data-acl-event="cta_click" data-acl-param-component="hero"><a id="link" href="/a">Go</a></div>';
 const PARAMS = { link_text: 'Go', click_type: 'link', link_url: 'http://localhost:3000/a', component: 'hero' };
 
-describe('AnalyticsContextLayer', () => {
+describe('Acl', () => {
   let acl;
   let adapter;
 
@@ -26,14 +26,14 @@ describe('AnalyticsContextLayer', () => {
   }
 
   it('tracks clicks only by default', () => {
-    acl = new AnalyticsContextLayer({ adapter });
+    acl = new Acl({ adapter });
 
     expect(acl.settings).toEqual({ ...DEFAULT_SETTINGS, adapter });
     expect(acl.settings.types).toEqual(['click']);
   });
 
   it('sends the event name, the parameters and the context to the adapter', () => {
-    acl = new AnalyticsContextLayer({ adapter }).init();
+    acl = new Acl({ adapter }).init();
     document.querySelector('#link').click();
 
     expect(adapter.send).toHaveBeenCalledWith('cta_click', PARAMS, { debug: false, settings: acl.settings });
@@ -42,21 +42,21 @@ describe('AnalyticsContextLayer', () => {
   it('uses a function as the adapter send()', () => {
     const send = vi.fn();
 
-    acl = new AnalyticsContextLayer({ adapter: send }).init();
+    acl = new Acl({ adapter: send }).init();
     document.querySelector('#link').click();
 
     expect(send).toHaveBeenCalledWith('cta_click', PARAMS, expect.any(Object));
   });
 
   it('adds properties that every other parameter overrides', () => {
-    acl = new AnalyticsContextLayer({ adapter, properties: { site: 'example', component: 'default', link_text: 'default' } }).init();
+    acl = new Acl({ adapter, properties: { site: 'example', component: 'default', link_text: 'default' } }).init();
     document.querySelector('#link').click();
 
     expect(sent()).toEqual([['cta_click', { site: 'example', ...PARAMS }]]);
   });
 
   it('binds once however many times it is initialized', () => {
-    acl = new AnalyticsContextLayer({ adapter });
+    acl = new Acl({ adapter });
 
     expect(acl.init()).toBe(acl);
     expect(acl.init()).toBe(acl);
@@ -67,7 +67,7 @@ describe('AnalyticsContextLayer', () => {
   });
 
   it('can be initialized again after it is destroyed', () => {
-    acl = new AnalyticsContextLayer({ adapter }).init();
+    acl = new Acl({ adapter }).init();
     acl.destroy();
     acl.destroy();
     acl.init();
@@ -77,8 +77,8 @@ describe('AnalyticsContextLayer', () => {
   });
 
   it('tracks every enabled type', () => {
-    document.body.innerHTML = `${MARKUP}<form data-analytics-form="contact"><input id="field" name="email"></form><p data-analytics-form-submitted="contact"></p>`;
-    acl = new AnalyticsContextLayer({ adapter, types: ['click', 'form_start', 'field_complete', 'form_submit'] }).init();
+    document.body.innerHTML = `${MARKUP}<form data-acl-form="contact"><input id="field" name="email"></form><p data-acl-form-submitted="contact"></p>`;
+    acl = new Acl({ adapter, types: ['click', 'form_start', 'field_complete', 'form_submit'] }).init();
 
     document.querySelector('#link').click();
     document.querySelector('#field').dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
@@ -98,21 +98,21 @@ describe('AnalyticsContextLayer', () => {
       'The analytics collector "position" must be a function.',
     ],
   ])('throws on %s', (_description, settings, message) => {
-    expect(() => new AnalyticsContextLayer(settings)).toThrow(message);
+    expect(() => new Acl(settings)).toThrow(message);
   });
 
   describe('collectors', () => {
     let error;
 
     beforeEach(() => {
-      document.body.innerHTML = `<div data-analytics-collector="outer"><div id="source" data-analytics-collector="position">${MARKUP}</div></div>`;
+      document.body.innerHTML = `<div data-acl-collector="outer"><div id="source" data-acl-collector="position">${MARKUP}</div></div>`;
       error = vi.spyOn(console, 'error').mockImplementation(() => {});
     });
 
     it('merges what the closest collector returns over the other parameters', () => {
       const collectors = { outer: vi.fn(), position: vi.fn(() => ({ position: '1', component: 'collected' })) };
 
-      acl = new AnalyticsContextLayer({ adapter, collectors }).init();
+      acl = new Acl({ adapter, collectors }).init();
       document.querySelector('#link').click();
 
       expect(collectors.outer).not.toHaveBeenCalled();
@@ -128,17 +128,17 @@ describe('AnalyticsContextLayer', () => {
         params.link_text = 'changed';
       };
 
-      acl = new AnalyticsContextLayer({ adapter, collectors: { position } }).init();
+      acl = new Acl({ adapter, collectors: { position } }).init();
       document.querySelector('#link').click();
 
       expect(sent()).toEqual([['cta_click', PARAMS]]);
     });
 
     it('runs the collector for every event type tracked from inside it', () => {
-      document.body.innerHTML = `<div data-analytics-collector="position">${MARKUP}<form data-analytics-form="contact"><input id="field" name="email"></form><p data-analytics-form-submitted="contact"></p></div>`;
+      document.body.innerHTML = `<div data-acl-collector="position">${MARKUP}<form data-acl-form="contact"><input id="field" name="email"></form><p data-acl-form-submitted="contact"></p></div>`;
       const position = vi.fn(() => ({ position: '1' }));
 
-      acl = new AnalyticsContextLayer({ adapter, types: ['click', 'form_start', 'field_complete', 'form_submit'], collectors: { position } }).init();
+      acl = new Acl({ adapter, types: ['click', 'form_start', 'field_complete', 'form_submit'], collectors: { position } }).init();
       document.querySelector('#link').click();
       document.querySelector('#field').dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
       document.querySelector('#field').dispatchEvent(new Event('change', { bubbles: true }));
@@ -148,8 +148,8 @@ describe('AnalyticsContextLayer', () => {
     });
 
     it.each([
-      ['an unknown collector', 'missing', {}, ['[analytics] Unknown analytics collector "missing".']],
-      ['an inherited property as a collector', 'toString', {}, ['[analytics] Unknown analytics collector "toString".']],
+      ['an unknown collector', 'missing', {}, ['[acl] Unknown analytics collector "missing".']],
+      ['an inherited property as a collector', 'toString', {}, ['[acl] Unknown analytics collector "toString".']],
       [
         'a collector that throws',
         'position',
@@ -158,19 +158,14 @@ describe('AnalyticsContextLayer', () => {
             throw new Error('Broken.');
           },
         },
-        ['[analytics] Broken.'],
+        ['[acl] Broken.'],
       ],
-      [
-        'a collector that returns a string',
-        'position',
-        { position: () => 'position' },
-        ['[analytics] The analytics collector "position" must return an object.'],
-      ],
-      ['a collector that returns an array', 'position', { position: () => ['1'] }, ['[analytics] The analytics collector "position" must return an object.']],
+      ['a collector that returns a string', 'position', { position: () => 'position' }, ['[acl] The analytics collector "position" must return an object.']],
+      ['a collector that returns an array', 'position', { position: () => ['1'] }, ['[acl] The analytics collector "position" must return an object.']],
       ['a collector that returns null', 'position', { position: () => null }, []],
     ])('sends the event without collected parameters for %s', (_description, collectorName, collectors, errors) => {
-      document.querySelector('#source').setAttribute('data-analytics-collector', collectorName);
-      acl = new AnalyticsContextLayer({ adapter, collectors }).init();
+      document.querySelector('#source').setAttribute('data-acl-collector', collectorName);
+      acl = new Acl({ adapter, collectors }).init();
       document.querySelector('#link').click();
 
       expect(sent()).toEqual([['cta_click', PARAMS]]);
@@ -201,7 +196,7 @@ describe('AnalyticsContextLayer', () => {
 
     it('keeps the shared instance when another instance is destroyed', () => {
       acl = init({ adapter });
-      new AnalyticsContextLayer({ adapter }).init().destroy();
+      new Acl({ adapter }).init().destroy();
 
       expect(init()).toBe(acl);
     });
@@ -217,27 +212,27 @@ describe('AnalyticsContextLayer', () => {
     });
 
     it('logs events and tells the adapter for the rest of the session once the debug hash is opened', () => {
-      acl = new AnalyticsContextLayer({ adapter }).init();
+      acl = new Acl({ adapter }).init();
 
-      window.history.pushState({}, '', '/#analytics-debug');
+      window.history.pushState({}, '', '/#acl-debug');
       document.querySelector('#link').click();
       window.history.pushState({}, '', '/about');
       document.querySelector('#link').click();
 
       expect(log).toHaveBeenCalledTimes(2);
-      expect(log).toHaveBeenLastCalledWith('[analytics]', 'cta_click', PARAMS);
+      expect(log).toHaveBeenLastCalledWith('[acl]', 'cta_click', PARAMS);
       expect(adapter.send).toHaveBeenLastCalledWith('cta_click', PARAMS, { debug: true, settings: acl.settings });
     });
 
     it('does not log without the debug hash', () => {
-      acl = new AnalyticsContextLayer({ adapter }).init();
+      acl = new Acl({ adapter }).init();
       document.querySelector('#link').click();
 
       expect(log).not.toHaveBeenCalled();
     });
 
     it('uses custom debug settings', () => {
-      acl = new AnalyticsContextLayer({ adapter, debugHash: '#debug', debugStorageKey: 'custom' }).init();
+      acl = new Acl({ adapter, debugHash: '#debug', debugStorageKey: 'custom' }).init();
       window.history.pushState({}, '', '/#debug');
       document.querySelector('#link').click();
 
@@ -246,10 +241,10 @@ describe('AnalyticsContextLayer', () => {
     });
 
     it.each([
-      [1, 'with the debug hash', '/#analytics-debug'],
+      [1, 'with the debug hash', '/#acl-debug'],
       [0, 'without the debug hash', '/'],
     ])('logs %i event(s) %s when the browser blocks storage', (logs, _description, url) => {
-      acl = new AnalyticsContextLayer({ adapter }).init();
+      acl = new Acl({ adapter }).init();
 
       vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
         throw new Error('Storage is blocked.');
@@ -265,12 +260,12 @@ describe('AnalyticsContextLayer', () => {
     });
 
     it.each([
-      ['the adapter validation warnings', ['first.', 'second.'], ['[analytics] cta_click: first.', '[analytics] cta_click: second.']],
+      ['the adapter validation warnings', ['first.', 'second.'], ['[acl] cta_click: first.', '[acl] cta_click: second.']],
       ['no warnings when the adapter validation passes', [], []],
     ])('prints %s', (_description, warnings, expected) => {
       adapter.validate = vi.fn(() => warnings);
-      acl = new AnalyticsContextLayer({ adapter });
-      window.history.pushState({}, '', '/#analytics-debug');
+      acl = new Acl({ adapter });
+      window.history.pushState({}, '', '/#acl-debug');
       acl.send('cta_click', { a: 1 });
 
       expect(adapter.validate).toHaveBeenCalledWith('cta_click', { a: 1 });
@@ -278,8 +273,8 @@ describe('AnalyticsContextLayer', () => {
     });
 
     it('sends without validation when the adapter has none', () => {
-      acl = new AnalyticsContextLayer({ adapter });
-      window.history.pushState({}, '', '/#analytics-debug');
+      acl = new Acl({ adapter });
+      window.history.pushState({}, '', '/#acl-debug');
       acl.send('cta_click', {});
 
       expect(warn).not.toHaveBeenCalled();
@@ -288,7 +283,7 @@ describe('AnalyticsContextLayer', () => {
 
     it('does not validate without the debug hash', () => {
       adapter.validate = vi.fn(() => ['first.']);
-      acl = new AnalyticsContextLayer({ adapter });
+      acl = new Acl({ adapter });
       acl.send('cta_click', {});
 
       expect(adapter.validate).not.toHaveBeenCalled();

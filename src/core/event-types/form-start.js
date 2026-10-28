@@ -8,14 +8,14 @@ import { formParams, isSkipped, listen } from '../dom.js';
 /**
  * Track the first focus inside each marked form.
  *
- * @param {import('../core.js').AnalyticsContextLayer} acl - The instance.
+ * @param {import('../core.js').Acl} acl - The instance.
  * @return {Function} A function that stops tracking.
  */
 export function formStart(acl) {
   const started = new WeakSet();
 
   return listen('focusin', (event) => {
-    const form = event.target instanceof Element ? event.target.closest('[data-analytics-form]') : null;
+    const form = event.target instanceof Element ? event.target.closest('[data-acl-form]') : null;
 
     if (!form || started.has(form) || isSkipped(event.target)) {
       return;

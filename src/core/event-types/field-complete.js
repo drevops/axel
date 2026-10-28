@@ -24,13 +24,13 @@ function getFieldLabel(field) {
 /**
  * Track changes to fields inside marked forms.
  *
- * @param {import('../core.js').AnalyticsContextLayer} acl - The instance.
+ * @param {import('../core.js').Acl} acl - The instance.
  * @return {Function} A function that stops tracking.
  */
 export function fieldComplete(acl) {
   return listen('change', (event) => {
     const field = event.target;
-    const form = field instanceof Element ? field.closest('[data-analytics-form]') : null;
+    const form = field instanceof Element ? field.closest('[data-acl-form]') : null;
 
     if (!form || isSkipped(field)) {
       return;

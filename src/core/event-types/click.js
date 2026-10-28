@@ -1,6 +1,6 @@
 /**
  * @file
- * Click events for interactive elements inside 'data-analytics-event'.
+ * Click events for interactive elements inside 'data-acl-event'.
  */
 
 import { getLabel, isSkipped, listen, resolveUrl } from '../dom.js';
@@ -34,13 +34,13 @@ function findTitle(element, scope, selector) {
  *   undefined outside any group of the kind.
  */
 function getGroupTitle(element, kind, selectors) {
-  const group = element.closest(`[data-analytics-${kind}]`);
+  const group = element.closest(`[data-acl-${kind}]`);
 
   if (!group) {
     return undefined;
   }
 
-  const scopeSelector = group.getAttribute(`data-analytics-${kind}-scope`);
+  const scopeSelector = group.getAttribute(`data-acl-${kind}-scope`);
   const scope = (scopeSelector && group.closest(scopeSelector)) || group;
 
   for (const selector of selectors) {
@@ -76,7 +76,7 @@ function getSubmitDestination(element) {
 /**
  * Track clicks and middle clicks.
  *
- * @param {import('../core.js').AnalyticsContextLayer} acl - The instance.
+ * @param {import('../core.js').Acl} acl - The instance.
  * @return {Function} A function that stops tracking.
  */
 export function click(acl) {
@@ -87,7 +87,7 @@ export function click(acl) {
       return;
     }
 
-    const enrolled = element.closest('[data-analytics-event]');
+    const enrolled = element.closest('[data-acl-event]');
 
     if (!enrolled) {
       return;
@@ -101,19 +101,19 @@ export function click(acl) {
       params.link_url = linkUrl;
     }
 
-    const groupTitle = getGroupTitle(element, 'group', ['[data-analytics-group-title]', acl.settings.groupTitleSelector]);
+    const groupTitle = getGroupTitle(element, 'group', ['[data-acl-group-title]', acl.settings.groupTitleSelector]);
 
     if (groupTitle !== undefined) {
       params.group_title = groupTitle;
     }
 
-    const subgroupTitle = getGroupTitle(element, 'subgroup', ['[data-analytics-subgroup-title]']);
+    const subgroupTitle = getGroupTitle(element, 'subgroup', ['[data-acl-subgroup-title]']);
 
     if (subgroupTitle !== undefined) {
       params.subgroup_title = subgroupTitle;
     }
 
-    acl.track(enrolled.getAttribute('data-analytics-event'), element, params);
+    acl.track(enrolled.getAttribute('data-acl-event'), element, params);
   };
 
   // Capture runs before any handler on the page can stop a click from

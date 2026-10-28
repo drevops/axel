@@ -78,7 +78,7 @@
 <h2>click</h2>
 
 <section class="case" id="case-click-outside" data-steps="click #click-outside-link; click #click-outside-button">
-  <h3>A link and a button outside any data-analytics-event send nothing</h3>
+  <h3>A link and a button outside any data-acl-event send nothing</h3>
   <a id="click-outside-link" href="/contact">Contact</a>
   <button id="click-outside-button" type="button">Open</button>
   <pre class="expected">[]</pre>
@@ -86,7 +86,7 @@
 
 <section class="case" id="case-click-link" data-steps="click #click-link">
   <h3>A link sends the event named by its component, with its text, URL and the component parameters</h3>
-  <div data-analytics-event="component_click" data-analytics-param-component="promo">
+  <div data-acl-event="component_click" data-acl-param-component="promo">
     <a id="click-link" href="/sale">See the deals</a>
   </div>
   <pre class="expected">[{ "event": "component_click", "link_text": "See the deals", "click_type": "link", "link_url": "/sale", "component": "promo" }]</pre>
@@ -94,7 +94,7 @@
 
 <section class="case" id="case-click-phone" data-steps="click #click-phone">
   <h3>A phone link</h3>
-  <div data-analytics-event="component_click" data-analytics-param-component="promo">
+  <div data-acl-event="component_click" data-acl-param-component="promo">
     <a id="click-phone" href="tel:0200000000">02 0000 0000</a>
   </div>
   <pre class="expected">[{ "event": "component_click", "link_text": "02 0000 0000", "click_type": "link", "link_url": "tel:0200000000", "component": "promo" }]</pre>
@@ -102,7 +102,7 @@
 
 <section class="case" id="case-click-external" data-steps="click #click-external">
   <h3>A link to another site</h3>
-  <div data-analytics-event="component_click" data-analytics-param-component="promo">
+  <div data-acl-event="component_click" data-acl-param-component="promo">
     <a id="click-external" href="https://example.com/partner">Visit our partner</a>
   </div>
   <pre class="expected">[{ "event": "component_click", "link_text": "Visit our partner", "click_type": "link", "link_url": "https://example.com/partner", "component": "promo" }]</pre>
@@ -110,7 +110,7 @@
 
 <section class="case" id="case-click-anchor" data-steps="click #click-anchor">
   <h3>A link to a section of the page</h3>
-  <div data-analytics-event="component_click" data-analytics-param-component="promo">
+  <div data-acl-event="component_click" data-acl-param-component="promo">
     <a id="click-anchor" href="#form">Jump to the form</a>
   </div>
   <pre class="expected">[{ "event": "component_click", "link_text": "Jump to the form", "click_type": "link", "link_url": "#form", "component": "promo" }]</pre>
@@ -118,7 +118,7 @@
 
 <section class="case" id="case-click-button" data-steps="click #click-button">
   <h3>A button sends its text and no URL</h3>
-  <div data-analytics-event="component_click" data-analytics-param-component="promo">
+  <div data-acl-event="component_click" data-acl-param-component="promo">
     <button id="click-button" type="button">Menu</button>
   </div>
   <pre class="expected">[{ "event": "component_click", "link_text": "Menu", "click_type": "button", "component": "promo" }]</pre>
@@ -126,7 +126,7 @@
 
 <section class="case" id="case-click-input-buttons" data-steps="click #click-submit; click #click-input-button; click #click-reset">
   <h3>A submit input, an input button and a reset input send their value as the text</h3>
-  <div data-analytics-event="component_click" data-analytics-param-component="promo">
+  <div data-acl-event="component_click" data-acl-param-component="promo">
     <form action="/subscribe">
       <input id="click-submit" type="submit" value="Subscribe">
       <input id="click-input-button" type="button" value="Clear">
@@ -142,7 +142,7 @@
 
 <section class="case" id="case-click-form-destination" data-steps="click #click-destination-form; click #click-destination-formaction; click #click-destination-shadowed; click #click-destination-no-action; click #click-destination-no-form; click #click-destination-param">
   <h3>A submit button sends its formaction or its form's address as the URL, even with a field named "action"; without either it sends none</h3>
-  <div data-analytics-event="component_click">
+  <div data-acl-event="component_click">
     <form action="/search">
       <button id="click-destination-form">Search</button>
       <button id="click-destination-formaction" formaction="/search/advanced">Advanced search</button>
@@ -155,7 +155,7 @@
       <button id="click-destination-no-action">Save</button>
     </form>
     <button id="click-destination-no-form">Print</button>
-    <a id="click-destination-param" href="/help" data-analytics-param-click-type="cta">Get help</a>
+    <a id="click-destination-param" href="/help" data-acl-param-click-type="cta">Get help</a>
   </div>
   <pre class="expected">[
   { "event": "component_click", "link_text": "Search", "click_type": "button", "link_url": "/search" },
@@ -169,7 +169,7 @@
 
 <section class="case" id="case-click-not-interactive" data-steps="click #click-no-href; click #click-text">
   <h3>An anchor without an address and plain text send nothing</h3>
-  <div data-analytics-event="component_click" data-analytics-param-component="promo">
+  <div data-acl-event="component_click" data-acl-param-component="promo">
     <a id="click-no-href">An anchor without an address</a>
     <p><span id="click-text">Plain text</span></p>
   </div>
@@ -178,7 +178,7 @@
 
 <section class="case" id="case-click-mouse-buttons" data-steps="middle-click #click-mouse; right-click #click-mouse">
   <h3>A middle click sends the event and a right click sends nothing</h3>
-  <div data-analytics-event="component_click">
+  <div data-acl-event="component_click">
     <a id="click-mouse" href="/sale">See the deals</a>
   </div>
   <pre class="expected">[{ "event": "component_click", "link_text": "See the deals", "click_type": "link", "link_url": "/sale" }]</pre>
@@ -186,16 +186,16 @@
 
 <section class="case" id="case-click-nested" data-steps="click #click-nested-inner .visually-hidden; click #click-nested-outer; click #click-nested-event; click #click-own-event; click #click-text-param">
   <h3>Nested components: the closest event name and the closest of each parameter win</h3>
-  <div data-analytics-event="component_click" data-analytics-param-component="section" data-analytics-param-layout="grid">
-    <div data-analytics-event="component_click" data-analytics-param-component="card">
+  <div data-acl-event="component_click" data-acl-param-component="section" data-acl-param-layout="grid">
+    <div data-acl-event="component_click" data-acl-param-component="card">
       <a id="click-nested-inner" href="/sale/spring"><span>Read more<span class="visually-hidden">: Spring sale</span></span></a>
     </div>
     <a id="click-nested-outer" href="/about">About us</a>
-    <div data-analytics-event="card_click">
+    <div data-acl-event="card_click">
       <a id="click-nested-event" href="/sale/summer">Summer sale</a>
     </div>
-    <a id="click-own-event" href="/contact" data-analytics-event="contact_click" data-analytics-param-position="2">Get in touch</a>
-    <a id="click-text-param" href="/contact" data-analytics-param-link-text="Custom text">Contact</a>
+    <a id="click-own-event" href="/contact" data-acl-event="contact_click" data-acl-param-position="2">Get in touch</a>
+    <a id="click-text-param" href="/contact" data-acl-param-link-text="Custom text">Contact</a>
   </div>
   <pre class="expected">[
   { "event": "component_click", "link_text": "Read more: Spring sale", "click_type": "link", "link_url": "/sale/spring", "component": "card", "layout": "grid" },
@@ -208,10 +208,10 @@
 
 <section class="case" id="case-click-skip" data-steps="click #click-skip-link; click #click-skip-container-link">
   <h3>A skipped link and a link inside a skipped element send nothing</h3>
-  <div data-analytics-event="component_click" data-analytics-param-component="footer">
-    <a id="click-skip-link" href="/terms" data-analytics-skip>Terms</a>
-    <div data-analytics-skip>
-      <a id="click-skip-container-link" href="/privacy" data-analytics-event="legal_click">Privacy</a>
+  <div data-acl-event="component_click" data-acl-param-component="footer">
+    <a id="click-skip-link" href="/terms" data-acl-skip>Terms</a>
+    <div data-acl-skip>
+      <a id="click-skip-container-link" href="/privacy" data-acl-event="legal_click">Privacy</a>
     </div>
   </div>
   <pre class="expected">[]</pre>
@@ -219,7 +219,7 @@
 
 <section class="case" id="case-click-link-text" data-steps="click #click-text-hidden; click #click-text-label; click #click-text-title; click #click-text-none">
   <h3>Link text skips hidden content and comments, then falls back to aria-label and title</h3>
-  <div data-analytics-event="component_click">
+  <div data-acl-event="component_click">
     <a id="click-text-hidden" href="/contact"><span aria-hidden="true">&rarr;</span>
       Contact
       us <!-- An HTML comment. --></a>
@@ -239,7 +239,7 @@
 
 <section class="case" id="case-group-heading" data-steps="click #group-heading-sibling; click #group-heading-nested; click #group-heading-before">
   <h3>A click inside a group sends the heading before it, found in a sibling or an ancestor's sibling</h3>
-  <div data-analytics-event="component_click" data-analytics-group>
+  <div data-acl-event="component_click" data-acl-group>
     <a id="group-heading-before" href="/intro">Introduction</a>
     <h2>Our <span aria-hidden="true">*</span>services</h2>
     <a id="group-heading-sibling" href="/services">All services</a>
@@ -256,7 +256,7 @@
 
 <section class="case" id="case-group-closest" data-steps="click #group-closest-sibling; click #group-closest-h5">
   <h3>The closest preceding h2, h3 or h4 wins, even inside 1 sibling</h3>
-  <div data-analytics-event="component_click" data-analytics-group>
+  <div data-acl-event="component_click" data-acl-group>
     <h2>Help</h2>
     <div>
       <h3>Storms</h3>
@@ -274,15 +274,15 @@
 
 <section class="case" id="case-group-boundary" data-steps="click #group-boundary-first; click #group-boundary-nested; click #group-boundary-param; click #group-boundary-none">
   <h3>The closest group bounds the lookup, a parameter overrides the title and a click outside any group sends no title</h3>
-  <div data-analytics-event="component_click">
+  <div data-acl-event="component_click">
     <h2>Outside the group</h2>
-    <div data-analytics-group>
+    <div data-acl-group>
       <a id="group-boundary-first" href="/first">First</a>
       <h3>Events</h3>
-      <div data-analytics-group>
+      <div data-acl-group>
         <a id="group-boundary-nested" href="/nested">Nested</a>
       </div>
-      <a id="group-boundary-param" href="/param" data-analytics-param-group-title="Custom title">Param</a>
+      <a id="group-boundary-param" href="/param" data-acl-param-group-title="Custom title">Param</a>
     </div>
     <a id="group-boundary-none" href="/none">No group</a>
   </div>
@@ -295,9 +295,9 @@
 </section>
 
 <section class="case" id="case-group-marker" data-steps="click #group-marker-link">
-  <h3>A data-analytics-group-title marker wins over a closer heading</h3>
-  <div data-analytics-event="component_click" data-analytics-group>
-    <p data-analytics-group-title>Latest news</p>
+  <h3>A data-acl-group-title marker wins over a closer heading</h3>
+  <div data-acl-event="component_click" data-acl-group>
+    <p data-acl-group-title>Latest news</p>
     <h3>Storm season starts</h3>
     <a id="group-marker-link" href="/news">Read the story</a>
   </div>
@@ -306,10 +306,10 @@
 
 <section class="case" id="case-group-skip" data-steps="click #group-skip-link">
   <h3>A skipped heading and a heading inside a skipped element are never the title</h3>
-  <div data-analytics-event="component_click" data-analytics-group>
+  <div data-acl-event="component_click" data-acl-group>
     <h2>Resources</h2>
-    <h3 data-analytics-skip>Sponsored</h3>
-    <div data-analytics-skip><h4>Advert</h4></div>
+    <h3 data-acl-skip>Sponsored</h3>
+    <div data-acl-skip><h4>Advert</h4></div>
     <a id="group-skip-link" href="/resources">Browse</a>
   </div>
   <pre class="expected">[{ "event": "component_click", "link_text": "Browse", "click_type": "link", "link_url": "/resources", "group_title": "Resources" }]</pre>
@@ -319,11 +319,11 @@
   <h3>A scope selector widens the lookup to an ancestor; a scope that matches no ancestor keeps the group</h3>
   <div id="group-scope-region">
     <h2>Upcoming events</h2>
-    <p data-analytics-subgroup-title>This week</p>
-    <div data-analytics-event="component_click" data-analytics-group data-analytics-group-scope="#group-scope-region" data-analytics-subgroup data-analytics-subgroup-scope="#group-scope-region">
+    <p data-acl-subgroup-title>This week</p>
+    <div data-acl-event="component_click" data-acl-group data-acl-group-scope="#group-scope-region" data-acl-subgroup data-acl-subgroup-scope="#group-scope-region">
       <a id="group-scope-link" href="/events">All events</a>
     </div>
-    <div data-analytics-event="component_click" data-analytics-group data-analytics-group-scope="#group-scope-missing-region">
+    <div data-acl-event="component_click" data-acl-group data-acl-group-scope="#group-scope-missing-region">
       <a id="group-scope-missing" href="/events/past">Past events</a>
     </div>
   </div>
@@ -334,17 +334,17 @@
 </section>
 
 <section class="case" id="case-subgroup" data-steps="click #subgroup-link; click #subgroup-no-marker; click #subgroup-outside">
-  <h3>A click inside a subgroup sends the data-analytics-subgroup-title marker before it; headings don't count</h3>
-  <nav data-analytics-event="menu_click" data-analytics-group>
-    <h2 data-analytics-group-title>Main menu</h2>
+  <h3>A click inside a subgroup sends the data-acl-subgroup-title marker before it; headings don't count</h3>
+  <nav data-acl-event="menu_click" data-acl-group>
+    <h2 data-acl-group-title>Main menu</h2>
     <ul>
-      <li data-analytics-subgroup>
-        <span data-analytics-subgroup-title>About</span>
+      <li data-acl-subgroup>
+        <span data-acl-subgroup-title>About</span>
         <ul>
           <li><a id="subgroup-link" href="/about/team">Our team</a></li>
         </ul>
       </li>
-      <li data-analytics-subgroup>
+      <li data-acl-subgroup>
         <h3>Get involved</h3>
         <a id="subgroup-no-marker" href="/volunteer">Volunteer</a>
       </li>
@@ -362,8 +362,8 @@
 
 <section class="case" id="case-form-start-first-focus" data-steps="focus #form-start-name; focus #form-start-email; focus #form-start-name">
   <h3>The first focus in a marked form sends 1 event with the form and its ancestors' parameters</h3>
-  <div data-analytics-param-section="contact">
-    <form id="form-start-contact" action="/contact" data-analytics-form="contact" data-analytics-param-form-type="enquiry">
+  <div data-acl-param-section="contact">
+    <form id="form-start-contact" action="/contact" data-acl-form="contact" data-acl-param-form-type="enquiry">
       <label for="form-start-name">Name</label>
       <input id="form-start-name" type="text" name="name">
       <label for="form-start-email">Email</label>
@@ -375,7 +375,7 @@
 
 <section class="case" id="case-form-start-wrapper" data-steps="focus #form-start-newsletter-email">
   <h3>A marked wrapper without an ID or address sends only the form name</h3>
-  <div data-analytics-form="newsletter">
+  <div data-acl-form="newsletter">
     <form>
       <input id="form-start-newsletter-email" type="email" name="email">
     </form>
@@ -385,7 +385,7 @@
 
 <section class="case" id="case-form-start-no-address" data-steps="focus #form-start-phone">
   <h3>A form without an address sends no destination</h3>
-  <form id="form-start-callback" data-analytics-form="callback">
+  <form id="form-start-callback" data-acl-form="callback">
     <input id="form-start-phone" type="tel" name="phone">
   </form>
   <pre class="expected">[{ "event": "form_start", "form_name": "callback", "form_id": "form-start-callback" }]</pre>
@@ -393,8 +393,8 @@
 
 <section class="case" id="case-form-start-skipped" data-steps="focus #form-start-skipped-field; focus #form-start-after-skip">
   <h3>A skipped field doesn't start the form; the next focus does</h3>
-  <form id="form-start-quote" data-analytics-form="quote">
-    <input id="form-start-skipped-field" type="text" name="internal" data-analytics-skip>
+  <form id="form-start-quote" data-acl-form="quote">
+    <input id="form-start-skipped-field" type="text" name="internal" data-acl-skip>
     <button id="form-start-after-skip" type="button">Next</button>
   </form>
   <pre class="expected">[{ "event": "form_start", "form_name": "quote", "form_id": "form-start-quote" }]</pre>
@@ -402,7 +402,7 @@
 
 <section class="case" id="case-form-start-shadowed" data-steps="focus #form-start-report-reason">
   <h3>Fields named "id" and "action" don't replace the form ID and address</h3>
-  <form id="form-start-report" action="/report" data-analytics-form="report">
+  <form id="form-start-report" action="/report" data-acl-form="report">
     <input type="hidden" name="id" value="42">
     <input type="hidden" name="action" value="report">
     <input id="form-start-report-reason" type="text" name="reason">
@@ -411,7 +411,7 @@
 </section>
 
 <section class="case" id="case-form-start-unmarked" data-steps="focus #form-start-unmarked-field">
-  <h3>A form without data-analytics-form sends nothing</h3>
+  <h3>A form without data-acl-form sends nothing</h3>
   <form action="/search">
     <input id="form-start-unmarked-field" type="text" name="keywords">
   </form>
@@ -422,7 +422,7 @@
 
 <section class="case" id="case-field-label" data-steps="change #field-name">
   <h3>A field is named by its label, without hidden content</h3>
-  <form id="field-label-form" action="/apply" data-analytics-form="apply">
+  <form id="field-label-form" action="/apply" data-acl-form="apply">
     <label for="field-name">Full <span>name</span> <span aria-hidden="true">*</span></label>
     <input id="field-name" type="text" name="full_name">
   </form>
@@ -431,7 +431,7 @@
 
 <section class="case" id="case-field-wrapping-label" data-steps="change #field-phone">
   <h3>A field inside its label</h3>
-  <form id="field-wrapping-label-form" data-analytics-form="apply">
+  <form id="field-wrapping-label-form" data-acl-form="apply">
     <label>Phone <input id="field-phone" type="tel" name="phone"></label>
   </form>
   <pre class="expected">[{ "event": "field_complete", "form_name": "apply", "form_id": "field-wrapping-label-form", "field_name": "phone", "field_label": "Phone" }]</pre>
@@ -439,7 +439,7 @@
 
 <section class="case" id="case-field-textarea-select" data-steps="change #field-message; change #field-state">
   <h3>A textarea and a select are named by their labels, never their content</h3>
-  <form id="field-textarea-select-form" data-analytics-form="apply">
+  <form id="field-textarea-select-form" data-acl-form="apply">
     <label for="field-message">Message</label>
     <textarea id="field-message" name="message">Pre-filled text</textarea>
     <label for="field-state">State</label>
@@ -456,7 +456,7 @@
 
 <section class="case" id="case-field-options" data-steps="change #field-method-phone; change #field-callback-yes; change #field-callback-no; change #field-terms">
   <h3>Radios and checkboxes in a fieldset use its legend; a loose radio never uses its own label</h3>
-  <form id="field-options-form" data-analytics-form="apply">
+  <form id="field-options-form" data-acl-form="apply">
     <fieldset>
       <legend>Contact method</legend>
       <input id="field-method-email" type="radio" name="method" value="email">
@@ -481,9 +481,9 @@
 
 <section class="case" id="case-field-fallbacks" data-steps="change #field-aria; change #field-param-label; change #field-bare">
   <h3>A field falls back to aria-label; a label parameter overrides; a bare field sends an empty label</h3>
-  <form id="field-fallbacks-form" data-analytics-form="apply">
+  <form id="field-fallbacks-form" data-acl-form="apply">
     <input id="field-aria" type="text" name="reference" aria-label="Reference number">
-    <input id="field-param-label" type="text" data-analytics-param-field-label="Custom label">
+    <input id="field-param-label" type="text" data-acl-param-field-label="Custom label">
     <input id="field-bare" type="text">
   </form>
   <pre class="expected">[
@@ -495,7 +495,7 @@
 
 <section class="case" id="case-field-every-change" data-steps="change #field-repeat; change #field-repeat">
   <h3>Every change sends an event</h3>
-  <form id="field-every-change-form" data-analytics-form="apply">
+  <form id="field-every-change-form" data-acl-form="apply">
     <label for="field-repeat">Suburb</label>
     <input id="field-repeat" type="text" name="suburb">
   </form>
@@ -507,8 +507,8 @@
 
 <section class="case" id="case-field-ignored" data-steps="change #field-skipped; change #field-unmarked">
   <h3>A skipped field and a field outside a marked form send nothing</h3>
-  <form data-analytics-form="apply">
-    <input id="field-skipped" type="text" name="internal" data-analytics-skip>
+  <form data-acl-form="apply">
+    <input id="field-skipped" type="text" name="internal" data-acl-skip>
   </form>
   <form action="/search">
     <input id="field-unmarked" type="text" name="keywords">
@@ -520,11 +520,11 @@
 
 <section class="case" id="case-submit-on-load" data-steps="load">
   <h3>A confirmation rendered with the page sends the event on load; a skipped one sends nothing</h3>
-  <div data-analytics-form-submitted="contact" data-analytics-param-form-type="enquiry">
+  <div data-acl-form-submitted="contact" data-acl-param-form-type="enquiry">
     <p>Thank you for your enquiry.</p>
   </div>
-  <div data-analytics-skip>
-    <div data-analytics-form-submitted="internal"></div>
+  <div data-acl-skip>
+    <div data-acl-form-submitted="internal"></div>
   </div>
   <pre class="expected">[{ "event": "form_submit", "form_name": "contact", "form_type": "enquiry" }]</pre>
 </section>
@@ -536,9 +536,9 @@
     <button type="button" data-insert="#submit-nested-confirmation" data-into="#submit-ajax-wrapper">Add the nested confirmation</button>
     <button type="button" data-insert="#submit-no-marker" data-into="#submit-ajax-wrapper">Add markup without a marker</button>
   </p>
-  <div id="submit-ajax-wrapper" data-analytics-param-section="newsletter"></div>
-  <template id="submit-confirmation"><p data-analytics-form-submitted="newsletter">Subscribed.</p></template>
-  <template id="submit-nested-confirmation"><div><p data-analytics-form-submitted="callback">We'll call you.</p></div></template>
+  <div id="submit-ajax-wrapper" data-acl-param-section="newsletter"></div>
+  <template id="submit-confirmation"><p data-acl-form-submitted="newsletter">Subscribed.</p></template>
+  <template id="submit-nested-confirmation"><div><p data-acl-form-submitted="callback">We'll call you.</p></div></template>
   <template id="submit-no-marker"><p>Saved.</p></template>
   <pre class="expected">[
   { "event": "form_submit", "form_name": "newsletter", "section": "newsletter" },
@@ -556,7 +556,7 @@
 
 <section class="case" id="case-privacy-text" data-steps="fill #privacy-name = Jane Citizen; fill #privacy-email = jane@example.com">
   <h3>Typed text and email values are never sent</h3>
-  <form id="privacy-text-form" data-analytics-form="private">
+  <form id="privacy-text-form" data-acl-form="private">
     <label for="privacy-name">Name</label>
     <input id="privacy-name" type="text" name="name">
     <label for="privacy-email">Email</label>
@@ -571,7 +571,7 @@
 
 <section class="case" id="case-privacy-textarea" data-steps="fill #privacy-message = Jane Citizen typed this">
   <h3>Textarea content, pre-filled or typed, is never sent</h3>
-  <form id="privacy-textarea-form" data-analytics-form="private">
+  <form id="privacy-textarea-form" data-acl-form="private">
     <label for="privacy-message">Message <textarea id="privacy-message" name="message">Jane Citizen pre-filled</textarea></label>
   </form>
   <pre class="expected">[
@@ -582,7 +582,7 @@
 
 <section class="case" id="case-privacy-choices" data-steps="select #privacy-select = jane; check #privacy-radio; check #privacy-checkbox">
   <h3>The chosen option, radio or checkbox is never sent</h3>
-  <form id="privacy-choices-form" data-analytics-form="private">
+  <form id="privacy-choices-form" data-acl-form="private">
     <label for="privacy-select">Answer</label>
     <select id="privacy-select" name="answer">
       <option value="other">Other</option>
@@ -608,14 +608,14 @@
 
 <section class="case" id="case-privacy-link" data-steps="click #privacy-help">
   <h3>A textarea inside a clicked link adds nothing to the link text</h3>
-  <div data-analytics-event="form_click">
+  <div data-acl-event="form_click">
     <a id="privacy-help" href="/help">Help <textarea>Jane Citizen</textarea></a>
   </div>
   <pre class="expected">[{ "event": "form_click", "link_text": "Help", "click_type": "link", "link_url": "/help" }]</pre>
 </section>
 
 <script>
-  window.analyticsContextLayerSettings = { types: ['click', 'form_start', 'field_complete', 'form_submit'] };
+  window.aclSettings = { types: ['click', 'form_start', 'field_complete', 'form_submit'] };
 
   // Keep this page open when a link is clicked or a form is submitted.
   ['click', 'auxclick'].forEach((type) => window.addEventListener(type, (event) => event.target.closest?.('a[href]') && event.preventDefault()));
@@ -648,13 +648,13 @@
     if (button?.dataset.insert) {
       document.querySelector(button.dataset.into).append(document.querySelector(button.dataset.insert).content.cloneNode(true));
     } else if (button) {
-      window.analyticsContextLayer.formSubmitted(button.dataset.hook, JSON.parse(button.dataset.hookParams));
+      window.acl.formSubmitted(button.dataset.hook, JSON.parse(button.dataset.hookParams));
     }
   });
 </script>
 <script src="../../build/acl.gtm.js"></script>
 <script>
-  document.querySelector('#events-missing-build').hidden = Boolean(window.AnalyticsContextLayer);
+  document.querySelector('#events-missing-build').hidden = Boolean(window.Acl);
 </script>
 </body>
 </html>
