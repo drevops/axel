@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { gtm } from '../../../src/adapters/gtm.js';
-import { AnalyticsContextLayer } from '../../../src/core/core.js';
+import { Acl } from '../../../src/core/core.js';
 import { loadFixture } from '../../helpers.js';
 
 // The behavior of each kind of form is covered by the cases in
@@ -13,7 +13,7 @@ describe('form_start', () => {
     window.dataLayer = [];
     window.sessionStorage.clear();
 
-    acl = new AnalyticsContextLayer({ adapter: gtm, types: ['form_start'] }).init();
+    acl = new Acl({ adapter: gtm, types: ['form_start'] }).init();
   });
 
   afterEach(() => {
@@ -29,8 +29,7 @@ describe('form_start', () => {
 
   it('starts a form again once it is replaced', () => {
     document.querySelector('#form-start-phone').focus();
-    document.querySelector('#form-start-callback').outerHTML =
-      '<form id="form-start-callback" data-analytics-form="callback"><input id="form-start-phone"></form>';
+    document.querySelector('#form-start-callback').outerHTML = '<form id="form-start-callback" data-acl-form="callback"><input id="form-start-phone"></form>';
     document.querySelector('#form-start-phone').focus();
 
     expect(window.dataLayer).toHaveLength(2);

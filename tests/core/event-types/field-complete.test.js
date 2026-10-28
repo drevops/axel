@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { gtm } from '../../../src/adapters/gtm.js';
-import { AnalyticsContextLayer } from '../../../src/core/core.js';
+import { Acl } from '../../../src/core/core.js';
 import { loadFixture } from '../../helpers.js';
 
 // The behavior of each kind of field is covered by the cases in
@@ -13,7 +13,7 @@ describe('field_complete', () => {
     window.dataLayer = [];
     window.sessionStorage.clear();
 
-    acl = new AnalyticsContextLayer({ adapter: gtm, types: ['field_complete'] }).init();
+    acl = new Acl({ adapter: gtm, types: ['field_complete'] }).init();
   });
 
   afterEach(() => {

@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { gtm } from '../../src/adapters/gtm.js';
-import { AnalyticsContextLayer, TYPES } from '../../src/core/core.js';
+import { Acl, TYPES } from '../../src/core/core.js';
 import { readCases } from '../cases.js';
 import { flushMutations, loadFixture, runStep } from '../helpers.js';
 
@@ -16,13 +16,13 @@ describe('cases.html', () => {
     window.dataLayer = [];
     window.sessionStorage.clear();
 
-    acl = new AnalyticsContextLayer({ adapter: gtm, types: Object.keys(TYPES) }).init();
-    window.analyticsContextLayer = acl;
+    acl = new Acl({ adapter: gtm, types: Object.keys(TYPES) }).init();
+    window.acl = acl;
   });
 
   afterEach(() => {
     acl.destroy();
-    delete window.analyticsContextLayer;
+    delete window.acl;
     delete window.dataLayer;
   });
 

@@ -8,7 +8,7 @@ const SETTINGS = { properties: { site: 'example' } };
 
 // Each bundle is checked for the code of the other integrations and adapters.
 const MARKERS = {
-  standalone: /analyticsContextLayerSettings/,
+  standalone: /aclSettings/,
   drupal: /drupalSettings/,
   gtm: /,\s*event:\s*\w+\s*\}\)/,
   gtag: /window\.gtag/,
@@ -24,15 +24,15 @@ describe('Built bundles', () => {
   beforeEach(() => {
     window.dataLayer = [];
     window.sessionStorage.clear();
-    document.body.innerHTML = '<div data-analytics-event="cta_click"><a href="https://example.com/" id="link">Link</a></div>';
+    document.body.innerHTML = '<div data-acl-event="cta_click"><a href="https://example.com/" id="link">Link</a></div>';
   });
 
   afterEach(() => {
-    window.analyticsContextLayer?.destroy();
-    delete window.analyticsContextLayerSettings;
-    delete window.analyticsContextLayerAdapter;
-    delete window.analyticsContextLayer;
-    delete window.AnalyticsContextLayer;
+    window.acl?.destroy();
+    delete window.aclSettings;
+    delete window.aclAdapter;
+    delete window.acl;
+    delete window.Acl;
     delete window.Drupal;
     delete window.drupalSettings;
     delete window.gtag;
@@ -47,20 +47,20 @@ describe('Built bundles', () => {
     const custom = vi.fn();
 
     window.gtag = vi.fn();
-    window.analyticsContextLayerAdapter = custom;
+    window.aclAdapter = custom;
 
     if (integration === 'drupal') {
       window.Drupal = { behaviors: {} };
-      window.drupalSettings = { analyticsContextLayer: SETTINGS };
+      window.drupalSettings = { acl: SETTINGS };
     } else {
-      window.analyticsContextLayerSettings = SETTINGS;
+      window.aclSettings = SETTINGS;
     }
 
     new Function(read(file))();
-    window.Drupal?.behaviors.analyticsContextLayer.attach(document);
+    window.Drupal?.behaviors.acl.attach(document);
     document.querySelector('#link').click();
 
-    expect(window.AnalyticsContextLayer).toBeTypeOf('function');
+    expect(window.Acl).toBeTypeOf('function');
     expect(window.dataLayer).toEqual(adapter === 'gtm' ? [{ event: 'cta_click', ...PARAMS }] : []);
     expect(window.gtag.mock.calls).toEqual(adapter === 'gtag' ? [['event', 'cta_click', PARAMS]] : []);
     expect(custom.mock.calls.map(([name, params]) => [name, params])).toEqual(adapter === null ? [['cta_click', PARAMS]] : []);
@@ -75,13 +75,13 @@ describe('Built bundles', () => {
   });
 
   it('acl.esm.js exports init() and both Google adapters', async () => {
-    const { init, gtm, gtag, AnalyticsContextLayer } = await import('../build/acl.esm.js');
+    const { init, gtm, gtag, Acl } = await import('../build/acl.esm.js');
     const acl = init({ adapter: gtm, ...SETTINGS });
 
     document.querySelector('#link').click();
     acl.destroy();
 
-    expect(acl).toBeInstanceOf(AnalyticsContextLayer);
+    expect(acl).toBeInstanceOf(Acl);
     expect(gtag.send).toBeTypeOf('function');
     expect(window.dataLayer).toEqual([{ event: 'cta_click', ...PARAMS }]);
   });

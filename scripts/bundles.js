@@ -2,7 +2,7 @@
  * @file
  * The bundle matrix: every integration paired with every adapter.
  *
- * A bundle without an adapter takes it from 'window.analyticsContextLayerAdapter'.
+ * A bundle without an adapter takes it from 'window.aclAdapter'.
  */
 
 export const INTEGRATIONS = [

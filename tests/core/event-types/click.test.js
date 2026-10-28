@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { gtm } from '../../../src/adapters/gtm.js';
-import { AnalyticsContextLayer } from '../../../src/core/core.js';
+import { Acl } from '../../../src/core/core.js';
 import { loadFixture } from '../../helpers.js';
 
 // The behavior of each kind of element is covered by the cases in
@@ -13,7 +13,7 @@ describe('click', () => {
     window.dataLayer = [];
     window.sessionStorage.clear();
 
-    acl = new AnalyticsContextLayer({ adapter: gtm }).init();
+    acl = new Acl({ adapter: gtm }).init();
   });
 
   afterEach(() => {
@@ -39,7 +39,7 @@ describe('click', () => {
 
   it('tracks elements matching a custom click selector', () => {
     acl.destroy();
-    acl = new AnalyticsContextLayer({ adapter: gtm, clickSelector: 'p' }).init();
+    acl = new Acl({ adapter: gtm, clickSelector: 'p' }).init();
 
     document.querySelector('#click-text').click();
     document.querySelector('#click-link').click();
@@ -49,7 +49,7 @@ describe('click', () => {
 
   it('titles a group with headings matching a custom group title selector', () => {
     acl.destroy();
-    acl = new AnalyticsContextLayer({ adapter: gtm, groupTitleSelector: 'h5' }).init();
+    acl = new Acl({ adapter: gtm, groupTitleSelector: 'h5' }).init();
 
     document.querySelector('#group-closest-h5').click();
     document.querySelector('#group-marker-link').click();

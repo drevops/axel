@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { gtm } from '../../src/adapters/gtm.js';
-import { AnalyticsContextLayer } from '../../src/core/core.js';
+import { Acl } from '../../src/core/core.js';
 import { loadFixture } from '../helpers.js';
 
 // Typed and chosen values are covered by the privacy cases in
@@ -20,8 +20,8 @@ describe('privacy', () => {
   });
 
   it('sends no typed value when the click selector matches a text input', () => {
-    document.querySelector('#privacy-name').closest('form').setAttribute('data-analytics-event', 'form_click');
-    acl = new AnalyticsContextLayer({ adapter: gtm, clickSelector: 'input' }).init();
+    document.querySelector('#privacy-name').closest('form').setAttribute('data-acl-event', 'form_click');
+    acl = new Acl({ adapter: gtm, clickSelector: 'input' }).init();
 
     const field = document.querySelector('#privacy-name');
 

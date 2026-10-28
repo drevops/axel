@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { gtm } from '../../../src/adapters/gtm.js';
-import { AnalyticsContextLayer } from '../../../src/core/core.js';
+import { Acl } from '../../../src/core/core.js';
 import { flushMutations, loadFixture } from '../../helpers.js';
 
-const CONFIRMATION = '<p data-analytics-form-submitted="newsletter">Subscribed.</p>';
+const CONFIRMATION = '<p data-acl-form-submitted="newsletter">Subscribed.</p>';
 
 // The behavior of each kind of confirmation is covered by the cases in
 // tests/fixtures/cases.html; these tests cover what the page can't express.
@@ -15,7 +15,7 @@ describe('form_submit', () => {
     window.dataLayer = [];
     window.sessionStorage.clear();
 
-    acl = new AnalyticsContextLayer({ adapter: gtm, types: ['form_submit'] }).init();
+    acl = new Acl({ adapter: gtm, types: ['form_submit'] }).init();
   });
 
   afterEach(() => {
@@ -31,7 +31,7 @@ describe('form_submit', () => {
   });
 
   it('sends 1 event per marker when it is moved', async () => {
-    document.querySelector('#submit-ajax-wrapper').append(document.querySelector('[data-analytics-form-submitted="contact"]'));
+    document.querySelector('#submit-ajax-wrapper').append(document.querySelector('[data-acl-form-submitted="contact"]'));
     await flushMutations();
 
     expect(window.dataLayer).toHaveLength(1);
@@ -52,7 +52,7 @@ describe('form_submit', () => {
   });
 
   it('sends the event from the hook when the type is not enabled', () => {
-    new AnalyticsContextLayer({ adapter: gtm, types: [] }).formSubmitted('callback');
+    new Acl({ adapter: gtm, types: [] }).formSubmitted('callback');
 
     expect(window.dataLayer.at(-1)).toEqual({ event: 'form_submit', form_name: 'callback' });
   });

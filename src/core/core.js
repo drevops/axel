@@ -2,9 +2,9 @@
  * @file
  * Analytics Context Layer core.
  *
- * Turns interactions with elements marked with 'data-analytics-*' attributes
- * into events and hands them to an adapter. README.md describes the attributes
- * and the adapter contract.
+ * Turns interactions with elements marked with 'data-acl-*' attributes into
+ * events and hands them to an adapter. README.md describes the attributes and
+ * the adapter contract.
  */
 
 import { collectParams } from './dom.js';
@@ -30,17 +30,17 @@ export const DEFAULT_SETTINGS = {
   properties: {},
   // Elements whose clicks are tracked.
   clickSelector: 'a[href], button, input[type="submit"], input[type="button"], input[type="reset"]',
-  // Headings that title a data-analytics-group when it has no marker.
+  // Headings that title a data-acl-group when it has no marker.
   groupTitleSelector: 'h2, h3, h4',
-  // Functions named by data-analytics-collector, as name => function.
+  // Functions named by data-acl-collector, as name => function.
   collectors: {},
-  debugHash: '#analytics-debug',
-  debugStorageKey: 'analyticsDebug',
+  debugHash: '#acl-debug',
+  debugStorageKey: 'aclDebug',
   // Used by the standalone integration only.
   autoInit: true,
 };
 
-export class AnalyticsContextLayer {
+export class Acl {
   /**
    * @param {object} settings - Overrides for DEFAULT_SETTINGS.
    */
@@ -75,7 +75,7 @@ export class AnalyticsContextLayer {
    *
    * Calling it again on an initialized instance does nothing.
    *
-   * @return {AnalyticsContextLayer} The instance.
+   * @return {Acl} The instance.
    */
   init() {
     if (!this.cleanups) {
@@ -103,7 +103,7 @@ export class AnalyticsContextLayer {
    * @param {string}  name    - The event name.
    * @param {Element} element - The element the event is about.
    * @param {object}  derived - Parameters derived from the element, which
-   *   'data-analytics-param-*' attributes override.
+   *   'data-acl-param-*' attributes override.
    */
   track(name, element, derived = {}) {
     const params = { ...derived, ...collectParams(element) };
@@ -112,7 +112,7 @@ export class AnalyticsContextLayer {
   }
 
   /**
-   * Run the collector named by the closest 'data-analytics-collector'.
+   * Run the collector named by the closest 'data-acl-collector'.
    *
    * A failing collector adds nothing, so the event is still sent.
    *
@@ -122,13 +122,13 @@ export class AnalyticsContextLayer {
    * @return {object} The parameters the collector returns.
    */
   collect(name, params, element) {
-    const source = element.closest('[data-analytics-collector]');
+    const source = element.closest('[data-acl-collector]');
 
     if (!source) {
       return {};
     }
 
-    const collectorName = source.getAttribute('data-analytics-collector');
+    const collectorName = source.getAttribute('data-acl-collector');
 
     try {
       // Only own keys, so a name such as 'toString' can't reach the prototype.
@@ -148,7 +148,7 @@ export class AnalyticsContextLayer {
 
       return collected;
     } catch (error) {
-      console.error(`[analytics] ${error.message}`);
+      console.error(`[acl] ${error.message}`);
 
       return {};
     }
@@ -175,8 +175,8 @@ export class AnalyticsContextLayer {
     const debug = this.isDebug();
 
     if (debug) {
-      console.log('[analytics]', name, event);
-      (this.adapter.validate?.(name, event) || []).forEach((warning) => console.warn(`[analytics] ${name}: ${warning}`));
+      console.log('[acl]', name, event);
+      (this.adapter.validate?.(name, event) || []).forEach((warning) => console.warn(`[acl] ${name}: ${warning}`));
     }
 
     this.adapter.send(name, event, { debug, settings: this.settings });
@@ -216,10 +216,10 @@ let shared = null;
  * and ignore their settings.
  *
  * @param {object} settings - Overrides for DEFAULT_SETTINGS.
- * @return {AnalyticsContextLayer} The shared instance.
+ * @return {Acl} The shared instance.
  */
 export function init(settings = {}) {
-  shared = shared || new AnalyticsContextLayer(settings);
+  shared = shared || new Acl(settings);
 
   return shared.init();
 }

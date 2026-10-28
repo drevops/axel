@@ -5,12 +5,12 @@
 
 import { isSkipped } from '../dom.js';
 
-const MARKER = '[data-analytics-form-submitted]';
+const MARKER = '[data-acl-form-submitted]';
 
 /**
  * Track confirmation markers present at start and added later.
  *
- * @param {import('../core.js').AnalyticsContextLayer} acl - The instance.
+ * @param {import('../core.js').Acl} acl - The instance.
  * @return {Function} A function that stops tracking.
  */
 export function formSubmit(acl) {
@@ -22,7 +22,7 @@ export function formSubmit(acl) {
     }
 
     seen.add(marker);
-    acl.track('form_submit', marker, { form_name: marker.getAttribute('data-analytics-form-submitted') });
+    acl.track('form_submit', marker, { form_name: marker.getAttribute('data-acl-form-submitted') });
   };
 
   const scan = (root) => {
