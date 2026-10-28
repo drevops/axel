@@ -17,7 +17,7 @@ flowchart TB
     subgraph core[src/core - shared by every bundle]
         coreJs[core.js<br>AnalyticsContextLayer, TYPES, init]
         eventTypes[event-types/<br>click, form-start, field-complete, form-submit]
-        dom[dom.js<br>listen, getText, getLabel, collectParams, isSkipped, formParams]
+        dom[dom.js<br>listen, getText, getLabel, collectParams, isSkipped, resolveUrl, formParams]
     end
     subgraph adapters[src/adapters - where events go]
         gtm[gtm.js]

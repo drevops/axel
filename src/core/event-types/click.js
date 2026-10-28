@@ -3,7 +3,7 @@
  * Click events for interactive elements inside 'data-analytics-event'.
  */
 
-import { getLabel, isSkipped, listen } from '../dom.js';
+import { getLabel, isSkipped, listen, resolveUrl } from '../dom.js';
 
 /**
  * Find the title closest before an element within a scope.
@@ -67,10 +67,10 @@ function getSubmitDestination(element) {
   }
 
   if (element.hasAttribute('formaction')) {
-    return new URL(element.getAttribute('formaction'), element.baseURI).href;
+    return resolveUrl(element, 'formaction');
   }
 
-  return element.form.hasAttribute('action') ? element.form.action : undefined;
+  return element.form.hasAttribute('action') ? resolveUrl(element.form, 'action') : undefined;
 }
 
 /**

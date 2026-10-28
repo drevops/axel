@@ -140,12 +140,16 @@
 ]</pre>
 </section>
 
-<section class="case" id="case-click-form-destination" data-steps="click #click-destination-form; click #click-destination-formaction; click #click-destination-no-action; click #click-destination-no-form; click #click-destination-param">
-  <h3>A submit button sends its formaction or its form's address as the URL; without either it sends none</h3>
+<section class="case" id="case-click-form-destination" data-steps="click #click-destination-form; click #click-destination-formaction; click #click-destination-shadowed; click #click-destination-no-action; click #click-destination-no-form; click #click-destination-param">
+  <h3>A submit button sends its formaction or its form's address as the URL, even with a field named "action"; without either it sends none</h3>
   <div data-analytics-event="component_click">
     <form action="/search">
       <button id="click-destination-form">Search</button>
       <button id="click-destination-formaction" formaction="/search/advanced">Advanced search</button>
+    </form>
+    <form action="/report">
+      <input type="hidden" name="action" value="report">
+      <button id="click-destination-shadowed">Report</button>
     </form>
     <form>
       <button id="click-destination-no-action">Save</button>
@@ -156,6 +160,7 @@
   <pre class="expected">[
   { "event": "component_click", "link_text": "Search", "click_type": "button", "link_url": "/search" },
   { "event": "component_click", "link_text": "Advanced search", "click_type": "button", "link_url": "/search/advanced" },
+  { "event": "component_click", "link_text": "Report", "click_type": "button", "link_url": "/report" },
   { "event": "component_click", "link_text": "Save", "click_type": "button" },
   { "event": "component_click", "link_text": "Print", "click_type": "button" },
   { "event": "component_click", "link_text": "Get help", "click_type": "cta", "link_url": "/help" }
@@ -393,6 +398,16 @@
     <button id="form-start-after-skip" type="button">Next</button>
   </form>
   <pre class="expected">[{ "event": "form_start", "form_name": "quote", "form_id": "form-start-quote" }]</pre>
+</section>
+
+<section class="case" id="case-form-start-shadowed" data-steps="focus #form-start-report-reason">
+  <h3>Fields named "id" and "action" don't replace the form ID and address</h3>
+  <form id="form-start-report" action="/report" data-analytics-form="report">
+    <input type="hidden" name="id" value="42">
+    <input type="hidden" name="action" value="report">
+    <input id="form-start-report-reason" type="text" name="reason">
+  </form>
+  <pre class="expected">[{ "event": "form_start", "form_name": "report", "form_id": "form-start-report", "form_destination": "/report" }]</pre>
 </section>
 
 <section class="case" id="case-form-start-unmarked" data-steps="focus #form-start-unmarked-field">
