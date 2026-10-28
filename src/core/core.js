@@ -1,8 +1,8 @@
 /**
  * @file
- * Analytics Context Layer core.
+ * Axel core.
  *
- * Turns interactions with elements marked with 'data-acl-*' attributes into
+ * Turns interactions with elements marked with 'data-axel-*' attributes into
  * events and hands them to an adapter. README.md describes the attributes and
  * the adapter contract.
  */
@@ -30,17 +30,17 @@ export const DEFAULT_SETTINGS = {
   properties: {},
   // Elements whose clicks are tracked.
   clickSelector: 'a[href], button, input[type="submit"], input[type="button"], input[type="reset"]',
-  // Headings that title a data-acl-group when it has no marker.
+  // Headings that title a data-axel-group when it has no marker.
   groupTitleSelector: 'h2, h3, h4',
-  // Functions named by data-acl-collector, as name => function.
+  // Functions named by data-axel-collector, as name => function.
   collectors: {},
-  debugHash: '#acl-debug',
-  debugStorageKey: 'aclDebug',
+  debugHash: '#axel-debug',
+  debugStorageKey: 'axelDebug',
   // Used by the standalone integration only.
   autoInit: true,
 };
 
-export class Acl {
+export class Axel {
   /**
    * @param {object} settings - Overrides for DEFAULT_SETTINGS.
    */
@@ -75,7 +75,7 @@ export class Acl {
    *
    * Calling it again on an initialized instance does nothing.
    *
-   * @return {Acl} The instance.
+   * @return {Axel} The instance.
    */
   init() {
     if (!this.cleanups) {
@@ -103,7 +103,7 @@ export class Acl {
    * @param {string}  name    - The event name.
    * @param {Element} element - The element the event is about.
    * @param {object}  derived - Parameters derived from the element, which
-   *   'data-acl-param-*' attributes override.
+   *   'data-axel-param-*' attributes override.
    */
   track(name, element, derived = {}) {
     const params = { ...derived, ...collectParams(element) };
@@ -112,7 +112,7 @@ export class Acl {
   }
 
   /**
-   * Run the collector named by the closest 'data-acl-collector'.
+   * Run the collector named by the closest 'data-axel-collector'.
    *
    * A failing collector adds nothing, so the event is still sent.
    *
@@ -122,13 +122,13 @@ export class Acl {
    * @return {object} The parameters the collector returns.
    */
   collect(name, params, element) {
-    const source = element.closest('[data-acl-collector]');
+    const source = element.closest('[data-axel-collector]');
 
     if (!source) {
       return {};
     }
 
-    const collectorName = source.getAttribute('data-acl-collector');
+    const collectorName = source.getAttribute('data-axel-collector');
 
     try {
       // Only own keys, so a name such as 'toString' can't reach the prototype.
@@ -148,7 +148,7 @@ export class Acl {
 
       return collected;
     } catch (error) {
-      console.error(`[acl] ${error.message}`);
+      console.error(`[axel] ${error.message}`);
 
       return {};
     }
@@ -175,8 +175,8 @@ export class Acl {
     const debug = this.isDebug();
 
     if (debug) {
-      console.log('[acl]', name, event);
-      (this.adapter.validate?.(name, event) || []).forEach((warning) => console.warn(`[acl] ${name}: ${warning}`));
+      console.log('[axel]', name, event);
+      (this.adapter.validate?.(name, event) || []).forEach((warning) => console.warn(`[axel] ${name}: ${warning}`));
     }
 
     this.adapter.send(name, event, { debug, settings: this.settings });
@@ -216,10 +216,10 @@ let shared = null;
  * and ignore their settings.
  *
  * @param {object} settings - Overrides for DEFAULT_SETTINGS.
- * @return {Acl} The shared instance.
+ * @return {Axel} The shared instance.
  */
 export function init(settings = {}) {
-  shared = shared || new Acl(settings);
+  shared = shared || new Axel(settings);
 
   return shared.init();
 }

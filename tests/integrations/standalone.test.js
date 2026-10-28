@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const MARKUP = '<div data-acl-event="cta_click"><a href="https://example.com/" id="link">Link</a></div>';
+const MARKUP = '<div data-axel-event="cta_click"><a href="https://example.com/" id="link">Link</a></div>';
 
 describe('standalone integration', () => {
   let start;
@@ -15,23 +15,23 @@ describe('standalone integration', () => {
   });
 
   afterEach(() => {
-    window.acl?.destroy();
-    delete window.aclSettings;
-    delete window.aclAdapter;
-    delete window.aclCollectors;
-    delete window.acl;
-    delete window.Acl;
+    window.axel?.destroy();
+    delete window.axelSettings;
+    delete window.axelAdapter;
+    delete window.axelCollectors;
+    delete window.axel;
+    delete window.Axel;
   });
 
   it('exposes the class and an initialized shared instance configured from settings', async () => {
-    window.aclSettings = { properties: { site: 'example' } };
+    window.axelSettings = { properties: { site: 'example' } };
 
     start(adapter);
-    const { Acl, init } = await import('../../src/core/core.js');
+    const { Axel, init } = await import('../../src/core/core.js');
     document.querySelector('#link').click();
 
-    expect(window.Acl).toBe(Acl);
-    expect(window.acl).toBe(init());
+    expect(window.Axel).toBe(Axel);
+    expect(window.axel).toBe(init());
     expect(adapter.send).toHaveBeenCalledWith(
       'cta_click',
       { site: 'example', link_text: 'Link', click_type: 'link', link_url: 'https://example.com/' },
@@ -40,15 +40,15 @@ describe('standalone integration', () => {
   });
 
   it('keeps the built-in adapter over one in the settings', () => {
-    window.aclSettings = { adapter: vi.fn() };
+    window.axelSettings = { adapter: vi.fn() };
 
     start(adapter);
 
-    expect(window.acl.adapter).toBe(adapter);
+    expect(window.axel.adapter).toBe(adapter);
   });
 
   it('uses the page adapter when none is built in', () => {
-    window.aclAdapter = adapter;
+    window.axelAdapter = adapter;
 
     start();
     document.querySelector('#link').click();
@@ -60,12 +60,12 @@ describe('standalone integration', () => {
     const page = vi.fn();
     const own = vi.fn();
 
-    window.aclCollectors = { page, own: vi.fn() };
-    window.aclSettings = { collectors: { own } };
+    window.axelCollectors = { page, own: vi.fn() };
+    window.axelSettings = { collectors: { own } };
 
     start(adapter);
 
-    expect(window.acl.settings.collectors).toEqual({ page, own });
+    expect(window.axel.settings.collectors).toEqual({ page, own });
   });
 
   it('throws when no adapter is built in or defined by the page', () => {
@@ -73,14 +73,14 @@ describe('standalone integration', () => {
   });
 
   it('waits for the site to initialize when auto-init is disabled', () => {
-    window.aclSettings = { autoInit: false };
+    window.axelSettings = { autoInit: false };
 
     start(adapter);
     document.querySelector('#link').click();
 
     expect(adapter.send).not.toHaveBeenCalled();
 
-    window.acl.init();
+    window.axel.init();
     document.querySelector('#link').click();
 
     expect(adapter.send).toHaveBeenCalledTimes(1);

@@ -1,6 +1,6 @@
 /**
  * @file
- * Click events for interactive elements inside 'data-acl-event'.
+ * Click events for interactive elements inside 'data-axel-event'.
  */
 
 import { getLabel, isSkipped, listen, resolveUrl } from '../dom.js';
@@ -34,13 +34,13 @@ function findTitle(element, scope, selector) {
  *   undefined outside any group of the kind.
  */
 function getGroupTitle(element, kind, selectors) {
-  const group = element.closest(`[data-acl-${kind}]`);
+  const group = element.closest(`[data-axel-${kind}]`);
 
   if (!group) {
     return undefined;
   }
 
-  const scopeSelector = group.getAttribute(`data-acl-${kind}-scope`);
+  const scopeSelector = group.getAttribute(`data-axel-${kind}-scope`);
   const scope = (scopeSelector && group.closest(scopeSelector)) || group;
 
   for (const selector of selectors) {
@@ -76,18 +76,18 @@ function getSubmitDestination(element) {
 /**
  * Track clicks and middle clicks.
  *
- * @param {import('../core.js').Acl} acl - The instance.
+ * @param {import('../core.js').Axel} axel - The instance.
  * @return {Function} A function that stops tracking.
  */
-export function click(acl) {
+export function click(axel) {
   const track = (event) => {
-    const element = event.target instanceof Element ? event.target.closest(acl.settings.clickSelector) : null;
+    const element = event.target instanceof Element ? event.target.closest(axel.settings.clickSelector) : null;
 
     if (!element || isSkipped(element)) {
       return;
     }
 
-    const enrolled = element.closest('[data-acl-event]');
+    const enrolled = element.closest('[data-axel-event]');
 
     if (!enrolled) {
       return;
@@ -101,19 +101,19 @@ export function click(acl) {
       params.link_url = linkUrl;
     }
 
-    const groupTitle = getGroupTitle(element, 'group', ['[data-acl-group-title]', acl.settings.groupTitleSelector]);
+    const groupTitle = getGroupTitle(element, 'group', ['[data-axel-group-title]', axel.settings.groupTitleSelector]);
 
     if (groupTitle !== undefined) {
       params.group_title = groupTitle;
     }
 
-    const subgroupTitle = getGroupTitle(element, 'subgroup', ['[data-acl-subgroup-title]']);
+    const subgroupTitle = getGroupTitle(element, 'subgroup', ['[data-axel-subgroup-title]']);
 
     if (subgroupTitle !== undefined) {
       params.subgroup_title = subgroupTitle;
     }
 
-    acl.track(enrolled.getAttribute('data-acl-event'), element, params);
+    axel.track(enrolled.getAttribute('data-axel-event'), element, params);
   };
 
   // Capture runs before any handler on the page can stop a click from

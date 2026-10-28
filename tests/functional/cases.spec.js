@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test';
 import { listCases, readCases } from '../cases.js';
 import { FIXTURE } from '../helpers.js';
 
-// The page loads build/acl.gtm.js, so run "npm run build" first.
+// The page loads build/axel.gtm.js, so run "npm run build" first.
 const PAGE = pathToFileURL(FIXTURE).href;
 
 const ACTIONS = {
@@ -24,7 +24,7 @@ const ACTIONS = {
   },
   insert: (page, target, value) =>
     page.evaluate(([to, from]) => document.querySelector(to).append(document.querySelector(from).content.cloneNode(true)), [target, value]),
-  hook: (page, target, value) => page.evaluate(([name, params]) => window.acl.formSubmitted(name, JSON.parse(params)), [target, value]),
+  hook: (page, target, value) => page.evaluate(([name, params]) => window.axel.formSubmitted(name, JSON.parse(params)), [target, value]),
 };
 
 function dataLayer(page, from = 0) {

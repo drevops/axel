@@ -9,7 +9,7 @@ Install the dependencies and run each check:
     npm run lint
     npm run test
 
-`npm run build` runs `scripts/build.js`, which writes every bundle in the matrix from `scripts/bundles.js` to `build/`, plain and minified, plus `build/acl.esm.js`. `npm run test`, `npm run test-coverage` and `npm run test-functional` run the build first, because the suites also test the built bundles. `npm run test-coverage` fails below 100% coverage.
+`npm run build` runs `scripts/build.js`, which writes every bundle in the matrix from `scripts/bundles.js` to `build/`, plain and minified, plus `build/axel.esm.js`. `npm run test`, `npm run test-coverage` and `npm run test-functional` run the build first, because the suites also test the built bundles. `npm run test-coverage` fails below 100% coverage.
 
 To add a bundle for another destination, add its adapter to `src/adapters/` and to `ADAPTERS` in `scripts/bundles.js`. The build and the bundle tests pick it up for both integrations.
 
@@ -20,10 +20,10 @@ To add a bundle for another destination, add its adapter to `src/adapters/` and 
 The 2 suites run every case on the page:
 
 - `npm run test` runs them in jsdom through `tests/core/cases.test.js`, which also counts towards coverage.
-- `npm run test-functional` runs them in Chromium through `tests/functional/cases.spec.js`, against `build/acl.gtm.js`.
+- `npm run test-functional` runs them in Chromium through `tests/functional/cases.spec.js`, against `build/axel.gtm.js`.
 
 Before the first functional run, install Chromium for Playwright:
 
     npx playwright install chromium
 
-To add a case, add a section to the page. Both suites pick it up. To try a case by hand, run `npm run build` and open `tests/fixtures/cases.html` in a browser. The **Events** panel and the console list every event the page pushes, and the buttons in the `form_submit` cases run their insert and hook steps. Add `#acl-debug` to the URL to also see the library's own log and GA4 limit warnings.
+To add a case, add a section to the page. Both suites pick it up. To try a case by hand, run `npm run build` and open `tests/fixtures/cases.html` in a browser. The **Events** panel and the console list every event the page pushes, and the buttons in the `form_submit` cases run their insert and hook steps. Add `#axel-debug` to the URL to also see the library's own log and GA4 limit warnings.

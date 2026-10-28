@@ -57,7 +57,7 @@ const ACTIONS = {
  */
 export function runStep({ action, target, value }) {
   if (action === 'hook') {
-    window.acl.formSubmitted(target, JSON.parse(value));
+    window.axel.formSubmitted(target, JSON.parse(value));
 
     return;
   }

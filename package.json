@@ -1,7 +1,7 @@
 {
     "name": "@drevops/analytics-context-layer",
     "version": "0.1.0",
-    "description": "Turns clicks and form interactions on elements marked with data-acl-* attributes into analytics events.",
+    "description": "Turns clicks and form interactions on elements marked with data-axel-* attributes into analytics events.",
     "license": "MIT",
     "author": {
         "name": "Alex Skrypnyk",
@@ -9,13 +9,13 @@
         "url": "https://drevops.com"
     },
     "contributors": [],
-    "repository": "github:drevops/analytics-context-layer",
-    "bugs": "https://github.com/drevops/analytics-context-layer/issues",
+    "repository": "github:drevops/axel",
+    "bugs": "https://github.com/drevops/axel/issues",
     "type": "module",
-    "main": "build/acl.esm.js",
-    "module": "build/acl.esm.js",
+    "main": "build/axel.esm.js",
+    "module": "build/axel.esm.js",
     "exports": {
-        ".": "./build/acl.esm.js"
+        ".": "./build/axel.esm.js"
     },
     "files": [
         "build",

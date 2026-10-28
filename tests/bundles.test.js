@@ -8,7 +8,7 @@ const SETTINGS = { properties: { site: 'example' } };
 
 // Each bundle is checked for the code of the other integrations and adapters.
 const MARKERS = {
-  standalone: /aclSettings/,
+  standalone: /axelSettings/,
   drupal: /drupalSettings/,
   gtm: /,\s*event:\s*\w+\s*\}\)/,
   gtag: /window\.gtag/,
@@ -24,15 +24,15 @@ describe('Built bundles', () => {
   beforeEach(() => {
     window.dataLayer = [];
     window.sessionStorage.clear();
-    document.body.innerHTML = '<div data-acl-event="cta_click"><a href="https://example.com/" id="link">Link</a></div>';
+    document.body.innerHTML = '<div data-axel-event="cta_click"><a href="https://example.com/" id="link">Link</a></div>';
   });
 
   afterEach(() => {
-    window.acl?.destroy();
-    delete window.aclSettings;
-    delete window.aclAdapter;
-    delete window.acl;
-    delete window.Acl;
+    window.axel?.destroy();
+    delete window.axelSettings;
+    delete window.axelAdapter;
+    delete window.axel;
+    delete window.Axel;
     delete window.Drupal;
     delete window.drupalSettings;
     delete window.gtag;
@@ -40,27 +40,27 @@ describe('Built bundles', () => {
   });
 
   it('builds 6 bundles', () => {
-    expect(BUNDLES.map((bundle) => bundle.file)).toEqual(['acl.gtm', 'acl.gtag', 'acl', 'acl.drupal.gtm', 'acl.drupal.gtag', 'acl.drupal']);
+    expect(BUNDLES.map((bundle) => bundle.file)).toEqual(['axel.gtm', 'axel.gtag', 'axel', 'axel.drupal.gtm', 'axel.drupal.gtag', 'axel.drupal']);
   });
 
   it.each(FILES)('$file starts through $integration and sends to $adapter', ({ file, integration, adapter }) => {
     const custom = vi.fn();
 
     window.gtag = vi.fn();
-    window.aclAdapter = custom;
+    window.axelAdapter = custom;
 
     if (integration === 'drupal') {
       window.Drupal = { behaviors: {} };
-      window.drupalSettings = { acl: SETTINGS };
+      window.drupalSettings = { axel: SETTINGS };
     } else {
-      window.aclSettings = SETTINGS;
+      window.axelSettings = SETTINGS;
     }
 
     new Function(read(file))();
-    window.Drupal?.behaviors.acl.attach(document);
+    window.Drupal?.behaviors.axel.attach(document);
     document.querySelector('#link').click();
 
-    expect(window.Acl).toBeTypeOf('function');
+    expect(window.Axel).toBeTypeOf('function');
     expect(window.dataLayer).toEqual(adapter === 'gtm' ? [{ event: 'cta_click', ...PARAMS }] : []);
     expect(window.gtag.mock.calls).toEqual(adapter === 'gtag' ? [['event', 'cta_click', PARAMS]] : []);
     expect(custom.mock.calls.map(([name, params]) => [name, params])).toEqual(adapter === null ? [['cta_click', PARAMS]] : []);
@@ -74,14 +74,14 @@ describe('Built bundles', () => {
     });
   });
 
-  it('acl.esm.js exports init() and both Google adapters', async () => {
-    const { init, gtm, gtag, Acl } = await import('../build/acl.esm.js');
-    const acl = init({ adapter: gtm, ...SETTINGS });
+  it('axel.esm.js exports init() and both Google adapters', async () => {
+    const { init, gtm, gtag, Axel } = await import('../build/axel.esm.js');
+    const axel = init({ adapter: gtm, ...SETTINGS });
 
     document.querySelector('#link').click();
-    acl.destroy();
+    axel.destroy();
 
-    expect(acl).toBeInstanceOf(Acl);
+    expect(axel).toBeInstanceOf(Axel);
     expect(gtag.send).toBeTypeOf('function');
     expect(window.dataLayer).toEqual([{ event: 'cta_click', ...PARAMS }]);
   });
