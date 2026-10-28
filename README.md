@@ -8,12 +8,12 @@
 
 <div align="center">
 
-[![GitHub Issues](https://img.shields.io/github/issues/drevops/analytics-context-layer.svg)](https://github.com/drevops/analytics-context-layer/issues)
-[![GitHub Pull Requests](https://img.shields.io/github/issues-pr/drevops/analytics-context-layer.svg)](https://github.com/drevops/analytics-context-layer/pulls)
-[![Test Node.js](https://github.com/drevops/analytics-context-layer/actions/workflows/test-nodejs.yml/badge.svg)](https://github.com/drevops/analytics-context-layer/actions/workflows/test-nodejs.yml)
-[![codecov](https://codecov.io/gh/drevops/analytics-context-layer/graph/badge.svg)](https://codecov.io/gh/drevops/analytics-context-layer)
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/drevops/analytics-context-layer)
-![LICENSE](https://img.shields.io/github/license/drevops/analytics-context-layer)
+[![GitHub Issues](https://img.shields.io/github/issues/drevops/axel.svg)](https://github.com/drevops/axel/issues)
+[![GitHub Pull Requests](https://img.shields.io/github/issues-pr/drevops/axel.svg)](https://github.com/drevops/axel/pulls)
+[![Test Node.js](https://github.com/drevops/axel/actions/workflows/test-nodejs.yml/badge.svg)](https://github.com/drevops/axel/actions/workflows/test-nodejs.yml)
+[![codecov](https://codecov.io/gh/drevops/axel/graph/badge.svg)](https://codecov.io/gh/drevops/axel)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/drevops/axel)
+![LICENSE](https://img.shields.io/github/license/drevops/axel)
 ![Renovate](https://img.shields.io/badge/renovate-enabled-green?logo=renovatebot)
 
 </div>
@@ -37,7 +37,7 @@ The script holds no rules about your markup. The attributes decide which element
 
 ## 📦 Installation
 
-Every [release](https://github.com/drevops/analytics-context-layer/releases/latest) attaches 1 ready-made bundle per setup. Pick the bundle that matches how your site starts scripts and where your events go:
+Every [release](https://github.com/drevops/axel/releases/latest) attaches 1 ready-made bundle per setup. Pick the bundle that matches how your site starts scripts and where your events go:
 
 | Bundle                  | Starts                                   | Sends events to                                  |
 |-------------------------|------------------------------------------|--------------------------------------------------|

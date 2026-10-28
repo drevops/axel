@@ -4,7 +4,7 @@ This page explains how to report a security vulnerability in Axel.
 
 ## Supported versions
 
-Security fixes go into the latest release only. Upgrade to the [latest release](https://github.com/drevops/analytics-context-layer/releases/latest) before you report an issue.
+Security fixes go into the latest release only. Upgrade to the [latest release](https://github.com/drevops/axel/releases/latest) before you report an issue.
 
 ## Report a vulnerability
 

@@ -9,8 +9,8 @@
         "url": "https://drevops.com"
     },
     "contributors": [],
-    "repository": "github:drevops/analytics-context-layer",
-    "bugs": "https://github.com/drevops/analytics-context-layer/issues",
+    "repository": "github:drevops/axel",
+    "bugs": "https://github.com/drevops/axel/issues",
     "type": "module",
     "main": "build/axel.esm.js",
     "module": "build/axel.esm.js",
