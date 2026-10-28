@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AnalyticsContextLayer, DEFAULT_SETTINGS, init } from '../../src/core/core.js';
 
 const MARKUP = '<div data-analytics-event="cta_click" data-analytics-param-component="hero"><a id="link" href="/a">Go</a></div>';
-const PARAMS = { link_text: 'Go', link_url: 'http://localhost:3000/a', component: 'hero' };
+const PARAMS = { link_text: 'Go', click_type: 'link', link_url: 'http://localhost:3000/a', component: 'hero' };
 
 describe('AnalyticsContextLayer', () => {
   let acl;
@@ -92,8 +92,90 @@ describe('AnalyticsContextLayer', () => {
     ['an adapter without send()', { adapter: {} }, 'The analytics adapter must be a function or an object with a send() function.'],
     ['an unknown type', { adapter: vi.fn(), types: ['click', 'scroll'] }, 'Unknown analytics event type "scroll".'],
     ['an inherited property as a type', { adapter: vi.fn(), types: ['toString'] }, 'Unknown analytics event type "toString".'],
+    [
+      'a collector that is not a function',
+      { adapter: vi.fn(), collectors: { position: 'position' } },
+      'The analytics collector "position" must be a function.',
+    ],
   ])('throws on %s', (_description, settings, message) => {
     expect(() => new AnalyticsContextLayer(settings)).toThrow(message);
+  });
+
+  describe('collectors', () => {
+    let error;
+
+    beforeEach(() => {
+      document.body.innerHTML = `<div data-analytics-collector="outer"><div id="source" data-analytics-collector="position">${MARKUP}</div></div>`;
+      error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    });
+
+    it('merges what the closest collector returns over the other parameters', () => {
+      const collectors = { outer: vi.fn(), position: vi.fn(() => ({ position: '1', component: 'collected' })) };
+
+      acl = new AnalyticsContextLayer({ adapter, collectors }).init();
+      document.querySelector('#link').click();
+
+      expect(collectors.outer).not.toHaveBeenCalled();
+      expect(collectors.position).toHaveBeenCalledWith('cta_click', PARAMS, {
+        element: document.querySelector('#link'),
+        source: document.querySelector('#source'),
+      });
+      expect(sent()).toEqual([['cta_click', { ...PARAMS, position: '1', component: 'collected' }]]);
+    });
+
+    it('passes the collector a copy of the parameters', () => {
+      const position = (_name, params) => {
+        params.link_text = 'changed';
+      };
+
+      acl = new AnalyticsContextLayer({ adapter, collectors: { position } }).init();
+      document.querySelector('#link').click();
+
+      expect(sent()).toEqual([['cta_click', PARAMS]]);
+    });
+
+    it('runs the collector for every event type tracked from inside it', () => {
+      document.body.innerHTML = `<div data-analytics-collector="position">${MARKUP}<form data-analytics-form="contact"><input id="field" name="email"></form><p data-analytics-form-submitted="contact"></p></div>`;
+      const position = vi.fn(() => ({ position: '1' }));
+
+      acl = new AnalyticsContextLayer({ adapter, types: ['click', 'form_start', 'field_complete', 'form_submit'], collectors: { position } }).init();
+      document.querySelector('#link').click();
+      document.querySelector('#field').dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+      document.querySelector('#field').dispatchEvent(new Event('change', { bubbles: true }));
+
+      expect(position.mock.calls.map(([name]) => name)).toEqual(['form_submit', 'cta_click', 'form_start', 'field_complete']);
+      expect(sent().map(([, params]) => params.position)).toEqual(['1', '1', '1', '1']);
+    });
+
+    it.each([
+      ['an unknown collector', 'missing', {}, ['[analytics] Unknown analytics collector "missing".']],
+      ['an inherited property as a collector', 'toString', {}, ['[analytics] Unknown analytics collector "toString".']],
+      [
+        'a collector that throws',
+        'position',
+        {
+          position: () => {
+            throw new Error('Broken.');
+          },
+        },
+        ['[analytics] Broken.'],
+      ],
+      [
+        'a collector that returns a string',
+        'position',
+        { position: () => 'position' },
+        ['[analytics] The analytics collector "position" must return an object.'],
+      ],
+      ['a collector that returns an array', 'position', { position: () => ['1'] }, ['[analytics] The analytics collector "position" must return an object.']],
+      ['a collector that returns null', 'position', { position: () => null }, []],
+    ])('sends the event without collected parameters for %s', (_description, collectorName, collectors, errors) => {
+      document.querySelector('#source').setAttribute('data-analytics-collector', collectorName);
+      acl = new AnalyticsContextLayer({ adapter, collectors }).init();
+      document.querySelector('#link').click();
+
+      expect(sent()).toEqual([['cta_click', PARAMS]]);
+      expect(error.mock.calls.map(([message]) => message)).toEqual(errors);
+    });
   });
 
   describe('init()', () => {

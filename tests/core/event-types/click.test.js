@@ -44,7 +44,17 @@ describe('click', () => {
     document.querySelector('#click-text').click();
     document.querySelector('#click-link').click();
 
-    expect(window.dataLayer).toEqual([{ event: 'component_click', link_text: 'Plain text', component: 'promo' }]);
+    expect(window.dataLayer).toEqual([{ event: 'component_click', link_text: 'Plain text', click_type: 'button', component: 'promo' }]);
+  });
+
+  it('titles a group with headings matching a custom group title selector', () => {
+    acl.destroy();
+    acl = new AnalyticsContextLayer({ adapter: gtm, groupTitleSelector: 'h5' }).init();
+
+    document.querySelector('#group-closest-h5').click();
+    document.querySelector('#group-marker-link').click();
+
+    expect(window.dataLayer.map((event) => event.group_title)).toEqual(['Not a title', 'Latest news']);
   });
 
   it('stops sending events once destroyed', () => {

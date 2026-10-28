@@ -28,6 +28,6 @@ describe('privacy', () => {
     field.value = 'Jane Citizen';
     field.click();
 
-    expect(window.dataLayer).toEqual([{ event: 'form_click', link_text: '' }]);
+    expect(window.dataLayer).toEqual([{ event: 'form_click', link_text: '', click_type: 'button' }]);
   });
 });

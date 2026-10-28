@@ -89,7 +89,7 @@
   <div data-analytics-event="component_click" data-analytics-param-component="promo">
     <a id="click-link" href="/sale">See the deals</a>
   </div>
-  <pre class="expected">[{ "event": "component_click", "link_text": "See the deals", "link_url": "/sale", "component": "promo" }]</pre>
+  <pre class="expected">[{ "event": "component_click", "link_text": "See the deals", "click_type": "link", "link_url": "/sale", "component": "promo" }]</pre>
 </section>
 
 <section class="case" id="case-click-phone" data-steps="click #click-phone">
@@ -97,7 +97,7 @@
   <div data-analytics-event="component_click" data-analytics-param-component="promo">
     <a id="click-phone" href="tel:0200000000">02 0000 0000</a>
   </div>
-  <pre class="expected">[{ "event": "component_click", "link_text": "02 0000 0000", "link_url": "tel:0200000000", "component": "promo" }]</pre>
+  <pre class="expected">[{ "event": "component_click", "link_text": "02 0000 0000", "click_type": "link", "link_url": "tel:0200000000", "component": "promo" }]</pre>
 </section>
 
 <section class="case" id="case-click-external" data-steps="click #click-external">
@@ -105,7 +105,7 @@
   <div data-analytics-event="component_click" data-analytics-param-component="promo">
     <a id="click-external" href="https://example.com/partner">Visit our partner</a>
   </div>
-  <pre class="expected">[{ "event": "component_click", "link_text": "Visit our partner", "link_url": "https://example.com/partner", "component": "promo" }]</pre>
+  <pre class="expected">[{ "event": "component_click", "link_text": "Visit our partner", "click_type": "link", "link_url": "https://example.com/partner", "component": "promo" }]</pre>
 </section>
 
 <section class="case" id="case-click-anchor" data-steps="click #click-anchor">
@@ -113,7 +113,7 @@
   <div data-analytics-event="component_click" data-analytics-param-component="promo">
     <a id="click-anchor" href="#form">Jump to the form</a>
   </div>
-  <pre class="expected">[{ "event": "component_click", "link_text": "Jump to the form", "link_url": "#form", "component": "promo" }]</pre>
+  <pre class="expected">[{ "event": "component_click", "link_text": "Jump to the form", "click_type": "link", "link_url": "#form", "component": "promo" }]</pre>
 </section>
 
 <section class="case" id="case-click-button" data-steps="click #click-button">
@@ -121,20 +121,44 @@
   <div data-analytics-event="component_click" data-analytics-param-component="promo">
     <button id="click-button" type="button">Menu</button>
   </div>
-  <pre class="expected">[{ "event": "component_click", "link_text": "Menu", "component": "promo" }]</pre>
+  <pre class="expected">[{ "event": "component_click", "link_text": "Menu", "click_type": "button", "component": "promo" }]</pre>
 </section>
 
-<section class="case" id="case-click-input-buttons" data-steps="click #click-submit; click #click-input-button">
-  <h3>A submit input and an input button send their value as the text</h3>
+<section class="case" id="case-click-input-buttons" data-steps="click #click-submit; click #click-input-button; click #click-reset">
+  <h3>A submit input, an input button and a reset input send their value as the text</h3>
   <div data-analytics-event="component_click" data-analytics-param-component="promo">
     <form action="/subscribe">
       <input id="click-submit" type="submit" value="Subscribe">
       <input id="click-input-button" type="button" value="Clear">
+      <input id="click-reset" type="reset" value="Start again">
     </form>
   </div>
   <pre class="expected">[
-  { "event": "component_click", "link_text": "Subscribe", "component": "promo" },
-  { "event": "component_click", "link_text": "Clear", "component": "promo" }
+  { "event": "component_click", "link_text": "Subscribe", "click_type": "button", "link_url": "/subscribe", "component": "promo" },
+  { "event": "component_click", "link_text": "Clear", "click_type": "button", "component": "promo" },
+  { "event": "component_click", "link_text": "Start again", "click_type": "button", "component": "promo" }
+]</pre>
+</section>
+
+<section class="case" id="case-click-form-destination" data-steps="click #click-destination-form; click #click-destination-formaction; click #click-destination-no-action; click #click-destination-no-form; click #click-destination-param">
+  <h3>A submit button sends its formaction or its form's address as the URL; without either it sends none</h3>
+  <div data-analytics-event="component_click">
+    <form action="/search">
+      <button id="click-destination-form">Search</button>
+      <button id="click-destination-formaction" formaction="/search/advanced">Advanced search</button>
+    </form>
+    <form>
+      <button id="click-destination-no-action">Save</button>
+    </form>
+    <button id="click-destination-no-form">Print</button>
+    <a id="click-destination-param" href="/help" data-analytics-param-click-type="cta">Get help</a>
+  </div>
+  <pre class="expected">[
+  { "event": "component_click", "link_text": "Search", "click_type": "button", "link_url": "/search" },
+  { "event": "component_click", "link_text": "Advanced search", "click_type": "button", "link_url": "/search/advanced" },
+  { "event": "component_click", "link_text": "Save", "click_type": "button" },
+  { "event": "component_click", "link_text": "Print", "click_type": "button" },
+  { "event": "component_click", "link_text": "Get help", "click_type": "cta", "link_url": "/help" }
 ]</pre>
 </section>
 
@@ -152,7 +176,7 @@
   <div data-analytics-event="component_click">
     <a id="click-mouse" href="/sale">See the deals</a>
   </div>
-  <pre class="expected">[{ "event": "component_click", "link_text": "See the deals", "link_url": "/sale" }]</pre>
+  <pre class="expected">[{ "event": "component_click", "link_text": "See the deals", "click_type": "link", "link_url": "/sale" }]</pre>
 </section>
 
 <section class="case" id="case-click-nested" data-steps="click #click-nested-inner .visually-hidden; click #click-nested-outer; click #click-nested-event; click #click-own-event; click #click-text-param">
@@ -169,11 +193,11 @@
     <a id="click-text-param" href="/contact" data-analytics-param-link-text="Custom text">Contact</a>
   </div>
   <pre class="expected">[
-  { "event": "component_click", "link_text": "Read more: Spring sale", "link_url": "/sale/spring", "component": "card", "layout": "grid" },
-  { "event": "component_click", "link_text": "About us", "link_url": "/about", "component": "section", "layout": "grid" },
-  { "event": "card_click", "link_text": "Summer sale", "link_url": "/sale/summer", "component": "section", "layout": "grid" },
-  { "event": "contact_click", "link_text": "Get in touch", "link_url": "/contact", "component": "section", "layout": "grid", "position": "2" },
-  { "event": "component_click", "link_text": "Custom text", "link_url": "/contact", "component": "section", "layout": "grid" }
+  { "event": "component_click", "link_text": "Read more: Spring sale", "click_type": "link", "link_url": "/sale/spring", "component": "card", "layout": "grid" },
+  { "event": "component_click", "link_text": "About us", "click_type": "link", "link_url": "/about", "component": "section", "layout": "grid" },
+  { "event": "card_click", "link_text": "Summer sale", "click_type": "link", "link_url": "/sale/summer", "component": "section", "layout": "grid" },
+  { "event": "contact_click", "link_text": "Get in touch", "click_type": "link", "link_url": "/contact", "component": "section", "layout": "grid", "position": "2" },
+  { "event": "component_click", "link_text": "Custom text", "click_type": "link", "link_url": "/contact", "component": "section", "layout": "grid" }
 ]</pre>
 </section>
 
@@ -199,10 +223,133 @@
     <a id="click-text-none" href="/contact"><svg aria-hidden="true" width="20" height="20"></svg></a>
   </div>
   <pre class="expected">[
-  { "event": "component_click", "link_text": "Contact us", "link_url": "/contact" },
-  { "event": "component_click", "link_text": "Call us", "link_url": "tel:0200000000" },
-  { "event": "component_click", "link_text": "Contact the team", "link_url": "/contact" },
-  { "event": "component_click", "link_text": "", "link_url": "/contact" }
+  { "event": "component_click", "link_text": "Contact us", "click_type": "link", "link_url": "/contact" },
+  { "event": "component_click", "link_text": "Call us", "click_type": "link", "link_url": "tel:0200000000" },
+  { "event": "component_click", "link_text": "Contact the team", "click_type": "link", "link_url": "/contact" },
+  { "event": "component_click", "link_text": "", "click_type": "link", "link_url": "/contact" }
+]</pre>
+</section>
+
+<h2>Groups</h2>
+
+<section class="case" id="case-group-heading" data-steps="click #group-heading-sibling; click #group-heading-nested; click #group-heading-before">
+  <h3>A click inside a group sends the heading before it, found in a sibling or an ancestor's sibling</h3>
+  <div data-analytics-event="component_click" data-analytics-group>
+    <a id="group-heading-before" href="/intro">Introduction</a>
+    <h2>Our <span aria-hidden="true">*</span>services</h2>
+    <a id="group-heading-sibling" href="/services">All services</a>
+    <ul>
+      <li><a id="group-heading-nested" href="/services/repairs">Repairs</a></li>
+    </ul>
+  </div>
+  <pre class="expected">[
+  { "event": "component_click", "link_text": "All services", "click_type": "link", "link_url": "/services", "group_title": "Our services" },
+  { "event": "component_click", "link_text": "Repairs", "click_type": "link", "link_url": "/services/repairs", "group_title": "Our services" },
+  { "event": "component_click", "link_text": "Introduction", "click_type": "link", "link_url": "/intro", "group_title": "" }
+]</pre>
+</section>
+
+<section class="case" id="case-group-closest" data-steps="click #group-closest-sibling; click #group-closest-h5">
+  <h3>The closest preceding h2, h3 or h4 wins, even inside 1 sibling</h3>
+  <div data-analytics-event="component_click" data-analytics-group>
+    <h2>Help</h2>
+    <div>
+      <h3>Storms</h3>
+      <h4>Wind</h4>
+    </div>
+    <a id="group-closest-sibling" href="/wind">Prepare for wind</a>
+    <h5>Not a title</h5>
+    <a id="group-closest-h5" href="/wind/checklist">Checklist</a>
+  </div>
+  <pre class="expected">[
+  { "event": "component_click", "link_text": "Prepare for wind", "click_type": "link", "link_url": "/wind", "group_title": "Wind" },
+  { "event": "component_click", "link_text": "Checklist", "click_type": "link", "link_url": "/wind/checklist", "group_title": "Wind" }
+]</pre>
+</section>
+
+<section class="case" id="case-group-boundary" data-steps="click #group-boundary-first; click #group-boundary-nested; click #group-boundary-param; click #group-boundary-none">
+  <h3>The closest group bounds the lookup, a parameter overrides the title and a click outside any group sends no title</h3>
+  <div data-analytics-event="component_click">
+    <h2>Outside the group</h2>
+    <div data-analytics-group>
+      <a id="group-boundary-first" href="/first">First</a>
+      <h3>Events</h3>
+      <div data-analytics-group>
+        <a id="group-boundary-nested" href="/nested">Nested</a>
+      </div>
+      <a id="group-boundary-param" href="/param" data-analytics-param-group-title="Custom title">Param</a>
+    </div>
+    <a id="group-boundary-none" href="/none">No group</a>
+  </div>
+  <pre class="expected">[
+  { "event": "component_click", "link_text": "First", "click_type": "link", "link_url": "/first", "group_title": "" },
+  { "event": "component_click", "link_text": "Nested", "click_type": "link", "link_url": "/nested", "group_title": "" },
+  { "event": "component_click", "link_text": "Param", "click_type": "link", "link_url": "/param", "group_title": "Custom title" },
+  { "event": "component_click", "link_text": "No group", "click_type": "link", "link_url": "/none" }
+]</pre>
+</section>
+
+<section class="case" id="case-group-marker" data-steps="click #group-marker-link">
+  <h3>A data-analytics-group-title marker wins over a closer heading</h3>
+  <div data-analytics-event="component_click" data-analytics-group>
+    <p data-analytics-group-title>Latest news</p>
+    <h3>Storm season starts</h3>
+    <a id="group-marker-link" href="/news">Read the story</a>
+  </div>
+  <pre class="expected">[{ "event": "component_click", "link_text": "Read the story", "click_type": "link", "link_url": "/news", "group_title": "Latest news" }]</pre>
+</section>
+
+<section class="case" id="case-group-skip" data-steps="click #group-skip-link">
+  <h3>A skipped heading and a heading inside a skipped element are never the title</h3>
+  <div data-analytics-event="component_click" data-analytics-group>
+    <h2>Resources</h2>
+    <h3 data-analytics-skip>Sponsored</h3>
+    <div data-analytics-skip><h4>Advert</h4></div>
+    <a id="group-skip-link" href="/resources">Browse</a>
+  </div>
+  <pre class="expected">[{ "event": "component_click", "link_text": "Browse", "click_type": "link", "link_url": "/resources", "group_title": "Resources" }]</pre>
+</section>
+
+<section class="case" id="case-group-scope" data-steps="click #group-scope-link; click #group-scope-missing">
+  <h3>A scope selector widens the lookup to an ancestor; a scope that matches no ancestor keeps the group</h3>
+  <div id="group-scope-region">
+    <h2>Upcoming events</h2>
+    <p data-analytics-subgroup-title>This week</p>
+    <div data-analytics-event="component_click" data-analytics-group data-analytics-group-scope="#group-scope-region" data-analytics-subgroup data-analytics-subgroup-scope="#group-scope-region">
+      <a id="group-scope-link" href="/events">All events</a>
+    </div>
+    <div data-analytics-event="component_click" data-analytics-group data-analytics-group-scope="#group-scope-missing-region">
+      <a id="group-scope-missing" href="/events/past">Past events</a>
+    </div>
+  </div>
+  <pre class="expected">[
+  { "event": "component_click", "link_text": "All events", "click_type": "link", "link_url": "/events", "group_title": "Upcoming events", "subgroup_title": "This week" },
+  { "event": "component_click", "link_text": "Past events", "click_type": "link", "link_url": "/events/past", "group_title": "" }
+]</pre>
+</section>
+
+<section class="case" id="case-subgroup" data-steps="click #subgroup-link; click #subgroup-no-marker; click #subgroup-outside">
+  <h3>A click inside a subgroup sends the data-analytics-subgroup-title marker before it; headings don't count</h3>
+  <nav data-analytics-event="menu_click" data-analytics-group>
+    <h2 data-analytics-group-title>Main menu</h2>
+    <ul>
+      <li data-analytics-subgroup>
+        <span data-analytics-subgroup-title>About</span>
+        <ul>
+          <li><a id="subgroup-link" href="/about/team">Our team</a></li>
+        </ul>
+      </li>
+      <li data-analytics-subgroup>
+        <h3>Get involved</h3>
+        <a id="subgroup-no-marker" href="/volunteer">Volunteer</a>
+      </li>
+    </ul>
+    <a id="subgroup-outside" href="/contact">Contact</a>
+  </nav>
+  <pre class="expected">[
+  { "event": "menu_click", "link_text": "Our team", "click_type": "link", "link_url": "/about/team", "group_title": "Main menu", "subgroup_title": "About" },
+  { "event": "menu_click", "link_text": "Volunteer", "click_type": "link", "link_url": "/volunteer", "group_title": "Main menu", "subgroup_title": "" },
+  { "event": "menu_click", "link_text": "Contact", "click_type": "link", "link_url": "/contact", "group_title": "Main menu" }
 ]</pre>
 </section>
 
@@ -449,7 +596,7 @@
   <div data-analytics-event="form_click">
     <a id="privacy-help" href="/help">Help <textarea>Jane Citizen</textarea></a>
   </div>
-  <pre class="expected">[{ "event": "form_click", "link_text": "Help", "link_url": "/help" }]</pre>
+  <pre class="expected">[{ "event": "form_click", "link_text": "Help", "click_type": "link", "link_url": "/help" }]</pre>
 </section>
 
 <script>

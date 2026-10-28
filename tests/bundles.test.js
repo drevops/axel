@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { BUNDLES } from '../scripts/bundles.js';
 
-const PARAMS = { site: 'example', link_text: 'Link', link_url: 'https://example.com/' };
+const PARAMS = { site: 'example', link_text: 'Link', click_type: 'link', link_url: 'https://example.com/' };
 const SETTINGS = { properties: { site: 'example' } };
 
 // Each bundle is checked for the code of the other integrations and adapters.
