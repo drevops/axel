@@ -4,6 +4,7 @@
 </p>
 
 <h1 align="center">Axel</h1>
+<h3 align="center">Analytics Context Layer</h3>
 
 <div align="center">
 
@@ -19,7 +20,7 @@
 
 ---
 
-Axel, the Analytics Context Layer, turns clicks and form interactions into analytics events. Your server renders `data-axel-*` attributes into the page, and the script reads them when a visitor interacts. An adapter sends each event to its destination: Google Tag Manager, the Google tag or a system you plug in.
+Axel turns clicks and form interactions into analytics events. Your server renders `data-axel-*` attributes into the page, and the script reads them when a visitor interacts. An adapter sends each event to its destination: Google Tag Manager, the Google tag or a system you plug in.
 
 The script holds no rules about your markup. The attributes decide which elements report, under which event name and with which parameters. This README is for developers adding the script to a site and rendering its attributes.
 
