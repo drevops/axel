@@ -23,7 +23,7 @@ Analytics Context Layer turns clicks and form interactions into analytics events
 
 The script holds no rules about your markup. The attributes decide which elements report, under which event name and with which parameters. This README is for developers adding the script to a site and rendering its attributes.
 
-## Features
+## ✨ Features
 
 - Tracks clicks on links and buttons inside elements marked with `data-analytics-event`.
 - Tracks form starts, field changes and server-confirmed submissions as opt-in event types.
@@ -32,7 +32,7 @@ The script holds no rules about your markup. The attributes decide which element
 - Never reads what a visitor types or chooses in a form field.
 - Ships as 1 dependency-free file per setup, for a plain page or a Drupal site.
 
-## Installation
+## 📦 Installation
 
 Every [release](https://github.com/drevops/analytics-context-layer/releases/latest) attaches 1 ready-made bundle per setup. Pick the bundle that matches how your site starts scripts and where your events go:
 
@@ -85,12 +85,15 @@ init({ adapter: gtm, types: ['click', 'form_start'] });
 
 The module's `init()` creates 1 shared instance on its first call. Later calls return that instance and ignore their settings, so a second call never doubles your events.
 
-## Usage
+## 🚀 Usage
 
 To report the clicks inside a component, set `data-analytics-event` on the component:
 
 ```html
-<section data-analytics-event="component_click" data-analytics-param-component="promo">
+<section
+  data-analytics-event="component_click"
+  data-analytics-param-component="promo"
+>
   <a href="/sale">See the deals</a>
 </section>
 ```
@@ -179,7 +182,8 @@ To send events to another system, such as Segment or `adobeDataLayer`, load `acl
 
 ```html
 <script>
-  window.analyticsContextLayerAdapter = (name, params) => window.analytics.track(name, params);
+  window.analyticsContextLayerAdapter = (name, params) =>
+    window.analytics.track(name, params);
 </script>
 <script src="/path/to/acl.min.js"></script>
 ```
@@ -222,7 +226,7 @@ The following table lists every setting:
 
 A missing adapter or an unknown event type throws an error when the instance is created, so a typo fails before any event is lost.
 
-Every bundle exposes the class as `window.AnalyticsContextLayer` and the shared instance as `window.analyticsContextLayer`. Call `destroy()` on an instance to stop tracking, and `init()` to start again with the same settings.
+Every bundle except `acl.esm.js` exposes the class as `window.AnalyticsContextLayer` and the shared instance as `window.analyticsContextLayer`. Call `destroy()` on an instance to stop tracking, and `init()` to start again with the same settings.
 
 ### Google Analytics limits
 
@@ -241,11 +245,11 @@ To log every event to the console, append `#analytics-debug` to the URL. Debug m
 
 In debug mode, the `gtm` and `gtag` adapters add `debug_mode: true` to every event, so Google Analytics lists it in DebugView.
 
-## Contributing
+## 🤝 Contributing
 
-See [`CONTRIBUTING.md`](CONTRIBUTING.md) for local development setup and the build, linting and testing commands.
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for local development setup and the build, linting and testing commands. [`docs/architecture/README.md`](docs/architecture/README.md) explains how the library works inside.
 
-## Updating
+## 🔄 Updating
 
 To pull the latest infrastructure from the template into this project, ask Claude Code to "update scaffold" - see [`AGENTS.md`](AGENTS.md) for details.
 
