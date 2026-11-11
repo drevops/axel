@@ -37,13 +37,25 @@ The script holds no rules about your markup. The attributes decide which element
 
 ## 🤔 Why?
 
-A services page shows a grid of cards, and every card ends in a "Learn more" link. A click report shows that visitors clicked "Learn more". To act on that, you need to know which card they picked and which section of the page held it.
+Google Analytics can tell you that a visitor clicked a link or submitted a form. To act on that, you need to know which link and which form, and the context around them: the card, the section and the component they sat in.
 
-Your server has that context when it renders the page. With Axel, you add that context to your templates as `data-axel-*` attributes, and the script adds it to every click inside the marked elements. The attributes describe the content, so a change to the CSS classes leaves the tracking intact.
+For example, a services page shows a grid of cards, and every card ends in a "Learn more" link. A report that lists clicks on "Learn more" can't tell you which card the visitor picked or which section of the page held it.
+
+Without Axel, you get that context by tracking each link and form on its own. In Google Tag Manager, you write a trigger and the variables that collect its context for every component. Without Google Tag Manager, a developer adds a `dataLayer.push()` call to every link and form in the templates. On a site with many page types and components, that's an enormous amount of work, and every new component adds more.
+
+Axel replaces that per-link work. Mark a component once with `data-axel-event`, and every link and button inside it sends an event. Mark a form once with `data-axel-form`, and it reports when a visitor starts it, changes a field and gets the server's confirmation. Axel gathers the context for each event itself:
+
+- The link text and URL, or the form name and field labels
+- The section and card titles, read from their headings
+- Every `data-axel-param-*` value set on the element or any element around it
+
+A new page built from tracked components reports without any new tracking work.
+
+The attributes also give your analytics team a tracking framework. The team defines how every event is tracked and reported on: the event names, the parameters and which components send them. Developers add those attributes to the component templates, and every page built from them reports the same way.
 
 ### Don't existing analytics tools do this already?
 
-Some do, for their own product only. Each of these tools tracks clicks, and they differ in where the context comes from:
+Not for Google Analytics. Each of these tools tracks clicks, and they differ in where the context comes from:
 
 | Tool                                                                 | Where the context comes from                                                                                           |
 |----------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------|
@@ -52,13 +64,13 @@ Some do, for their own product only. Each of these tools tracks clicks, and they
 | Autocapture in Heap and PostHog                                      | The element's text and position in the page, stored for every click. You define events afterward with CSS selectors, and a selector stops matching when the markup changes. |
 | PostHog `data-ph-capture-attribute-*`, Matomo content tracking and the Adobe Experience Manager data layer | Attributes you add to your templates. Each one sends events only to its own product.                |
 
-Axel reads attributes you add to your templates, like the tools in the last row. It sends the events to Google Tag Manager, the Google tag or an adapter you write. It derives the link text and the URL itself. It reads a section's title from its nearest heading and a card's title from the heading you mark, so you never copy a title into an attribute.
+Axel reads attributes you add to your templates, like the tools in the last row. It sends the events to Google Tag Manager, the Google tag or an adapter you write.
 
 You can also render your own attributes and read them in Google Tag Manager. Its Element Attribute variable reads only the clicked element. Context on the card or section around it needs a Custom JavaScript variable or a community template for each parameter. Axel does that lookup for every parameter, and its tests cover it.
 
 ## ⚖️ Compared with Google's tracking
 
-Each of the 3 approaches tracks the same services grid, where both links read "Learn more":
+For example, take a services grid where both links read "Learn more". Each of the 3 approaches in this section tracks this grid:
 
 ```html
 <section class="services">
