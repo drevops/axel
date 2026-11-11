@@ -41,32 +41,32 @@ Google Analytics can tell you that a visitor clicked a link or submitted a form.
 
 For example, a services page shows a grid of cards, and every card ends in a "Learn more" link. A report that lists clicks on "Learn more" can't tell you which card the visitor picked or which section of the page held it.
 
-Without Axel, you get that context by tracking each link and form on its own. In Google Tag Manager, you write a trigger and the variables that collect its context for every component. Without Google Tag Manager, a developer adds a `dataLayer.push()` call to every link and form in the templates. On a site with many page types and components, that's an enormous amount of work, and every new component adds more.
+Without Axel, you get that context by tracking each link and form on its own. In Google Tag Manager, you write a trigger and context variables for every component. In code, a developer adds a `dataLayer.push()` call to every link and form in the templates. On a site with many page types and components, that's an enormous amount of work, and every new component adds more.
 
-Axel replaces that per-link work. Mark a component once with `data-axel-event`, and every link and button inside it sends an event. Mark a form once with `data-axel-form`, and it reports when a visitor starts it, changes a field and gets the server's confirmation. Axel gathers the context for each event itself:
+Axel replaces that per-link work with 1 attribute per component. Mark a component with `data-axel-event="card_click"`, and Axel sends a `card_click` event for every link and button inside it. Mark a form with `data-axel-form`, and Axel reports when a visitor starts it and changes a field, never what they typed. It reports the submission when the server's confirmation message appears on the page. Axel gathers the context for each event itself:
 
 - The link text and URL, or the form name and field labels
-- The section and card titles, read from their headings
-- Every `data-axel-param-*` value set on the element or any element around it
+- The section and card titles, read from the headings inside elements you mark with `data-axel-group` and `data-axel-subgroup`
+- Every `data-axel-param-*` value set on the element or any element that contains it
 
-A new page built from tracked components reports without any new tracking work.
+Axel tracks a new page built from tracked components with no new tracking work.
 
-The attributes also give your analytics team a tracking framework. The team defines how every event is tracked and reported on: the event names, the parameters and which components send them. Developers add those attributes to the component templates, and every page built from them reports the same way.
+The attributes also give your analytics team a tracking framework. The team defines how every event is tracked and reported on: the event names, the parameters and which components send them. Developers add those attributes to the component templates, and Axel reports every page built from them the same way.
 
 ### Don't existing analytics tools do this already?
 
-Not for Google Analytics. Each of these tools tracks clicks, and they differ in where the context comes from:
+Nothing gathers this context for Google Analytics out of the box. These tools differ in where the context comes from:
 
 | Tool                                                                 | Where the context comes from                                                                                           |
 |----------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------|
 | Google Analytics 4 Enhanced Measurement                              | The clicked link's own URL, classes and ID. It sends no `click` event for links to your own domain.                   |
 | Google Tag Manager                                                   | Selectors and Custom JavaScript variables you write in the container for each component, tied to the theme's CSS classes. |
 | Autocapture in Heap and PostHog                                      | The element's text and position in the page, stored for every click. You define events afterward with CSS selectors, and a selector stops matching when the markup changes. |
-| PostHog `data-ph-capture-attribute-*`, Matomo content tracking and the Adobe Experience Manager data layer | Attributes you add to your templates. Each one sends events only to its own product.                |
+| PostHog `data-ph-capture-attribute-*`, Matomo content tracking and the Adobe Experience Manager data layer | Attributes you add to your templates, each format built for its own product.                         |
 
 Axel reads attributes you add to your templates, like the tools in the last row. It sends the events to Google Tag Manager, the Google tag or an adapter you write.
 
-You can also render your own attributes and read them in Google Tag Manager. Its Element Attribute variable reads only the clicked element. Context on the card or section around it needs a Custom JavaScript variable or a community template for each parameter. Axel does that lookup for every parameter, and its tests cover it.
+You can also render your own attributes and read them in Google Tag Manager. Its Element Attribute variable reads only the clicked element. Context on the card or section around it needs a Custom JavaScript variable or a community template for each parameter. Axel does that lookup for every parameter on every event.
 
 ## ⚖️ Compared with Google's tracking
 
