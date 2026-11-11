@@ -19,7 +19,7 @@ To add a bundle for another destination, add its adapter to `src/adapters/` and 
 
 The 2 suites run every case on the page:
 
-- `npm run test` runs them in jsdom through `tests/core/cases.test.js`, which also counts towards coverage.
+- `npm run test` runs them in jsdom through `tests/core/cases.test.js`, which also counts toward coverage.
 - `npm run test-functional` runs them in Chromium through `tests/functional/cases.spec.js`, against `build/axel.gtm.js`.
 
 Before the first functional run, install Chromium for Playwright:
@@ -27,3 +27,7 @@ Before the first functional run, install Chromium for Playwright:
     npx playwright install chromium
 
 To add a case, add a section to the page. Both suites pick it up. To try a case by hand, run `npm run build` and open `tests/fixtures/cases.html` in a browser. The **Events** panel and the console list every event the page pushes, and the buttons in the `form_submit` cases run their insert and hook steps. Add `#axel-debug` to the URL to also see the library's own log and GA4 limit warnings.
+
+## Template updates
+
+This project was generated from the [Scaffold](https://getscaffold.dev/) template. To pull the template's latest infrastructure into this project, ask Claude Code to "update scaffold". [`AGENTS.md`](AGENTS.md) lists the steps the agent follows.

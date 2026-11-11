@@ -35,6 +35,100 @@ The script holds no rules about your markup. The attributes decide which element
 - Never reads what a visitor types or chooses in a form field.
 - Ships as 1 dependency-free file per setup, for a plain page or a Drupal site.
 
+## 🤔 Why?
+
+A click event identifies the link. To act on the click, you also need the context around the link, such as its card and its section. Your server has that context when it renders the page.
+
+With Axel, your templates write that context into `data-axel-*` attributes, and the script reads them when a visitor interacts. Google Tag Manager reads context from the page after it loads, through CSS selectors that match classes written for styling. Axel reads no CSS classes, so renaming a class leaves its tracking intact.
+
+## ⚖️ Compared with Google's tracking
+
+Each of the 3 approaches tracks the same services grid, where both links read "Learn more":
+
+```html
+<section class="services">
+  <h2>Our services</h2>
+  <div class="card">
+    <h3>Repairs</h3>
+    <a class="card-link" href="/services/repairs">Learn more</a>
+  </div>
+  <div class="card">
+    <h3>Installations</h3>
+    <a class="card-link" href="/services/installations">Learn more</a>
+  </div>
+</section>
+```
+
+To tell the 2 links apart in a report, you need the card title and the section heading.
+
+### Enhanced Measurement
+
+Enhanced Measurement in Google Analytics 4 sends `click` only for links to another domain, so it reports neither link. For a link to another domain, it sends `link_url`, `link_domain`, `link_classes`, `link_id` and `outbound`.
+
+Its `form_submit` goes out when the visitor submits a form, so a submission the server rejects still counts. Axel sends `form_submit` when the server's confirmation message, marked with `data-axel-form-submitted`, reaches the page.
+
+### Google Tag Manager
+
+In Google Tag Manager, a click trigger matches the links by their `card-link` class. A Custom JavaScript variable reads the card title from the clicked element:
+
+```js
+function () {
+  var card = {{Click Element}}.closest('.card');
+  var title = card && card.querySelector('h3');
+
+  return title ? title.textContent.trim() : undefined;
+}
+```
+
+A second variable reads the section heading, and a GA4 event tag maps each variable to a parameter. Every component type needs its own trigger and variables.
+
+After a redesign renames `.card`, the variable returns `undefined`. The container sits outside the site's code, so the site's tests never run the variable.
+
+### Axel
+
+With Axel, the grid's template holds these attributes:
+
+```html
+<section data-axel-event="card_click" data-axel-param-component="services" data-axel-group>
+  <h2 data-axel-group-title>Our services</h2>
+  <div data-axel-subgroup>
+    <h3 data-axel-subgroup-title>Repairs</h3>
+    <a href="/services/repairs">Learn more</a>
+  </div>
+  <div data-axel-subgroup>
+    <h3 data-axel-subgroup-title>Installations</h3>
+    <a href="/services/installations">Learn more</a>
+  </div>
+</section>
+```
+
+`data-axel-event` names the event for every link in the section, and `data-axel-param-component` adds the `component` parameter. `data-axel-group` and `data-axel-subgroup` mark the section and each card, and their `-title` attributes mark the headings. [Attributes](#attributes) lists them all.
+
+With `axel.gtm.js`, a click on the second link pushes this object to `window.dataLayer`:
+
+```js
+{
+  event: 'card_click',
+  link_text: 'Learn more',
+  click_type: 'link',
+  link_url: 'https://example.com/services/installations',
+  group_title: 'Our services',
+  subgroup_title: 'Installations',
+  component: 'services',
+}
+```
+
+With `axel.gtm.js`, Google Tag Manager still needs a custom event trigger and a GA4 event tag that maps each parameter. With `axel.gtag.js`, Axel sends events through the Google tag's `gtag()` function. Either way, each parameter you report on needs a dimension in Google Analytics, as [Google Analytics limits](#google-analytics-limits) describes.
+
+Changing the parameters means editing the template and deploying the site. In Google Tag Manager, a change goes live when you publish the container.
+
+### Axel alongside Enhanced Measurement
+
+Enhanced Measurement covers events Axel doesn't send, such as scrolls, site search and video engagement. Follow 2 rules when a page loads both:
+
+- Turn off **Form interactions** in Enhanced Measurement when Axel tracks forms. Otherwise both send `form_start` and `form_submit` for a form marked with `data-axel-form`.
+- Give Axel events a name other than `click`, such as `card_click`. Enhanced Measurement sends `click` for links to another domain, so a shared name mixes the 2 in reports.
+
 ## 📦 Installation
 
 Every [release](https://github.com/drevops/axel/releases/latest) attaches 1 ready-made bundle per setup. Pick the bundle that matches how your site starts scripts and where your events go:
@@ -332,101 +426,9 @@ To log every event to the console, append `#axel-debug` to the URL. Debug mode s
 
 In debug mode, the `gtm` and `gtag` adapters add `debug_mode: true` to every event, so Google Analytics lists it in DebugView.
 
-## ⚖️ Compared with Google's tracking
-
-Google Analytics 4 and Google Tag Manager can track clicks without Axel. This section compares the 3 approaches on 1 page, to help you decide whether Axel fits your site.
-
-The page has a services grid where both links read "Learn more":
-
-```html
-<section class="services">
-  <h2>Our services</h2>
-  <div class="card">
-    <h3>Repairs</h3>
-    <a class="card-link" href="/services/repairs">Learn more</a>
-  </div>
-  <div class="card">
-    <h3>Installations</h3>
-    <a class="card-link" href="/services/installations">Learn more</a>
-  </div>
-</section>
-```
-
-To tell the 2 links apart, a report needs the card title and the section heading.
-
-### Enhanced Measurement
-
-Enhanced Measurement in Google Analytics 4 sends a `click` event only for links to another domain, so it reports neither link. For a link to another domain, it sends `link_url`, `link_domain`, `link_classes`, `link_id` and `outbound`.
-
-Its `form_submit` event goes out when the visitor submits a form, so a submission the server rejects still counts. Axel's `form_submit` waits for the confirmation the server renders.
-
-### Google Tag Manager
-
-In Google Tag Manager, a click trigger matches the links by their `card-link` class. A Custom JavaScript variable reads the card title from the clicked element:
-
-```js
-function () {
-  var card = {{Click Element}}.closest('.card');
-  var title = card && card.querySelector('h3');
-
-  return title ? title.textContent.trim() : undefined;
-}
-```
-
-The section heading needs a second variable, and the GA4 event tag maps each variable to a parameter. Each component type needs its own trigger and variables.
-
-The variables depend on the theme's classes, so after a redesign renames `.card`, the card title variable returns `undefined`. The tracking lives in the container, so the site's own tests can't catch the change.
-
-### Axel
-
-With Axel, the template that renders the grid also renders its attributes:
-
-```html
-<section data-axel-event="card_click" data-axel-param-component="services" data-axel-group>
-  <h2 data-axel-group-title>Our services</h2>
-  <div data-axel-subgroup>
-    <h3 data-axel-subgroup-title>Repairs</h3>
-    <a href="/services/repairs">Learn more</a>
-  </div>
-  <div data-axel-subgroup>
-    <h3 data-axel-subgroup-title>Installations</h3>
-    <a href="/services/installations">Learn more</a>
-  </div>
-</section>
-```
-
-With `axel.gtm.js`, a click on the second link pushes this object to `window.dataLayer`:
-
-```js
-{
-  event: 'card_click',
-  link_text: 'Learn more',
-  click_type: 'link',
-  link_url: 'https://example.com/services/installations',
-  group_title: 'Our services',
-  subgroup_title: 'Installations',
-  component: 'services',
-}
-```
-
-Every grid the template renders reports the same way. Axel reads no CSS classes, so a redesign keeps the parameters. The attributes change in the same commit as the markup they describe.
-
-Changing what Axel sends means changing a template and deploying it. A Google Tag Manager change publishes from the container. Each parameter still needs a custom dimension in Google Analytics, as [Google Analytics limits](#google-analytics-limits) describes.
-
-### Axel alongside Enhanced Measurement
-
-Enhanced Measurement still tracks what Axel doesn't, such as scrolls, site search and video engagement. Follow 2 rules when a page loads both:
-
-- Turn off **Form interactions** in Enhanced Measurement when Axel tracks forms. Otherwise a marked form reports `form_start` and `form_submit` from both.
-- Name Axel events something other than `click`, such as `card_click`. Enhanced Measurement sends `click` for links to another domain, so a shared name mixes the 2 in reports.
-
 ## 🤝 Contributing
 
-See [`CONTRIBUTING.md`](CONTRIBUTING.md) for local development setup and the build, linting and testing commands. [`docs/architecture/README.md`](docs/architecture/README.md) explains how the library works inside.
-
-## 🔄 Updating
-
-To pull the latest infrastructure from the template into this project, ask Claude Code to "update scaffold" - see [`AGENTS.md`](AGENTS.md) for details.
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) to set up a local environment, run the checks and pull updates from the project template. [`docs/architecture/README.md`](docs/architecture/README.md) explains how the library works inside.
 
 ---
 _This repository was created using the [Scaffold](https://getscaffold.dev/) project template_
