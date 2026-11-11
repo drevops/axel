@@ -37,9 +37,24 @@ The script holds no rules about your markup. The attributes decide which element
 
 ## 🤔 Why?
 
-A click event identifies the link. To act on the click, you also need the context around the link, such as its card and its section. Your server has that context when it renders the page.
+A services page shows a grid of cards, and every card ends in a "Learn more" link. A click report shows that visitors clicked "Learn more". To act on that, you need to know which card they picked and which section of the page held it.
 
-With Axel, your templates write that context into `data-axel-*` attributes, and the script reads them when a visitor interacts. Google Tag Manager reads context from the page after it loads, through CSS selectors that match classes written for styling. Axel reads no CSS classes, so renaming a class leaves its tracking intact.
+Your server has that context when it renders the page. With Axel, you add that context to your templates as `data-axel-*` attributes, and the script adds it to every click inside the marked elements. The attributes describe the content, so a change to the CSS classes leaves the tracking intact.
+
+### Don't existing analytics tools do this already?
+
+Some do, for their own product only. Each of these tools tracks clicks, and they differ in where the context comes from:
+
+| Tool                                                                 | Where the context comes from                                                                                           |
+|----------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------|
+| Google Analytics 4 Enhanced Measurement                              | The clicked link's own URL, classes and ID. It sends no `click` event for links to your own domain.                   |
+| Google Tag Manager                                                   | Selectors and Custom JavaScript variables you write in the container for each component, tied to the theme's CSS classes. |
+| Autocapture in Heap and PostHog                                      | The element's text and position in the page, stored for every click. You define events afterward with CSS selectors, and a selector stops matching when the markup changes. |
+| PostHog `data-ph-capture-attribute-*`, Matomo content tracking and the Adobe Experience Manager data layer | Attributes you add to your templates. Each one sends events only to its own product.                |
+
+Axel reads attributes you add to your templates, like the tools in the last row. It sends the events to Google Tag Manager, the Google tag or an adapter you write. It derives the link text and the URL itself. It reads a section's title from its nearest heading and a card's title from the heading you mark, so you never copy a title into an attribute.
+
+You can also render your own attributes and read them in Google Tag Manager. Its Element Attribute variable reads only the clicked element. Context on the card or section around it needs a Custom JavaScript variable or a community template for each parameter. Axel does that lookup for every parameter, and its tests cover it.
 
 ## ⚖️ Compared with Google's tracking
 
