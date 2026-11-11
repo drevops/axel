@@ -57,6 +57,23 @@ describe('click', () => {
     expect(window.dataLayer.map((event) => event.group_title)).toEqual(['Not a title', 'Latest news']);
   });
 
+  it('keeps query strings and contact addresses with the full URLs setting', () => {
+    axel.destroy();
+    axel = new Axel({ adapter: gtm, types: ['click', 'form_start'], fullUrls: true }).init();
+
+    document.querySelector('#privacy-url-query').click();
+    document.querySelector('#privacy-url-mailto').click();
+    document.querySelector('#privacy-url-submit').click();
+    document.querySelector('#privacy-url-field').focus();
+
+    expect(window.dataLayer.map((event) => event.link_url || event.form_destination)).toEqual([
+      'http://localhost:3000/reset?token=abc&email=jane%40example.com#form',
+      'mailto:jane@example.com?subject=Hello',
+      'http://localhost:3000/subscribe?email=jane%40example.com',
+      'http://localhost:3000/apply?ref=jane%40example.com',
+    ]);
+  });
+
   it('stops sending events once destroyed', () => {
     axel.destroy();
     document.querySelector('#click-link').click();

@@ -281,8 +281,8 @@ The script derives each parameter as follows:
 
 - `link_text` is the visible text of the link or button with whitespace collapsed. It skips `aria-hidden="true"` content and falls back to `aria-label`, then `title`. For an input button, it's the button's `value`.
 - `click_type` is `link` for a link and `button` for every other element.
-- `link_url` is the absolute address of the link. For a submit button, it's the button's `formaction`, or the `action` of its form. A submit button with neither sends no `link_url`.
-- `form_id` is the `id` of the marked element. `form_destination` is the absolute `action` address, when the marked element is a `<form>` with an `action` attribute.
+- `link_url` is the absolute address of the link, without the parts [Privacy](#privacy) describes. For a submit button, it's the button's `formaction`, or the `action` of its form. A submit button with neither sends no `link_url`, and neither does an address that isn't a valid URL.
+- `form_id` is the `id` of the marked element. `form_destination` is the absolute `action` address, when the marked element is a `<form>` with an `action` attribute that holds a valid URL.
 - `field_label` is the text of the field's `<label>`, or its `aria-label`. For a radio button or checkbox inside a `<fieldset>`, it's the fieldset's `<legend>`, because the option's own label is the visitor's answer. A radio button outside a fieldset reports only its `aria-label`.
 
 Only the server knows that a submission succeeded, so `form_submit` waits for a confirmation it renders. Render `data-axel-form-submitted` into the confirmation message:
@@ -333,6 +333,8 @@ Subgroups work the same way through `data-axel-subgroup`, `data-axel-subgroup-ti
 ### Privacy
 
 Field events never carry what a visitor typed or chose: `field_complete` reports the field's name and label only. The script reads no text from inside a `<select>` or `<textarea>`, even when one sits inside a label or a link. Google Analytics forbids personal information in events, and form fields often hold it.
+
+URLs can hold personal information too, such as the token in `/reset?token=abc`. So `link_url` and `form_destination` send each URL without its query string. A `mailto:`, `tel:` or `sms:` URL sends only its scheme, such as `tel:`. The fragment stays, so a link to `#contact` still shows which section it opens. To send every URL as it is, set `fullUrls` to `true` after you've checked your URLs for personal information.
 
 Parameters you render yourself are sent as they are. Keep personal information out of `data-axel-param-*` values and out of your own adapters and collectors.
 
@@ -432,6 +434,7 @@ The following table lists every setting:
 | `clickSelector`   | `'a[href], button, input[type="submit"], input[type="button"], input[type="reset"]'` | Elements whose clicks the `click` type tracks.                  |
 | `groupTitleSelector` | `'h2, h3, h4'`                                                | Headings that title a group without a `data-axel-group-title` marker.               |
 | `collectors`      | `{}`                                                             | [Collectors](#collectors) by name.                                                  |
+| `fullUrls`        | `false`                                                          | If true, `link_url` and `form_destination` keep the query string and the address of a `mailto:`, `tel:` or `sms:` URL. See [Privacy](#privacy). |
 | `debugHash`       | `'#axel-debug'`                                                  | URL hash that turns on debug mode.                                                  |
 | `debugStorageKey` | `'axelDebug'`                                                    | `sessionStorage` key that keeps debug mode on until the tab closes.                 |
 | `autoInit`        | `true`                                                           | If true, a plain-page bundle starts tracking when it loads. If false, call `window.axel.init()` yourself. Drupal bundles always start in the behavior. |

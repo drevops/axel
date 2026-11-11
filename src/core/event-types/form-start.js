@@ -22,6 +22,6 @@ export function formStart(axel) {
     }
 
     started.add(form);
-    axel.track('form_start', form, formParams(form));
+    axel.track('form_start', form, formParams(form, axel.settings.fullUrls));
   });
 }
