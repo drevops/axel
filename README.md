@@ -53,6 +53,9 @@ Axel tracks a new page built from tracked components with no new tracking work.
 
 The attributes also give your analytics team a tracking framework. The team defines how every event is tracked and reported on: the event names, the parameters and which components send them. Developers add those attributes to the component templates, and Axel reports every page built from them the same way.
 
+<details>
+<summary><strong>🔍 Already on Google Analytics or Tag Manager? See what Axel adds, side by side</strong></summary>
+
 ### Don't existing analytics tools do this already?
 
 Nothing gathers this context for Google Analytics out of the box. These tools differ in where the context comes from:
@@ -68,7 +71,7 @@ Axel reads attributes you add to your templates, like the tools in the last row.
 
 You can also render your own attributes and read them in Google Tag Manager. Its Element Attribute variable reads only the clicked element. Context on the card or section around it needs a Custom JavaScript variable or a community template for each parameter. Axel does that lookup for every parameter on every event.
 
-## ⚖️ Compared with Google's tracking
+### Compared with Google's tracking
 
 For example, take a services grid where both links read "Learn more". Each of the 3 approaches in this section tracks this grid:
 
@@ -88,13 +91,13 @@ For example, take a services grid where both links read "Learn more". Each of th
 
 To tell the 2 links apart in a report, you need the card title and the section heading.
 
-### Enhanced Measurement
+#### Enhanced Measurement
 
 Enhanced Measurement in Google Analytics 4 sends `click` only for links to another domain, so it reports neither link. For a link to another domain, it sends `link_url`, `link_domain`, `link_classes`, `link_id` and `outbound`.
 
 Its `form_submit` goes out when the visitor submits a form, so a submission the server rejects still counts. Axel sends `form_submit` when the server's confirmation message, marked with `data-axel-form-submitted`, reaches the page.
 
-### Google Tag Manager
+#### Google Tag Manager
 
 In Google Tag Manager, a click trigger matches the links by their `card-link` class. A Custom JavaScript variable reads the card title from the clicked element:
 
@@ -111,7 +114,7 @@ A second variable reads the section heading, and a GA4 event tag maps each varia
 
 After a redesign renames `.card`, the variable returns `undefined`. The container sits outside the site's code, so the site's tests never run the variable.
 
-### Axel
+#### Axel
 
 With Axel, the grid's template holds these attributes:
 
@@ -149,12 +152,14 @@ With `axel.gtm.js`, Google Tag Manager still needs a custom event trigger and a 
 
 Changing the parameters means editing the template and deploying the site. In Google Tag Manager, a change goes live when you publish the container.
 
-### Axel alongside Enhanced Measurement
+#### Axel alongside Enhanced Measurement
 
 Enhanced Measurement covers events Axel doesn't send, such as scrolls, site search and video engagement. Follow 2 rules when a page loads both:
 
 - Turn off **Form interactions** in Enhanced Measurement when Axel tracks forms. Otherwise both send `form_start` and `form_submit` for a form marked with `data-axel-form`.
 - Give Axel events a name other than `click`, such as `card_click`. Enhanced Measurement sends `click` for links to another domain, so a shared name mixes the 2 in reports.
+
+</details>
 
 ## 📦 Installation
 
