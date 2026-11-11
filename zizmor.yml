@@ -11,18 +11,6 @@ rules:
     # the elevated trigger carries no code-injection risk.
     ignore:
       - assign-author.yml
-  cache-poisoning:
-    # Low-confidence findings on tag-triggered release workflows. The Node.js
-    # setup steps do not enable caching, and the Composer cache is keyed on the
-    # "composer.lock" hash, so the cache-poisoning surface is negligible.
-    ignore:
-      - release-nodejs.yml
-      - release-docs.yml
-  superfluous-actions:
-    # The release uses "softprops/action-gh-release" for richer release-asset
-    # handling than an equivalent "gh release" script step would provide.
-    ignore:
-      - release-nodejs.yml
   ref-version-mismatch:
     # Actions are pinned by commit SHA - the actual security control - while the
     # trailing version comment is managed by Renovate and may briefly lag the

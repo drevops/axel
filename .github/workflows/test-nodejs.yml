@@ -11,12 +11,8 @@ on:
       - main
       - 'feature/**'
   workflow_dispatch:
-    inputs:
-      enable_terminal:
-        type: boolean
-        description: 'Enable terminal session.'
-        required: false
-        default: false
+
+permissions: {}
 
 jobs:
   test-nodejs:
@@ -99,8 +95,3 @@ jobs:
           fail_ci_if_error: false
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-
-      - name: Setup tmate session
-        if: ${{ !cancelled() && github.event.inputs.enable_terminal == 'true' }}
-        uses: mxschmitt/action-tmate@35b54afac29c97fb54faba5b513f8fbd1882f113 # v3
-        timeout-minutes: 30
