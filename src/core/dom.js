@@ -5,6 +5,9 @@
 
 const PARAM_PREFIX = 'data-axel-param-';
 
+// The rest of a URL with these schemes is an address or a phone number.
+const CONTACT_PROTOCOLS = ['mailto:', 'tel:', 'sms:'];
+
 /**
  * Add a capture-phase listener to the document.
  *
@@ -93,21 +96,46 @@ export function isSkipped(element) {
  * The attribute is read directly because a form field named like a form
  * property, such as 'action' or 'id', shadows that property on the form.
  *
+ * Unless 'fullUrl' is set, the query string is dropped and a 'mailto:', 'tel:'
+ * or 'sms:' URL is reduced to its scheme, because both often hold personal
+ * information.
+ *
  * @param {Element} element   - The element.
  * @param {string}  attribute - The attribute name.
- * @return {string} The absolute URL.
+ * @param {boolean} fullUrl   - Whether to keep the URL as it is.
+ * @return {string|undefined} The absolute URL, or undefined when the value
+ *   isn't a valid URL.
  */
-export function resolveUrl(element, attribute) {
-  return new URL(element.getAttribute(attribute), element.baseURI).href;
+export function resolveUrl(element, attribute, fullUrl = false) {
+  let url;
+
+  try {
+    url = new URL(element.getAttribute(attribute), element.baseURI);
+  } catch {
+    return undefined;
+  }
+
+  if (fullUrl) {
+    return url.href;
+  }
+
+  if (CONTACT_PROTOCOLS.includes(url.protocol)) {
+    return url.protocol;
+  }
+
+  url.search = '';
+
+  return url.href;
 }
 
 /**
  * Get the parameters that describe a marked form.
  *
- * @param {Element} form - The element with 'data-axel-form'.
+ * @param {Element} form    - The element with 'data-axel-form'.
+ * @param {boolean} fullUrl - Whether to keep the destination URL as it is.
  * @return {object} The form name, and the form ID and destination when known.
  */
-export function formParams(form) {
+export function formParams(form, fullUrl = false) {
   const params = { form_name: form.getAttribute('data-axel-form') };
   const id = form.getAttribute('id');
 
@@ -115,8 +143,10 @@ export function formParams(form) {
     params.form_id = id;
   }
 
-  if (form instanceof HTMLFormElement && form.hasAttribute('action')) {
-    params.form_destination = resolveUrl(form, 'action');
+  const destination = form instanceof HTMLFormElement && form.hasAttribute('action') ? resolveUrl(form, 'action', fullUrl) : undefined;
+
+  if (destination !== undefined) {
+    params.form_destination = destination;
   }
 
   return params;

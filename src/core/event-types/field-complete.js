@@ -36,7 +36,7 @@ export function fieldComplete(axel) {
       return;
     }
 
-    const params = formParams(form);
+    const params = formParams(form, axel.settings.fullUrls);
 
     if (field.name) {
       params.field_name = field.name;

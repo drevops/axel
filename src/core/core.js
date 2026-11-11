@@ -34,6 +34,8 @@ export const DEFAULT_SETTINGS = {
   groupTitleSelector: 'h2, h3, h4',
   // Functions named by data-axel-collector, as name => function.
   collectors: {},
+  // Keep query strings and contact addresses in link_url and form_destination.
+  fullUrls: false,
   debugHash: '#axel-debug',
   debugStorageKey: 'axelDebug',
   // Used by the standalone integration only.
