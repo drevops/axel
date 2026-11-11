@@ -93,11 +93,11 @@
 </section>
 
 <section class="case" id="case-click-phone" data-steps="click #click-phone">
-  <h3>A phone link</h3>
+  <h3>A phone link sends only its scheme as the URL</h3>
   <div data-axel-event="component_click" data-axel-param-component="promo">
     <a id="click-phone" href="tel:0200000000">02 0000 0000</a>
   </div>
-  <pre class="expected">[{ "event": "component_click", "link_text": "02 0000 0000", "click_type": "link", "link_url": "tel:0200000000", "component": "promo" }]</pre>
+  <pre class="expected">[{ "event": "component_click", "link_text": "02 0000 0000", "click_type": "link", "link_url": "tel:", "component": "promo" }]</pre>
 </section>
 
 <section class="case" id="case-click-external" data-steps="click #click-external">
@@ -167,6 +167,20 @@
 ]</pre>
 </section>
 
+<section class="case" id="case-click-invalid-url" data-steps="click #invalid-url-link; focus #invalid-url-field">
+  <h3>A link or form address that isn't a valid URL sends no URL, and the event still goes out</h3>
+  <div data-axel-event="component_click">
+    <a id="invalid-url-link" href="http://[">Broken link</a>
+  </div>
+  <form id="invalid-url-form" data-axel-form="broken" action="http://[">
+    <input id="invalid-url-field" type="text" name="name" aria-label="Name">
+  </form>
+  <pre class="expected">[
+  { "event": "component_click", "link_text": "Broken link", "click_type": "link" },
+  { "event": "form_start", "form_name": "broken", "form_id": "invalid-url-form" }
+]</pre>
+</section>
+
 <section class="case" id="case-click-not-interactive" data-steps="click #click-no-href; click #click-text">
   <h3>An anchor without an address and plain text send nothing</h3>
   <div data-axel-event="component_click" data-axel-param-component="promo">
@@ -229,7 +243,7 @@
   </div>
   <pre class="expected">[
   { "event": "component_click", "link_text": "Contact us", "click_type": "link", "link_url": "/contact" },
-  { "event": "component_click", "link_text": "Call us", "click_type": "link", "link_url": "tel:0200000000" },
+  { "event": "component_click", "link_text": "Call us", "click_type": "link", "link_url": "tel:" },
   { "event": "component_click", "link_text": "Contact the team", "click_type": "link", "link_url": "/contact" },
   { "event": "component_click", "link_text": "", "click_type": "link", "link_url": "/contact" }
 ]</pre>
@@ -612,6 +626,30 @@
     <a id="privacy-help" href="/help">Help <textarea>Jane Citizen</textarea></a>
   </div>
   <pre class="expected">[{ "event": "form_click", "link_text": "Help", "click_type": "link", "link_url": "/help" }]</pre>
+</section>
+
+<section class="case" id="case-privacy-urls" data-steps="click #privacy-url-query; click #privacy-url-mailto; click #privacy-url-tel; click #privacy-url-sms; click #privacy-url-submit; focus #privacy-url-field">
+  <h3>URLs are sent without their query string, and contact links send only their scheme</h3>
+  <div data-axel-event="privacy_click">
+    <a id="privacy-url-query" href="/reset?token=abc&amp;email=jane%40example.com#form">Reset your password</a>
+    <a id="privacy-url-mailto" href="mailto:jane@example.com?subject=Hello">Email Jane</a>
+    <a id="privacy-url-tel" href="tel:0400000000">Call Jane</a>
+    <a id="privacy-url-sms" href="sms:0400000000">Text Jane</a>
+    <form action="/subscribe?email=jane%40example.com">
+      <button id="privacy-url-submit">Subscribe</button>
+    </form>
+  </div>
+  <form id="privacy-url-form" data-axel-form="private" action="/apply?ref=jane%40example.com">
+    <input id="privacy-url-field" type="text" name="name" aria-label="Name">
+  </form>
+  <pre class="expected">[
+  { "event": "privacy_click", "link_text": "Reset your password", "click_type": "link", "link_url": "/reset#form" },
+  { "event": "privacy_click", "link_text": "Email Jane", "click_type": "link", "link_url": "mailto:" },
+  { "event": "privacy_click", "link_text": "Call Jane", "click_type": "link", "link_url": "tel:" },
+  { "event": "privacy_click", "link_text": "Text Jane", "click_type": "link", "link_url": "sms:" },
+  { "event": "privacy_click", "link_text": "Subscribe", "click_type": "button", "link_url": "/subscribe" },
+  { "event": "form_start", "form_name": "private", "form_id": "privacy-url-form", "form_destination": "/apply" }
+]</pre>
 </section>
 
 <script>

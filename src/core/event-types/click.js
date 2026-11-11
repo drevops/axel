@@ -58,19 +58,20 @@ function getGroupTitle(element, kind, selectors) {
  * Get the address a submit button sends its form to.
  *
  * @param {Element} element - The element.
+ * @param {boolean} fullUrl - Whether to keep the address as it is.
  * @return {string|undefined} The absolute address, if the element is a submit
- *   button with a 'formaction' or a form with an 'action'.
+ *   button with a valid 'formaction' or a form with a valid 'action'.
  */
-function getSubmitDestination(element) {
+function getSubmitDestination(element, fullUrl) {
   if (element.type !== 'submit' || !element.form) {
     return undefined;
   }
 
   if (element.hasAttribute('formaction')) {
-    return resolveUrl(element, 'formaction');
+    return resolveUrl(element, 'formaction', fullUrl);
   }
 
-  return element.form.hasAttribute('action') ? resolveUrl(element.form, 'action') : undefined;
+  return element.form.hasAttribute('action') ? resolveUrl(element.form, 'action', fullUrl) : undefined;
 }
 
 /**
@@ -95,7 +96,8 @@ export function click(axel) {
 
     const isLink = element instanceof HTMLAnchorElement;
     const params = { link_text: getLabel(element), click_type: isLink ? 'link' : 'button' };
-    const linkUrl = isLink ? element.href : getSubmitDestination(element);
+    const { fullUrls } = axel.settings;
+    const linkUrl = isLink ? resolveUrl(element, 'href', fullUrls) : getSubmitDestination(element, fullUrls);
 
     if (linkUrl !== undefined) {
       params.link_url = linkUrl;
