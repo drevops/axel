@@ -1,4 +1,4 @@
-name: CodeQL
+name: Scan code
 
 on:
   schedule:
@@ -13,8 +13,8 @@ on:
 permissions: {}
 
 jobs:
-  codeql:
-    name: CodeQL (${{ matrix.language }})
+  scan-code:
+    name: Scan code (${{ matrix.language }})
     runs-on: ubuntu-latest
     # Code scanning needs a public repository or GitHub Advanced Security.
     if: ${{ !github.event.repository.private }}
@@ -41,7 +41,7 @@ jobs:
           languages: ${{ matrix.language }}
           build-mode: none
 
-      - name: Analyze with CodeQL
+      - name: Scan code for vulnerabilities with CodeQL
         uses: github/codeql-action/analyze@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
         with:
           category: '/language:${{ matrix.language }}'
