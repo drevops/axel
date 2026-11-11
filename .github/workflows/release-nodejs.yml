@@ -87,10 +87,15 @@ jobs:
             gh release create "${TAG}" --title "${TAG}" --generate-notes --draft --verify-tag
           fi
 
+          prerelease='false'
+          if [[ "${TAG}" == *-* ]]; then
+            prerelease='true'
+          fi
+
           gh release upload "${TAG}" build/*.js build/checksums.txt --clobber
 
           gh release view "${TAG}" --json body --jq .body > "${RUNNER_TEMP}/notes.md"
           echo >> "${RUNNER_TEMP}/notes.md"
           cat "${RUNNER_TEMP}/sri.md" >> "${RUNNER_TEMP}/notes.md"
 
-          gh release edit "${TAG}" --notes-file "${RUNNER_TEMP}/notes.md" --draft=false --verify-tag
+          gh release edit "${TAG}" --notes-file "${RUNNER_TEMP}/notes.md" --draft=false --prerelease="${prerelease}" --verify-tag

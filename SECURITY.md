@@ -30,11 +30,13 @@ Every release attaches the bundles, a `checksums.txt` file and a provenance atte
 To check that a bundle was built from this repository by the release workflow, run the GitHub CLI:
 
 ```bash
-gh attestation verify axel.gtm.min.js --repo drevops/axel
+gh attestation verify axel.gtm.min.js --repo drevops/axel --signer-workflow drevops/axel/.github/workflows/release-nodejs.yml
 ```
 
 To check a downloaded bundle against the release checksums, run this command in the folder that holds both files:
 
 ```bash
-sha256sum --check --ignore-missing checksums.txt
+grep ' axel.gtm.min.js$' checksums.txt | sha256sum --check
 ```
+
+The command prints `axel.gtm.min.js: OK` for a matching bundle. It fails when the bundle differs or `checksums.txt` lists no bundle by that name.

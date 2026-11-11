@@ -22,7 +22,7 @@ const FORBIDDEN = {
   WebSocket: /WebSocket/,
   EventSource: /EventSource/,
   eval: /\beval\s*\(/,
-  'new Function': /new\s+Function\b/,
+  Function: /\bFunction\s*\(/,
   'string timer': /set(?:Timeout|Interval)\s*\(\s*['"`]/,
   'document.cookie': /document\.cookie/,
   localStorage: /localStorage/,
