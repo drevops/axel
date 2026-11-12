@@ -32,6 +32,8 @@ To add a case, add a section to the page. Both suites pick it up. To try a case 
 
 Release Drafter keeps a draft release with the notes for the next version. A release goes out when a maintainer pushes its tag, and only maintainers can create tags.
 
+Release only by pushing the tag. Never click **Publish release** on the draft: releases are immutable, so a release published before the workflow runs can never get its bundles.
+
 To publish a release:
 
 1. Open the draft release on GitHub and note its tag, such as `1.2.3`.
