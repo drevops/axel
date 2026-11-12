@@ -28,6 +28,20 @@ Before the first functional run, install Chromium for Playwright:
 
 To add a case, add a section to the page. Both suites pick it up. To try a case by hand, run `npm run build` and open `tests/fixtures/cases.html` in a browser. The **Events** panel and the console list every event the page pushes, and the buttons in the `form_submit` cases run their insert and hook steps. Add `#axel-debug` to the URL to also see the library's own log and GA4 limit warnings.
 
+## Releases
+
+Release Drafter keeps a draft release with the notes for the next version. A release goes out when a maintainer pushes its tag, and only maintainers can create tags.
+
+To publish a release:
+
+1. Open the draft release on GitHub and note its tag, such as `1.2.3`.
+2. Tag the commit on `main` with that version and push the tag:
+
+       git tag 1.2.3
+       git push origin 1.2.3
+
+The `release-nodejs.yml` workflow builds the bundles and attests their provenance. It attaches the bundles and `checksums.txt` to the draft with the same tag, or to a new draft when none matches. It adds the Subresource Integrity hashes to the notes and then publishes the release. Releases are immutable, so a published release keeps its assets and its tag.
+
 ## Template updates
 
 This project was generated from the [Scaffold](https://getscaffold.dev/) template. To pull the template's latest infrastructure into this project, ask Claude Code to "update scaffold". [`AGENTS.md`](AGENTS.md) lists the steps the agent follows.

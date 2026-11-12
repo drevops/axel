@@ -4,49 +4,98 @@ on:
   push:
     tags:
       - '*'
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Release version'
-        required: true
-        type: string
 
-permissions:
-  contents: write
+permissions: {}
 
 jobs:
   release-nodejs:
     name: Release Node.js
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write # Upload the assets and publish the release.
+      id-token: write # Sign the provenance attestation.
+      attestations: write # Store the provenance attestation.
+
     steps:
+      - name: Check the tag
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          if [[ ! "${TAG}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::Tag '${TAG}' is not a version."
+            exit 1
+          fi
+
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
 
-      - name: Set release version
-        env:
-          INPUTS_VERSION: ${{ github.event.inputs.version }}
-          REF_NAME: ${{ github.ref_name }}
-        run: |
-          version="${INPUTS_VERSION:-${REF_NAME}}"
-          echo "RELEASE_VERSION=$version" >> "$GITHUB_ENV"
-          echo "Release version: $version"
-
       - name: Setup Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: 24
+          package-manager-cache: false
 
+      # A dependency's install script must not run next to a write token.
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --ignore-scripts
 
       - name: Build
         run: npm run build
 
-      - name: Create Release
-        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3
+      - name: Generate checksums
+        working-directory: build
+        run: sha256sum -- *.js > checksums.txt
+
+      - name: Generate Subresource Integrity hashes
+        working-directory: build
+        shell: bash
+        run: |
+          {
+            echo '## Subresource Integrity'
+            echo
+            echo '| File | Integrity |'
+            echo '| --- | --- |'
+            for file in *.js; do
+              integrity="sha384-$(openssl dgst -sha384 -binary "${file}" | openssl base64 -A)"
+              echo "| \`${file}\` | \`${integrity}\` |"
+            done
+          } > "${RUNNER_TEMP}/sri.md"
+          cat "${RUNNER_TEMP}/sri.md"
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
-          tag_name: ${{ env.RELEASE_VERSION }}
-          files: build/*.js
+          subject-path: build/*.js
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          state="$(gh release view "${TAG}" --json isDraft --jq 'if .isDraft then "draft" else "published" end' || echo 'none')"
+
+          if [ "${state}" = 'published' ]; then
+            echo "::error::Release '${TAG}' is already published, so its assets can't change."
+            exit 1
+          fi
+
+          if [ "${state}" = 'none' ]; then
+            gh release create "${TAG}" --title "${TAG}" --generate-notes --draft --verify-tag
+          fi
+
+          prerelease='false'
+          if [[ "${TAG}" == *-* ]]; then
+            prerelease='true'
+          fi
+
+          gh release upload "${TAG}" build/*.js build/checksums.txt --clobber
+
+          gh release view "${TAG}" --json body --jq .body > "${RUNNER_TEMP}/notes.md"
+          echo >> "${RUNNER_TEMP}/notes.md"
+          cat "${RUNNER_TEMP}/sri.md" >> "${RUNNER_TEMP}/notes.md"
+
+          gh release edit "${TAG}" --notes-file "${RUNNER_TEMP}/notes.md" --draft=false --prerelease="${prerelease}" --verify-tag

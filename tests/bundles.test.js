@@ -14,6 +14,26 @@ const MARKERS = {
   gtag: /window\.gtag/,
 };
 
+// APIs that send data, store data or run code from a string.
+const FORBIDDEN = {
+  fetch: /\bfetch\s*\(/,
+  XMLHttpRequest: /XMLHttpRequest/,
+  sendBeacon: /sendBeacon/,
+  WebSocket: /WebSocket/,
+  EventSource: /EventSource/,
+  eval: /\beval\s*\(/,
+  Function: /\bFunction\s*\(/,
+  'string timer': /set(?:Timeout|Interval)\s*\(\s*['"`]/,
+  'document.cookie': /document\.cookie/,
+  localStorage: /localStorage/,
+  indexedDB: /indexedDB/,
+  innerHTML: /\.(?:inner|outer)HTML\b/,
+  insertAdjacentHTML: /insertAdjacentHTML/,
+  'document.write': /document\.write/,
+  'script element': /createElement\s*\(\s*['"`]script/,
+  importScripts: /importScripts/,
+};
+
 const FILES = BUNDLES.flatMap((bundle) => ['', '.min'].map((suffix) => ({ ...bundle, file: `${bundle.file}${suffix}.js` })));
 
 function read(file) {
@@ -71,6 +91,14 @@ describe('Built bundles', () => {
 
     Object.entries(MARKERS).forEach(([name, marker]) => {
       expect(marker.test(code), `${name} in ${file}`).toBe(name === integration || name === adapter);
+    });
+  });
+
+  it.each([...FILES.map(({ file }) => file), 'axel.esm.js'])('%s uses no network, storage or code-evaluation APIs', (file) => {
+    const code = read(file);
+
+    Object.entries(FORBIDDEN).forEach(([name, pattern]) => {
+      expect(pattern.test(code), `${name} in ${file}`).toBe(false);
     });
   });
 

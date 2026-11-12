@@ -15,6 +15,7 @@
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/drevops/axel)
 ![LICENSE](https://img.shields.io/github/license/drevops/axel)
 ![Renovate](https://img.shields.io/badge/renovate-enabled-green?logo=renovatebot)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/drevops/axel/badge)](https://scorecard.dev/viewer/?uri=github.com/drevops/axel)
 
 </div>
 
@@ -186,6 +187,18 @@ Add the bundle to your pages:
 ```
 
 The script starts tracking as soon as it loads. Its listeners sit on `document`, so it can load in `<head>` before the rest of the page. To change the defaults, see [Settings](#settings).
+
+To serve the bundle from a CDN or another host, add its Subresource Integrity hash. The browser then refuses to run a file that differs from the release:
+
+```html
+<script
+  src="https://cdn.example.com/axel.gtm.min.js"
+  integrity="sha384-HASH"
+  crossorigin="anonymous"
+></script>
+```
+
+Replace `sha384-HASH` with the hash of your bundle from the release notes.
 
 ### Drupal
 
@@ -460,6 +473,23 @@ In debug mode, the `gtm` and `gtag` adapters warn in the console when an event b
 To log every event to the console, append `#axel-debug` to the URL. Debug mode stays on in that tab and in tabs opened from it until the tab closes, so it holds on the pages your clicks open. Turn on **Preserve log** in the browser console to keep the output across navigations.
 
 In debug mode, the `gtm` and `gtag` adapters add `debug_mode: true` to every event, so Google Analytics lists it in DebugView.
+
+## 🔒 Security
+
+Axel runs on every page that loads it. Here's what a bundle does on the page:
+
+- It reads `data-axel-*` attributes and listens for clicks, focus and field changes on `document`.
+- It watches the page for `data-axel-form-submitted` elements added after load.
+- It hands each event to the adapter. The adapter, such as Google Tag Manager, makes the network requests; the bundle makes none of its own.
+- It stores 1 value: the debug flag in `sessionStorage`. It sets no cookies.
+
+`tests/bundles.test.js` fails when a built bundle contains a network, storage or code-evaluation API, such as `fetch()`, `document.cookie` or `eval()`.
+
+Axel trusts the page that loads it. `window.axelSettings`, `window.axelAdapter` and `window.axelCollectors` carry the same trust as the page's own scripts, because any script on the page can set them. Load the bundle only on pages whose scripts you control.
+
+Anyone can add `#axel-debug` to a URL. Debug mode logs events to that visitor's own console. The `gtm` and `gtag` adapters also add `debug_mode: true` to that visitor's events, so Google Analytics lists them in DebugView.
+
+[`SECURITY.md`](SECURITY.md) explains how to report a vulnerability and how to verify a bundle against its release.
 
 ## 🤝 Contributing
 

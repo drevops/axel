@@ -5,6 +5,8 @@
     "dependencyDashboard": true,
     "pinDigests": true,
     "branchPrefix": "deps/",
+    "minimumReleaseAge": "7 days",
+    "internalChecksFilter": "strict",
     "packageRules": [
         {
             "matchDepNames": ["node", "yarn"],
@@ -20,6 +22,12 @@
             "matchPackageNames": ["*"],
             "groupName": "all dependencies",
             "groupSlug": "all"
+        },
+        {
+            "matchPackageNames": ["esbuild"],
+            "groupName": "esbuild",
+            "groupSlug": "esbuild",
+            "automerge": false
         }
     ]
 }
