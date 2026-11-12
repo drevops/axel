@@ -30,7 +30,7 @@ The source has 3 layers, and each folder holds 1 of them:
 - `tests/fixtures/cases.html` - Every behavior of the library as a case on 1 page: markup, steps in `data-steps` and the expected events. Add a case here before adding a test in code.
 - `tests/cases.js` - Reads the cases from the page; `tests/helpers.js` runs their steps in jsdom.
 - `tests/core/cases.test.js` - Runs every case in jsdom. `tests/functional/cases.spec.js` runs every case in Chromium with Playwright against `build/axel.gtm.js`.
-- `tests/` otherwise mirrors `src/`: `core/`, `adapters/` and `integrations/` hold the tests the page can't express. `tests/bundles.test.js` runs every built bundle and checks that it holds only its own integration and adapter.
+- `tests/` otherwise mirrors `src/`: `core/`, `adapters/` and `integrations/` hold the tests the page can't express. `tests/bundles.test.js` runs every built bundle and checks that it holds only its own integration and adapter. `tests/core/privacy.property.test.js` checks the privacy promises against random URLs and field values with `fast-check`.
 
 
 ## Commands

@@ -25,13 +25,15 @@ You get a reply within 3 business days. After the report is confirmed, the fix s
 
 ## Verify a bundle
 
-Every release attaches the bundles, a `checksums.txt` file and a provenance attestation for each bundle. The release notes list the Subresource Integrity hash of each bundle.
+Every release attaches the bundles, a `checksums.txt` file and `axel.intoto.jsonl`, the provenance attestation for every bundle. The release notes list the Subresource Integrity hash of each bundle.
 
 To check that a bundle was built from this repository by the release workflow, run the GitHub CLI:
 
 ```bash
 gh attestation verify axel.gtm.min.js --repo drevops/axel --signer-workflow drevops/axel/.github/workflows/release-nodejs.yml
 ```
+
+To verify against the attestation file from the release instead of GitHub's attestation API, add `--bundle axel.intoto.jsonl` to the command.
 
 To check a downloaded bundle against the release checksums, run this command in the folder that holds both files:
 

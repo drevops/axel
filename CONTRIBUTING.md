@@ -28,6 +28,17 @@ Before the first functional run, install Chromium for Playwright:
 
 To add a case, add a section to the page. Both suites pick it up. To try a case by hand, run `npm run build` and open `tests/fixtures/cases.html` in a browser. The **Events** panel and the console list every event the page pushes, and the buttons in the `form_submit` cases run their insert and hook steps. Add `#axel-debug` to the URL to also see the library's own log and GA4 limit warnings.
 
+## Issues and pull requests
+
+Report a bug or request a feature in [GitHub issues](https://github.com/drevops/axel/issues). Report a vulnerability privately instead, as [`SECURITY.md`](SECURITY.md) describes.
+
+To submit a change, open a pull request against `main`. A pull request merges after these checks pass:
+
+- `npm run lint` reports no errors.
+- `npm run test-coverage` passes with 100% coverage.
+- `npm run test-functional` passes in Chromium.
+- New behavior has a case in `tests/fixtures/cases.html`.
+
 ## Releases
 
 Release Drafter keeps a draft release with the notes for the next version. A release goes out when a maintainer pushes its tag, and only maintainers can create tags.

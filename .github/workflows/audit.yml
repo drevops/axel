@@ -35,6 +35,8 @@ jobs:
         with:
           results_file: results.sarif
           results_format: sarif
+          # The archive omits 'export-ignore' paths such as '.github'.
+          file_mode: git
           # The Scorecard API accepts results from the default branch only.
           publish_results: ${{ github.event_name != 'pull_request' }}
 

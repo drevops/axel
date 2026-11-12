@@ -6,4 +6,5 @@
 /.gitignore      export-ignore
 /docs            export-ignore
 /.npmignore      export-ignore
+/osv-scanner.toml export-ignore
 /renovate.json   export-ignore

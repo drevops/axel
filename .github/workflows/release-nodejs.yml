@@ -66,6 +66,7 @@ jobs:
           cat "${RUNNER_TEMP}/sri.md"
 
       - name: Attest build provenance
+        id: attest
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
           subject-path: build/*.js
@@ -75,7 +76,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           TAG: ${{ github.ref_name }}
+          PROVENANCE: ${{ steps.attest.outputs.bundle-path }}
         run: |
+          cp "${PROVENANCE}" "${RUNNER_TEMP}/axel.intoto.jsonl"
+
           state="$(gh release view "${TAG}" --json isDraft --jq 'if .isDraft then "draft" else "published" end' || echo 'none')"
 
           if [ "${state}" = 'published' ]; then
@@ -92,7 +96,7 @@ jobs:
             prerelease='true'
           fi
 
-          gh release upload "${TAG}" build/*.js build/checksums.txt --clobber
+          gh release upload "${TAG}" build/*.js build/checksums.txt "${RUNNER_TEMP}/axel.intoto.jsonl" --clobber
 
           gh release view "${TAG}" --json body --jq .body > "${RUNNER_TEMP}/notes.md"
           echo >> "${RUNNER_TEMP}/notes.md"
