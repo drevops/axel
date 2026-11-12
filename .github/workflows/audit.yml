@@ -17,7 +17,6 @@ jobs:
   audit:
     name: Audit
     runs-on: ubuntu-latest
-    if: ${{ !github.event.repository.private }}
 
     permissions:
       actions: read
@@ -47,8 +46,7 @@ jobs:
   security:
     name: Security
     runs-on: ubuntu-latest
-    # Code scanning needs a public repository or GitHub Advanced Security.
-    if: ${{ !github.event.repository.private && github.event_name != 'branch_protection_rule' }}
+    if: ${{ github.event_name != 'branch_protection_rule' }}
 
     permissions:
       actions: read
