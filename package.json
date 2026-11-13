@@ -16,14 +16,16 @@
     "homepage": "https://github.com/drevops/axel#readme",
     "bugs": "https://github.com/drevops/axel/issues",
     "type": "module",
-    "main": "build/axel.esm.js",
-    "module": "build/axel.esm.js",
+    "main": "dist/axel.esm.js",
+    "module": "dist/axel.esm.js",
     "exports": {
-        ".": "./build/axel.esm.js",
-        "./build/*": "./build/*"
+        ".": "./dist/axel.esm.js",
+        "./dist/*": "./dist/*"
     },
+    "jsdelivr": "dist/axel.gtm.min.js",
+    "unpkg": "dist/axel.gtm.min.js",
     "files": [
-        "build",
+        "dist",
         "src"
     ],
     "publishConfig": {
@@ -42,7 +44,7 @@
         "test-coverage": "vitest run --coverage",
         "pretest-functional": "npm run build",
         "test-functional": "playwright test",
-        "reset": "rm -Rf node_modules build .logs"
+        "reset": "rm -Rf node_modules dist .logs"
     },
     "engines": {
         "npm": ">=10",

@@ -9,7 +9,7 @@ Install the dependencies and run each check:
     npm run lint
     npm run test
 
-`npm run build` runs `scripts/build.js`, which writes every bundle in the matrix from `scripts/bundles.js` to `build/`, plain and minified, plus `build/axel.esm.js`. `npm run test`, `npm run test-coverage` and `npm run test-functional` run the build first, because the suites also test the built bundles. `npm run test-coverage` fails below 100% coverage.
+`npm run build` runs `scripts/build.js`, which writes every bundle in the matrix from `scripts/bundles.js` to `dist/`, plain and minified, plus `dist/axel.esm.js`. `npm run test`, `npm run test-coverage` and `npm run test-functional` run the build first, because the suites also test the built bundles. `npm run test-coverage` fails below 100% coverage.
 
 To add a bundle for another destination, add its adapter to `src/adapters/` and to `ADAPTERS` in `scripts/bundles.js`. The build and the bundle tests pick it up for both integrations.
 
@@ -20,7 +20,7 @@ To add a bundle for another destination, add its adapter to `src/adapters/` and 
 The 2 suites run every case on the page:
 
 - `npm run test` runs them in jsdom through `tests/core/cases.test.js`, which also counts toward coverage.
-- `npm run test-functional` runs them in Chromium through `tests/functional/cases.spec.js`, against `build/axel.gtm.js`.
+- `npm run test-functional` runs them in Chromium through `tests/functional/cases.spec.js`, against `dist/axel.gtm.js`.
 
 Before the first functional run, install Chromium for Playwright:
 
@@ -38,6 +38,9 @@ To submit a change, open a pull request against `main`. A pull request merges af
 - `npm run test-coverage` passes with 100% coverage.
 - `npm run test-functional` passes in Chromium.
 - New behavior has a case in `tests/fixtures/cases.html`.
+- The **Audit** and **Security** checks from `audit.yml` pass, and CodeQL finds no new high or critical alert.
+
+The `main` ruleset requires the **Node.js 22**, **Node.js 24**, **Audit** and **Security** checks, which run on every pull request.
 
 ## Releases
 

@@ -5,7 +5,7 @@
 /yarn.lock
 
 # Bundles are built in CI and attached to releases.
-/build
+/dist
 
 # Code coverage and test logs.
 /.logs

@@ -16,6 +16,8 @@
 ![LICENSE](https://img.shields.io/github/license/drevops/axel)
 ![Renovate](https://img.shields.io/badge/renovate-enabled-green?logo=renovatebot)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/drevops/axel/badge)](https://scorecard.dev/viewer/?uri=github.com/drevops/axel)
+[![npm](https://img.shields.io/npm/v/@drevops/axel)](https://www.npmjs.com/package/@drevops/axel)
+[![jsDelivr](https://data.jsdelivr.com/v1/package/npm/@drevops/axel/badge)](https://www.jsdelivr.com/package/npm/@drevops/axel)
 
 </div>
 
@@ -164,7 +166,7 @@ Enhanced Measurement covers events Axel doesn't send, such as scrolls, site sear
 
 ## 📦 Installation
 
-Every [release](https://github.com/drevops/axel/releases/latest) attaches 1 ready-made bundle per setup. The [`@drevops/axel`](https://www.npmjs.com/package/@drevops/axel) package on npm holds the same bundles in its `build/` folder. Pick the bundle that matches how your site starts scripts and where your events go:
+Axel ships 1 ready-made bundle per setup. Pick the bundle that matches how your site starts scripts and where your events go:
 
 | Bundle                  | Starts                                   | Sends events to                                  |
 |-------------------------|------------------------------------------|--------------------------------------------------|
@@ -178,9 +180,33 @@ Every [release](https://github.com/drevops/axel/releases/latest) attaches 1 read
 
 Each bundle also comes minified, such as `axel.gtm.min.js`. A bundle holds only its own adapter, so `axel.gtm.min.js` carries no Google tag code.
 
+### Where to get the bundles
+
+Load the bundles from [jsDelivr](https://www.jsdelivr.com/package/npm/@drevops/axel), which serves every file of every release:
+
+```text
+https://cdn.jsdelivr.net/npm/@drevops/axel@VERSION/dist/FILE
+```
+
+The same files are in the `dist/` folder of the [`@drevops/axel`](https://www.npmjs.com/package/@drevops/axel) npm package, and in the assets of each [GitHub release](https://github.com/drevops/axel/releases/latest).
+
+Pin an exact version such as `0.3.0`. A range such as `@0` or `@latest` serves a different file after the next release, so its Subresource Integrity hash stops matching and the browser blocks the script. The notes of each release list the jsDelivr URL and hash of every bundle, plus a ready-made `<script>` tag. [`SECURITY.md`](SECURITY.md#verify-a-bundle) explains how to verify a file you downloaded.
+
 ### Plain page
 
-Add the bundle to your pages:
+To load the bundle from jsDelivr, add it with its Subresource Integrity hash. The browser then refuses to run a file that differs from the release:
+
+```html
+<script
+  src="https://cdn.jsdelivr.net/npm/@drevops/axel@VERSION/dist/axel.gtm.min.js"
+  integrity="sha384-HASH"
+  crossorigin="anonymous"
+></script>
+```
+
+Replace `VERSION` with a release version such as `0.3.0`. Replace `sha384-HASH` with the bundle's hash from that release's notes.
+
+To serve the bundle from your own site, copy it from `node_modules/@drevops/axel/dist/` after `npm install @drevops/axel`, or from the GitHub release. Then add it to your pages:
 
 ```html
 <script src="/path/to/axel.gtm.min.js"></script>
@@ -188,30 +214,45 @@ Add the bundle to your pages:
 
 The script starts tracking as soon as it loads. Its listeners sit on `document`, so it can load in `<head>` before the rest of the page. To change the defaults, see [Settings](#settings).
 
-To load the bundle from a CDN, such as jsDelivr serving the npm package, add its Subresource Integrity hash. The browser then refuses to run a file that differs from the release:
-
-```html
-<script
-  src="https://cdn.jsdelivr.net/npm/@drevops/axel@VERSION/build/axel.gtm.min.js"
-  integrity="sha384-HASH"
-  crossorigin="anonymous"
-></script>
-```
-
-Replace `VERSION` with a release version such as `0.1.1`. Replace `sha384-HASH` with the bundle's hash from that release's notes.
-
 ### Drupal
 
-Define a library that loads a Drupal bundle:
+To load the bundle from jsDelivr, define a library in your module or theme that points at the CDN, with the bundle's hash:
 
 ```yaml
 axel:
   js:
-    js/axel.drupal.gtm.min.js: { minified: true }
+    https://cdn.jsdelivr.net/npm/@drevops/axel@VERSION/dist/axel.drupal.gtm.min.js:
+      type: external
+      minified: true
+      attributes:
+        integrity: sha384-HASH
+        crossorigin: anonymous
   dependencies:
     - core/drupal
     - core/drupalSettings
 ```
+
+To serve the bundle from your own site instead, install it with Composer. [Asset Packagist](https://asset-packagist.org) offers npm packages as Composer packages, and `@drevops/axel` is `npm-asset/drevops--axel` there. To install it into `web/libraries`:
+
+1. Add Asset Packagist as a repository and require the package:
+
+    ```bash
+    composer config repositories.asset-packagist composer https://asset-packagist.org
+    composer require oomphinc/composer-installers-extender npm-asset/drevops--axel
+    ```
+
+2. In `composer.json`, add `npm-asset` to `extra.installer-types` and add `"type:npm-asset"` to the `web/libraries/{$name}` entry in `extra.installer-paths`. Then run `composer install`. The bundles land in `web/libraries/drevops--axel/dist/`.
+
+3. Define a library in your module or theme that loads a Drupal bundle:
+
+    ```yaml
+    axel:
+      js:
+        /libraries/drevops--axel/dist/axel.drupal.gtm.min.js: { minified: true }
+      dependencies:
+        - core/drupal
+        - core/drupalSettings
+    ```
 
 The bundle registers the `axel` behavior. The behavior starts tracking when it first attaches and reads its settings from `drupalSettings.axel`. Later attaches, such as after an AJAX request, change nothing.
 

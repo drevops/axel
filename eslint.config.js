@@ -4,7 +4,7 @@ import prettierConfig from 'eslint-config-prettier';
 
 export default [
   {
-    ignores: ['build/**', 'node_modules/**', '.logs/**', '.artifacts/**'],
+    ignores: ['dist/**', 'node_modules/**', '.logs/**', '.artifacts/**'],
   },
   js.configs.recommended,
   {
