@@ -16,6 +16,7 @@
 ![LICENSE](https://img.shields.io/github/license/drevops/axel)
 ![Renovate](https://img.shields.io/badge/renovate-enabled-green?logo=renovatebot)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/drevops/axel/badge)](https://scorecard.dev/viewer/?uri=github.com/drevops/axel)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/16649/badge)](https://www.bestpractices.dev/projects/16649)
 [![npm](https://img.shields.io/npm/v/@drevops/axel)](https://www.npmjs.com/package/@drevops/axel)
 [![jsDelivr](https://data.jsdelivr.com/v1/package/npm/@drevops/axel/badge)](https://www.jsdelivr.com/package/npm/@drevops/axel)
 
