@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test';
 import { listCases, readCases } from '../cases.js';
 import { FIXTURE } from '../helpers.js';
 
-// The page loads build/axel.gtm.js, so run "npm run build" first.
+// The page loads dist/axel.gtm.js, so run "npm run build" first.
 const PAGE = pathToFileURL(FIXTURE).href;
 
 const ACTIONS = {

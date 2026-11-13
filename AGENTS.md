@@ -5,7 +5,7 @@ This file guides AI agents working with the code in this repository.
 
 ## Project overview
 
-Axel, the Analytics Context Layer, is a dependency-free browser library. It reads `data-axel-*` attributes the server renders, turns clicks and form interactions into events and hands them to an adapter. Releases attach every bundle in `build/` as GitHub release assets: 1 per integration and adapter pair, each plain and minified, plus `build/axel.esm.js`. The same bundles ship in the `@drevops/axel` npm package.
+Axel, the Analytics Context Layer, is a dependency-free browser library. It reads `data-axel-*` attributes the server renders, turns clicks and form interactions into events and hands them to an adapter. Releases attach every bundle in `dist/` as GitHub release assets: 1 per integration and adapter pair, each plain and minified, plus `dist/axel.esm.js`. The same bundles ship in the `dist/` folder of the `@drevops/axel` npm package, which CDNs such as jsDelivr serve. The `dist/` paths are part of the public contract, like the attributes.
 
 The attributes in `README.md` are the public contract and follow semver: renaming or removing one is a breaking change.
 
@@ -26,17 +26,17 @@ The source has 3 layers, and each folder holds 1 of them:
 - `src/integrations/` - How the script starts. `standalone.js` reads `window.axelSettings` on load; `drupal.js` registers a behavior that reads `drupalSettings.axel`.
 - `src/index.js` - ES module entry point. Re-exports the core and the adapters.
 - `scripts/bundles.js` - The bundle matrix: every integration paired with every adapter, plus 1 bundle per integration that takes its adapter from `window.axelAdapter`.
-- `scripts/build.js` - Builds every bundle in the matrix with esbuild, plain and minified, plus `build/axel.esm.js`.
+- `scripts/build.js` - Builds every bundle in the matrix with esbuild into `dist/`, plain and minified, plus `dist/axel.esm.js`.
 - `tests/fixtures/cases.html` - Every behavior of the library as a case on 1 page: markup, steps in `data-steps` and the expected events. Add a case here before adding a test in code.
 - `tests/cases.js` - Reads the cases from the page; `tests/helpers.js` runs their steps in jsdom.
-- `tests/core/cases.test.js` - Runs every case in jsdom. `tests/functional/cases.spec.js` runs every case in Chromium with Playwright against `build/axel.gtm.js`.
+- `tests/core/cases.test.js` - Runs every case in jsdom. `tests/functional/cases.spec.js` runs every case in Chromium with Playwright against `dist/axel.gtm.js`.
 - `tests/` otherwise mirrors `src/`: `core/`, `adapters/` and `integrations/` hold the tests the page can't express. `tests/bundles.test.js` runs every built bundle and checks that it holds only its own integration and adapter. `tests/core/privacy.property.test.js` checks the privacy promises against random URLs and field values with `fast-check`.
 
 
 ## Commands
 
 ```bash
-# Build every bundle in the matrix and build/axel.esm.js with esbuild
+# Build every bundle in the matrix and dist/axel.esm.js with esbuild
 npm run build
 
 # Run all linters (ESLint, Prettier)

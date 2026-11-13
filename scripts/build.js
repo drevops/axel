@@ -17,11 +17,11 @@ const builds = BUNDLES.flatMap((bundle) =>
       stdin: { contents: entry(bundle), resolveDir: root, sourcefile: `${bundle.file}.js` },
       format: 'iife',
       minify,
-      outfile: `build/${bundle.file}${minify ? '.min' : ''}.js`,
+      outfile: `dist/${bundle.file}${minify ? '.min' : ''}.js`,
     }),
   ),
 );
 
-builds.push(build({ ...options, entryPoints: ['src/index.js'], format: 'esm', outfile: 'build/axel.esm.js' }));
+builds.push(build({ ...options, entryPoints: ['src/index.js'], format: 'esm', outfile: 'dist/axel.esm.js' }));
 
 await Promise.all(builds);

@@ -57,12 +57,13 @@ jobs:
       - name: Build
         run: npm run build
 
+      # Written outside 'dist', which npm packs as it is.
       - name: Generate checksums
-        working-directory: build
-        run: sha256sum -- *.js > checksums.txt
+        working-directory: dist
+        run: sha256sum -- *.js > "${RUNNER_TEMP}/checksums.txt"
 
       - name: Generate Subresource Integrity hashes
-        working-directory: build
+        working-directory: dist
         shell: bash
         run: |
           {
@@ -81,7 +82,7 @@ jobs:
         id: attest
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
-          subject-path: build/*.js
+          subject-path: dist/*.js
 
       # Authenticates through npm trusted publishing, so no npm token is stored.
       - name: Publish to npm
@@ -141,7 +142,7 @@ jobs:
             prerelease='true'
           fi
 
-          gh release upload "${TAG}" build/*.js build/checksums.txt "${RUNNER_TEMP}/axel.intoto.jsonl" --clobber
+          gh release upload "${TAG}" dist/*.js "${RUNNER_TEMP}/checksums.txt" "${RUNNER_TEMP}/axel.intoto.jsonl" --clobber
 
           notes="$(gh release view "${TAG}" --json body --jq .body)"
           if [ -n "${draft}" ]; then

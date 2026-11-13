@@ -37,7 +37,7 @@ const FORBIDDEN = {
 const FILES = BUNDLES.flatMap((bundle) => ['', '.min'].map((suffix) => ({ ...bundle, file: `${bundle.file}${suffix}.js` })));
 
 function read(file) {
-  return readFileSync(join(import.meta.dirname, '../build', file), 'utf8');
+  return readFileSync(join(import.meta.dirname, '../dist', file), 'utf8');
 }
 
 describe('Built bundles', () => {
@@ -103,7 +103,7 @@ describe('Built bundles', () => {
   });
 
   it('axel.esm.js exports init() and both Google adapters', async () => {
-    const { init, gtm, gtag, Axel } = await import('../build/axel.esm.js');
+    const { init, gtm, gtag, Axel } = await import('../dist/axel.esm.js');
     const axel = init({ adapter: gtm, ...SETTINGS });
 
     document.querySelector('#link').click();

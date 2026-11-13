@@ -53,13 +53,13 @@ flowchart LR
     adapterList[ADAPTERS<br>gtm, gtag, none] --> matrix
     matrix[BUNDLES<br>6 pairs] --> entry[entry: import start + adapter, call start]
     entry --> esbuild[esbuild IIFE<br>plain and minified]
-    esbuild --> files[build/axel.integration.adapter.js]
-    index[src/index.js] --> esm[esbuild ESM] --> esmFile[build/axel.esm.js]
+    esbuild --> files[dist/axel.integration.adapter.js]
+    index[src/index.js] --> esm[esbuild ESM] --> esmFile[dist/axel.esm.js]
 ```
 
 `scripts/bundles.js` pairs every integration with every adapter. A standalone bundle adds no integration segment to its name, and a bundle without an adapter adds no adapter segment, so the 6 bundles are `axel.gtm`, `axel.gtag`, `axel`, `axel.drupal.gtm`, `axel.drupal.gtag` and `axel.drupal`. `entry()` generates each bundle's source: it imports the integration's `start()` and the adapter, then calls `start(adapter)`.
 
-`scripts/build.js` passes each generated entry to esbuild through `stdin` and writes a plain and a minified IIFE to `build/`. esbuild drops the modules a bundle doesn't import, so each bundle holds only its own integration and adapter. `src/index.js` builds separately into `build/axel.esm.js`, which `package.json` points `main`, `module` and `exports` at.
+`scripts/build.js` passes each generated entry to esbuild through `stdin` and writes a plain and a minified IIFE to `dist/`. esbuild drops the modules a bundle doesn't import, so each bundle holds only its own integration and adapter. `src/index.js` builds separately into `dist/axel.esm.js`, which `package.json` points `main`, `module` and `exports` at. `jsdelivr` and `unpkg` in `package.json` point those CDNs at `dist/axel.gtm.min.js` for a URL without a file path.
 
 
 ## Starting
