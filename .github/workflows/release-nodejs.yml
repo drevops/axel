@@ -87,7 +87,16 @@ jobs:
             exit 1
           fi
 
+          # Release Drafter names its draft after the version it guesses, which
+          # can differ from the pushed tag.
+          draft=''
           if [ "${state}" = 'none' ]; then
+            draft="$(gh release list --json tagName,isDraft --jq '[.[] | select(.isDraft) | .tagName][0] // empty')"
+          fi
+
+          if [ -n "${draft}" ]; then
+            gh release edit "${draft}" --tag "${TAG}" --title "${TAG}"
+          elif [ "${state}" = 'none' ]; then
             gh release create "${TAG}" --title "${TAG}" --generate-notes --draft --verify-tag
           fi
 
@@ -98,8 +107,11 @@ jobs:
 
           gh release upload "${TAG}" build/*.js build/checksums.txt "${RUNNER_TEMP}/axel.intoto.jsonl" --clobber
 
-          gh release view "${TAG}" --json body --jq .body > "${RUNNER_TEMP}/notes.md"
-          echo >> "${RUNNER_TEMP}/notes.md"
+          notes="$(gh release view "${TAG}" --json body --jq .body)"
+          if [ -n "${draft}" ]; then
+            notes="${notes//...${draft}/...${TAG}}"
+          fi
+          printf '%s\n\n' "${notes}" > "${RUNNER_TEMP}/notes.md"
           cat "${RUNNER_TEMP}/sri.md" >> "${RUNNER_TEMP}/notes.md"
 
           gh release edit "${TAG}" --notes-file "${RUNNER_TEMP}/notes.md" --draft=false --prerelease="${prerelease}" --verify-tag
