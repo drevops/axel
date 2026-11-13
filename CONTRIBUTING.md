@@ -41,7 +41,7 @@ To submit a change, open a pull request against `main`. A pull request merges af
 
 ## Releases
 
-Release Drafter keeps 1 draft release and adds every pull request merged into `main` to its notes. A release goes out when a maintainer pushes its version tag, such as `v1.2.3`. Only maintainers can create tags.
+Release Drafter keeps 1 draft release and adds every pull request merged into `main` to its notes. A release goes out when a maintainer pushes its version tag, such as `1.2.3`. Only maintainers can create tags.
 
 Release only by pushing the tag. Never click **Publish release** on the draft: releases are immutable, so a release published before the workflow runs can never get its bundles.
 
@@ -52,12 +52,12 @@ To publish a release:
 
        npm version 1.2.3
 
-    `npm version` sets the version in `package.json` and `package-lock.json`, commits the change as `Released v1.2.3.` and tags the commit `v1.2.3`.
+    `npm version` sets the version in `package.json` and `package-lock.json`, commits the change as `Released 1.2.3.` and tags the commit `1.2.3`. `.npmrc` makes the tag the bare version, with no `v`.
 3. Push the commit and the tag:
 
        git push origin main --follow-tags
 
-The `release-nodejs.yml` workflow checks that the tag matches the version in `package.json`, builds the bundles and attests their provenance. It publishes the package to npm with provenance, under the `next` dist-tag when the version has a suffix such as `-rc.1`. It renames the draft to the tag's version and fixes the version in its compare link, or creates a release with generated notes when no draft exists. It attaches the bundles, `checksums.txt` and `axel.intoto.jsonl`, adds the Subresource Integrity hashes to the notes and publishes the release. Releases and npm versions are immutable, so a rerun skips the npm step when the version is already on npm.
+The `release-nodejs.yml` workflow checks that the tag equals the version in `package.json`, builds the bundles and attests their provenance. It publishes the package to npm with provenance, under the `next` dist-tag when the version has a suffix such as `-rc.1`. It renames the draft to the tag's version and fixes the version in its compare link, or creates a release with generated notes when no draft exists. It attaches the bundles, `checksums.txt` and `axel.intoto.jsonl`, adds the Subresource Integrity hashes to the notes and publishes the release. Releases and npm versions are immutable, so a rerun skips the npm step when the version is already on npm.
 
 ### Set up npm publishing
 

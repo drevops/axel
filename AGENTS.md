@@ -61,7 +61,7 @@ npm run test-functional
 
 - `.github/workflows/test-nodejs.yml` - Lint, build, unit test and functional test on Node.js 22 and 24, with a coverage threshold.
 - `.github/workflows/audit.yml` - Audit the repository's security practices with OpenSSF Scorecard, publishing the results from `main`, and scan the JavaScript and the workflows for vulnerabilities with CodeQL.
-- `.github/workflows/release-nodejs.yml` - On a pushed `v*` tag made by `npm version`, check the tag against `package.json`, build every bundle and attest its provenance, publish to npm through trusted publishing, rename Release Drafter's draft to the tag's version, attach the bundles, `checksums.txt`, `axel.intoto.jsonl` and SRI hashes, then publish it.
+- `.github/workflows/release-nodejs.yml` - Runs on a version tag such as `1.2.3`, made by `npm version`. Check the tag against `package.json`, build every bundle, attest its provenance and publish to npm through trusted publishing. Then rename Release Drafter's draft to the tag, attach the bundles, `checksums.txt`, `axel.intoto.jsonl` and SRI hashes, and publish it.
 - `.github/workflows/draft-release-notes.yml` - Draft release notes with Release Drafter on every push to `main`.
 
 
