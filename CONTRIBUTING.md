@@ -38,6 +38,9 @@ To submit a change, open a pull request against `main`. A pull request merges af
 - `npm run test-coverage` passes with 100% coverage.
 - `npm run test-functional` passes in Chromium.
 - New behavior has a case in `tests/fixtures/cases.html`.
+- The **Audit** and **Security** checks from `audit.yml` pass, and CodeQL finds no new high or critical alert.
+
+The `main` ruleset requires the **Node.js 22**, **Node.js 24**, **Audit** and **Security** checks, which run on every pull request.
 
 ## Releases
 
