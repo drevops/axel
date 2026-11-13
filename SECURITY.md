@@ -42,3 +42,9 @@ grep ' axel.gtm.min.js$' checksums.txt | sha256sum --check
 ```
 
 The command prints `axel.gtm.min.js: OK` for a matching bundle. It fails when the bundle differs or `checksums.txt` lists no bundle by that name.
+
+Versions of the `@drevops/axel` npm package after `0.1.1` carry npm provenance from the same release workflow. To check the registry signatures and provenance of every installed package, run this command in the project that installs it:
+
+```bash
+npm audit signatures
+```

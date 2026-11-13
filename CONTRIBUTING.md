@@ -41,19 +41,40 @@ To submit a change, open a pull request against `main`. A pull request merges af
 
 ## Releases
 
-Release Drafter keeps 1 draft release and adds every pull request merged into `main` to its notes. A release goes out when a maintainer pushes its tag, and only maintainers can create tags.
+Release Drafter keeps 1 draft release and adds every pull request merged into `main` to its notes. A release goes out when a maintainer pushes its version tag, such as `v1.2.3`. Only maintainers can create tags.
 
 Release only by pushing the tag. Never click **Publish release** on the draft: releases are immutable, so a release published before the workflow runs can never get its bundles.
 
 To publish a release:
 
 1. Open the draft release on GitHub and edit its notes, if they need it. The draft's version is Release Drafter's guess, and the tag you push replaces it.
-2. Tag the commit on `main` with the version and push the tag:
+2. On an up-to-date `main` with no uncommitted changes, set the version:
 
-       git tag 1.2.3
-       git push origin 1.2.3
+       npm version 1.2.3
 
-The `release-nodejs.yml` workflow builds the bundles and attests their provenance. It renames the draft to the tag's version and fixes the version in its compare link, or creates a release with generated notes when no draft exists. It attaches the bundles, `checksums.txt` and `axel.intoto.jsonl`, adds the Subresource Integrity hashes to the notes and then publishes the release. Releases are immutable, so a published release keeps its assets and its tag.
+    `npm version` sets the version in `package.json` and `package-lock.json`, commits the change as `Released v1.2.3.` and tags the commit `v1.2.3`.
+3. Push the commit and the tag:
+
+       git push origin main --follow-tags
+
+The `release-nodejs.yml` workflow checks that the tag matches the version in `package.json`, builds the bundles and attests their provenance. It publishes the package to npm with provenance, under the `next` dist-tag when the version has a suffix such as `-rc.1`. It renames the draft to the tag's version and fixes the version in its compare link, or creates a release with generated notes when no draft exists. It attaches the bundles, `checksums.txt` and `axel.intoto.jsonl`, adds the Subresource Integrity hashes to the notes and publishes the release. Releases and npm versions are immutable, so a rerun skips the npm step when the version is already on npm.
+
+### Set up npm publishing
+
+The workflow publishes through npm trusted publishing, so GitHub stores no npm token. npm lets you add a trusted publisher only to a package that exists, so the first version goes out from your machine. Set it up once:
+
+1. Check that your npm account can publish under the `@drevops` scope.
+2. On an up-to-date `main`, build and publish the version in `package.json`:
+
+       npm login
+       npm ci
+       npm run build
+       npm publish
+
+3. On npmjs.com, open the settings of `@drevops/axel` and add a trusted publisher: **GitHub Actions**, repository `drevops/axel` and workflow `release-nodejs.yml`.
+4. In the same settings, require trusted publishing and turn off publishing with tokens.
+
+Every later version goes out through the workflow.
 
 ## Template updates
 

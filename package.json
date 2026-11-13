@@ -1,6 +1,6 @@
 {
-    "name": "@drevops/analytics-context-layer",
-    "version": "0.1.0",
+    "name": "@drevops/axel",
+    "version": "0.1.1",
     "description": "Turns clicks and form interactions on elements marked with data-axel-* attributes into analytics events.",
     "license": "MIT",
     "author": {
@@ -9,18 +9,26 @@
         "url": "https://drevops.com"
     },
     "contributors": [],
-    "repository": "github:drevops/axel",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/drevops/axel.git"
+    },
+    "homepage": "https://github.com/drevops/axel#readme",
     "bugs": "https://github.com/drevops/axel/issues",
     "type": "module",
     "main": "build/axel.esm.js",
     "module": "build/axel.esm.js",
     "exports": {
-        ".": "./build/axel.esm.js"
+        ".": "./build/axel.esm.js",
+        "./build/*": "./build/*"
     },
     "files": [
         "build",
         "src"
     ],
+    "publishConfig": {
+        "access": "public"
+    },
     "directories": {
         "test": "tests"
     },
