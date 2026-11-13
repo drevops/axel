@@ -62,7 +62,7 @@ To publish a release:
 
 The `release-nodejs.yml` workflow checks that the tag equals the version in `package.json`, builds the bundles and attests their provenance. It publishes the package to npm with provenance, under the `next` dist-tag when the version has a suffix such as `-rc.1`. It renames the draft to the tag's version and fixes the version in its compare link, or creates a release with generated notes when no draft exists. It attaches the bundles, `checksums.txt` and `axel.intoto.jsonl`, adds the Subresource Integrity hashes to the notes and publishes the release. Releases and npm versions are immutable, so a rerun skips the npm step when the version is already on npm.
 
-Release runs queue behind each other, so tags pushed together release 1 at a time. A release becomes the latest GitHub release only when no published release has a higher version.
+Release runs queue behind each other, so tags pushed together release 1 at a time. When you push 3 or more tags together, GitHub cancels every waiting run except the newest, so re-run each canceled release from the **Actions** tab. A release becomes the latest GitHub release only when no published release has a higher version.
 
 ## Template updates
 

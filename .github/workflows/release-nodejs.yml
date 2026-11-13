@@ -160,7 +160,11 @@ jobs:
           # A release for an older version must not take "latest" from a newer one.
           latest='false'
           if [ "${prerelease}" = 'false' ]; then
-            highest="$({ gh release list --exclude-drafts --exclude-pre-releases --json tagName --jq '.[].tagName'; echo "${TAG}"; } | sort -V | tail -n 1)"
+            if ! tags="$(gh release list --exclude-drafts --exclude-pre-releases --limit 1000 --json tagName --jq '.[].tagName')"; then
+              echo '::error::Could not list the published releases.'
+              exit 1
+            fi
+            highest="$(printf '%s\n%s\n' "${tags}" "${TAG}" | sort -V | tail -n 1)"
             if [ "${highest}" = "${TAG}" ]; then
               latest='true'
             fi
