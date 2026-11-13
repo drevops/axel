@@ -30,7 +30,7 @@ The source has 3 layers, and each folder holds 1 of them:
 - `tests/fixtures/cases.html` - Every behavior of the library as a case on 1 page: markup, steps in `data-steps` and the expected events. Add a case here before adding a test in code.
 - `tests/cases.js` - Reads the cases from the page; `tests/helpers.js` runs their steps in jsdom.
 - `tests/core/cases.test.js` - Runs every case in jsdom. `tests/functional/cases.spec.js` runs every case in Chromium with Playwright against `build/axel.gtm.js`.
-- `tests/` otherwise mirrors `src/`: `core/`, `adapters/` and `integrations/` hold the tests the page can't express. `tests/bundles.test.js` runs every built bundle and checks that it holds only its own integration and adapter.
+- `tests/` otherwise mirrors `src/`: `core/`, `adapters/` and `integrations/` hold the tests the page can't express. `tests/bundles.test.js` runs every built bundle and checks that it holds only its own integration and adapter. `tests/core/privacy.property.test.js` checks the privacy promises against random URLs and field values with `fast-check`.
 
 
 ## Commands
@@ -61,7 +61,7 @@ npm run test-functional
 
 - `.github/workflows/test-nodejs.yml` - Lint, build, unit test and functional test on Node.js 22 and 24, with a coverage threshold.
 - `.github/workflows/audit.yml` - Audit the repository's security practices with OpenSSF Scorecard, publishing the results from `main`, and scan the JavaScript and the workflows for vulnerabilities with CodeQL.
-- `.github/workflows/release-nodejs.yml` - On a pushed version tag, build every bundle, attest its provenance and attach the bundles, `checksums.txt` and SRI hashes to the draft release, then publish it.
+- `.github/workflows/release-nodejs.yml` - On a pushed version tag, build every bundle and attest its provenance, rename Release Drafter's draft to the tag's version, attach the bundles, `checksums.txt`, `axel.intoto.jsonl` and SRI hashes, then publish it.
 - `.github/workflows/draft-release-notes.yml` - Draft release notes with Release Drafter on every push to `main`.
 
 

@@ -9,9 +9,10 @@ export const FIXTURE = join(import.meta.dirname, 'fixtures', 'cases.html');
  * The page also runs in a browser, so its scripts are left out.
  */
 export function loadFixture() {
-  const html = readFileSync(FIXTURE, 'utf8');
+  const page = new DOMParser().parseFromString(readFileSync(FIXTURE, 'utf8'), 'text/html');
 
-  document.body.innerHTML = html.match(/<body>([\s\S]*)<\/body>/)[1].replace(/<script[\s\S]*?<\/script>/g, '');
+  page.querySelectorAll('script').forEach((script) => script.remove());
+  document.body.innerHTML = page.body.innerHTML;
 }
 
 /**

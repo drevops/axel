@@ -28,21 +28,32 @@ Before the first functional run, install Chromium for Playwright:
 
 To add a case, add a section to the page. Both suites pick it up. To try a case by hand, run `npm run build` and open `tests/fixtures/cases.html` in a browser. The **Events** panel and the console list every event the page pushes, and the buttons in the `form_submit` cases run their insert and hook steps. Add `#axel-debug` to the URL to also see the library's own log and GA4 limit warnings.
 
+## Issues and pull requests
+
+Report a bug or request a feature in [GitHub issues](https://github.com/drevops/axel/issues). Report a vulnerability privately instead, as [`SECURITY.md`](SECURITY.md) describes.
+
+To submit a change, open a pull request against `main`. A pull request merges after these checks pass:
+
+- `npm run lint` reports no errors.
+- `npm run test-coverage` passes with 100% coverage.
+- `npm run test-functional` passes in Chromium.
+- New behavior has a case in `tests/fixtures/cases.html`.
+
 ## Releases
 
-Release Drafter keeps a draft release with the notes for the next version. A release goes out when a maintainer pushes its tag, and only maintainers can create tags.
+Release Drafter keeps 1 draft release and adds every pull request merged into `main` to its notes. A release goes out when a maintainer pushes its tag, and only maintainers can create tags.
 
 Release only by pushing the tag. Never click **Publish release** on the draft: releases are immutable, so a release published before the workflow runs can never get its bundles.
 
 To publish a release:
 
-1. Open the draft release on GitHub and note its tag, such as `1.2.3`.
-2. Tag the commit on `main` with that version and push the tag:
+1. Open the draft release on GitHub and edit its notes, if they need it. The draft's version is Release Drafter's guess, and the tag you push replaces it.
+2. Tag the commit on `main` with the version and push the tag:
 
        git tag 1.2.3
        git push origin 1.2.3
 
-The `release-nodejs.yml` workflow builds the bundles and attests their provenance. It attaches the bundles and `checksums.txt` to the draft with the same tag, or to a new draft when none matches. It adds the Subresource Integrity hashes to the notes and then publishes the release. Releases are immutable, so a published release keeps its assets and its tag.
+The `release-nodejs.yml` workflow builds the bundles and attests their provenance. It renames the draft to the tag's version and fixes the version in its compare link, or creates a release with generated notes when no draft exists. It attaches the bundles, `checksums.txt` and `axel.intoto.jsonl`, adds the Subresource Integrity hashes to the notes and then publishes the release. Releases are immutable, so a published release keeps its assets and its tag.
 
 ## Template updates
 

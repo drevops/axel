@@ -1,0 +1,4 @@
+[[IgnoredVulns]]
+id = "GHSA-g3hv-75wg-m249"
+ignoreUntil = 2027-05-13
+reason = "minimatch is a dev dependency of ESLint only and never ships in a bundle. ESLint 10 has no release on minimatch 11."
