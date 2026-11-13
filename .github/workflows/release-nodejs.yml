@@ -8,6 +8,11 @@ on:
 
 permissions: {}
 
+# Releases share Release Drafter's single draft, so 2 runs must not overlap.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
 jobs:
   release-nodejs:
     name: Release Node.js
@@ -152,6 +157,19 @@ jobs:
             prerelease='true'
           fi
 
+          # A release for an older version must not take "latest" from a newer one.
+          latest='false'
+          if [ "${prerelease}" = 'false' ]; then
+            if ! tags="$(gh release list --exclude-drafts --exclude-pre-releases --limit 1000 --json tagName --jq '.[].tagName')"; then
+              echo '::error::Could not list the published releases.'
+              exit 1
+            fi
+            highest="$(printf '%s\n%s\n' "${tags}" "${TAG}" | sort -V | tail -n 1)"
+            if [ "${highest}" = "${TAG}" ]; then
+              latest='true'
+            fi
+          fi
+
           gh release upload "${TAG}" dist/*.js "${RUNNER_TEMP}/checksums.txt" "${RUNNER_TEMP}/axel.intoto.jsonl" --clobber
 
           notes="$(gh release view "${TAG}" --json body --jq .body)"
@@ -161,4 +179,4 @@ jobs:
           printf '%s\n\n' "${notes}" > "${RUNNER_TEMP}/notes.md"
           cat "${RUNNER_TEMP}/sri.md" >> "${RUNNER_TEMP}/notes.md"
 
-          gh release edit "${TAG}" --notes-file "${RUNNER_TEMP}/notes.md" --draft=false --prerelease="${prerelease}" --verify-tag
+          gh release edit "${TAG}" --notes-file "${RUNNER_TEMP}/notes.md" --draft=false --prerelease="${prerelease}" --latest="${latest}" --verify-tag
