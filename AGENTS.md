@@ -5,7 +5,7 @@ This file guides AI agents working with the code in this repository.
 
 ## Project overview
 
-Axel, the Analytics Context Layer, is a dependency-free browser library. It reads `data-axel-*` attributes the server renders, turns clicks and form interactions into events and hands them to an adapter. Releases attach every bundle in `build/` as GitHub release assets: 1 per integration and adapter pair, each plain and minified, plus `build/axel.esm.js`.
+Axel, the Analytics Context Layer, is a dependency-free browser library. It reads `data-axel-*` attributes the server renders, turns clicks and form interactions into events and hands them to an adapter. Releases attach every bundle in `build/` as GitHub release assets: 1 per integration and adapter pair, each plain and minified, plus `build/axel.esm.js`. The same bundles ship in the `@drevops/axel` npm package.
 
 The attributes in `README.md` are the public contract and follow semver: renaming or removing one is a breaking change.
 
@@ -61,7 +61,7 @@ npm run test-functional
 
 - `.github/workflows/test-nodejs.yml` - Lint, build, unit test and functional test on Node.js 22 and 24, with a coverage threshold.
 - `.github/workflows/audit.yml` - Audit the repository's security practices with OpenSSF Scorecard, publishing the results from `main`, and scan the JavaScript and the workflows for vulnerabilities with CodeQL.
-- `.github/workflows/release-nodejs.yml` - On a pushed version tag, build every bundle and attest its provenance, rename Release Drafter's draft to the tag's version, attach the bundles, `checksums.txt`, `axel.intoto.jsonl` and SRI hashes, then publish it.
+- `.github/workflows/release-nodejs.yml` - On a pushed `v*` tag made by `npm version`, check the tag against `package.json`, build every bundle and attest its provenance, publish to npm through trusted publishing, rename Release Drafter's draft to the tag's version, attach the bundles, `checksums.txt`, `axel.intoto.jsonl` and SRI hashes, then publish it.
 - `.github/workflows/draft-release-notes.yml` - Draft release notes with Release Drafter on every push to `main`.
 
 

@@ -164,7 +164,7 @@ Enhanced Measurement covers events Axel doesn't send, such as scrolls, site sear
 
 ## 📦 Installation
 
-Every [release](https://github.com/drevops/axel/releases/latest) attaches 1 ready-made bundle per setup. Pick the bundle that matches how your site starts scripts and where your events go:
+Every [release](https://github.com/drevops/axel/releases/latest) attaches 1 ready-made bundle per setup. The [`@drevops/axel`](https://www.npmjs.com/package/@drevops/axel) package on npm holds the same bundles in its `build/` folder. Pick the bundle that matches how your site starts scripts and where your events go:
 
 | Bundle                  | Starts                                   | Sends events to                                  |
 |-------------------------|------------------------------------------|--------------------------------------------------|
@@ -188,17 +188,17 @@ Add the bundle to your pages:
 
 The script starts tracking as soon as it loads. Its listeners sit on `document`, so it can load in `<head>` before the rest of the page. To change the defaults, see [Settings](#settings).
 
-To serve the bundle from a CDN or another host, add its Subresource Integrity hash. The browser then refuses to run a file that differs from the release:
+To load the bundle from a CDN, such as jsDelivr serving the npm package, add its Subresource Integrity hash. The browser then refuses to run a file that differs from the release:
 
 ```html
 <script
-  src="https://cdn.example.com/axel.gtm.min.js"
+  src="https://cdn.jsdelivr.net/npm/@drevops/axel@VERSION/build/axel.gtm.min.js"
   integrity="sha384-HASH"
   crossorigin="anonymous"
 ></script>
 ```
 
-Replace `sha384-HASH` with the hash of your bundle from the release notes.
+Replace `VERSION` with a release version such as `0.1.1`. Replace `sha384-HASH` with the bundle's hash from that release's notes.
 
 ### Drupal
 
@@ -217,10 +217,16 @@ The bundle registers the `axel` behavior. The behavior starts tracking when it f
 
 ### ES module
 
-To bundle the script with your own code, import `init()` and an adapter from `axel.esm.js`:
+To bundle the script with your own code, install the package from npm:
+
+```bash
+npm install @drevops/axel
+```
+
+Import `init()` and an adapter from the package, which resolves to `axel.esm.js`:
 
 ```js
-import { init, gtm } from './axel.esm.js';
+import { init, gtm } from '@drevops/axel';
 
 init({ adapter: gtm, types: ['click', 'form_start'] });
 ```
