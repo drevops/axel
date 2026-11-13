@@ -62,23 +62,6 @@ To publish a release:
 
 The `release-nodejs.yml` workflow checks that the tag equals the version in `package.json`, builds the bundles and attests their provenance. It publishes the package to npm with provenance, under the `next` dist-tag when the version has a suffix such as `-rc.1`. It renames the draft to the tag's version and fixes the version in its compare link, or creates a release with generated notes when no draft exists. It attaches the bundles, `checksums.txt` and `axel.intoto.jsonl`, adds the Subresource Integrity hashes to the notes and publishes the release. Releases and npm versions are immutable, so a rerun skips the npm step when the version is already on npm.
 
-### Set up npm publishing
-
-The workflow publishes through npm trusted publishing, so GitHub stores no npm token. npm lets you add a trusted publisher only to a package that exists, so the first version goes out from your machine. Set it up once:
-
-1. Check that your npm account can publish under the `@drevops` scope.
-2. On an up-to-date `main`, build and publish the version in `package.json`:
-
-       npm login
-       npm ci
-       npm run build
-       npm publish
-
-3. On npmjs.com, open the settings of `@drevops/axel` and add a trusted publisher: **GitHub Actions**, repository `drevops/axel` and workflow `release-nodejs.yml`.
-4. In the same settings, require trusted publishing and turn off publishing with tokens.
-
-Every later version goes out through the workflow.
-
 ## Template updates
 
 This project was generated from the [Scaffold](https://getscaffold.dev/) template. To pull the template's latest infrastructure into this project, ask Claude Code to "update scaffold". [`AGENTS.md`](AGENTS.md) lists the steps the agent follows.
