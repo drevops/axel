@@ -65,15 +65,25 @@ jobs:
       - name: Generate Subresource Integrity hashes
         working-directory: dist
         shell: bash
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
         run: |
+          cdn="https://cdn.jsdelivr.net/npm/@drevops/axel@${VERSION}/dist"
+          gtm="sha384-$(openssl dgst -sha384 -binary axel.gtm.min.js | openssl base64 -A)"
           {
             echo '## Subresource Integrity'
+            echo
+            echo "To load a bundle from jsDelivr, add it with its hash, such as \`axel.gtm.min.js\`:"
+            echo
+            echo '```html'
+            echo "<script src=\"${cdn}/axel.gtm.min.js\" integrity=\"${gtm}\" crossorigin=\"anonymous\"></script>"
+            echo '```'
             echo
             echo '| File | Integrity |'
             echo '| --- | --- |'
             for file in *.js; do
               integrity="sha384-$(openssl dgst -sha384 -binary "${file}" | openssl base64 -A)"
-              echo "| \`${file}\` | \`${integrity}\` |"
+              echo "| [\`${file}\`](${cdn}/${file}) | \`${integrity}\` |"
             done
           } > "${RUNNER_TEMP}/sri.md"
           cat "${RUNNER_TEMP}/sri.md"

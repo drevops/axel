@@ -16,6 +16,8 @@
 ![LICENSE](https://img.shields.io/github/license/drevops/axel)
 ![Renovate](https://img.shields.io/badge/renovate-enabled-green?logo=renovatebot)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/drevops/axel/badge)](https://scorecard.dev/viewer/?uri=github.com/drevops/axel)
+[![npm](https://img.shields.io/npm/v/@drevops/axel)](https://www.npmjs.com/package/@drevops/axel)
+[![jsDelivr](https://data.jsdelivr.com/v1/package/npm/@drevops/axel/badge)](https://www.jsdelivr.com/package/npm/@drevops/axel)
 
 </div>
 
@@ -180,13 +182,15 @@ Each bundle also comes minified, such as `axel.gtm.min.js`. A bundle holds only 
 
 ### Where to get the bundles
 
-Every release publishes the same files in 3 places:
+Load the bundles from [jsDelivr](https://www.jsdelivr.com/package/npm/@drevops/axel), which serves every file of every release:
 
-- The `dist/` folder of the [`@drevops/axel`](https://www.npmjs.com/package/@drevops/axel) package on npm.
-- CDNs that serve npm packages, such as jsDelivr at `https://cdn.jsdelivr.net/npm/@drevops/axel@VERSION/dist/FILE`.
-- The assets of each [GitHub release](https://github.com/drevops/axel/releases/latest).
+```text
+https://cdn.jsdelivr.net/npm/@drevops/axel@VERSION/dist/FILE
+```
 
-Pin an exact version, such as `0.3.0`, so the file you tested is the file that loads. The notes of each release list the Subresource Integrity hash of every bundle. [`SECURITY.md`](SECURITY.md#verify-a-bundle) explains how to verify a file you downloaded.
+The same files are in the `dist/` folder of the [`@drevops/axel`](https://www.npmjs.com/package/@drevops/axel) npm package, and in the assets of each [GitHub release](https://github.com/drevops/axel/releases/latest).
+
+Pin an exact version such as `0.3.0`. A range such as `@0` or `@latest` serves a different file after the next release, so its Subresource Integrity hash stops matching and the browser blocks the script. The notes of each release list the jsDelivr URL and hash of every bundle, plus a ready-made `<script>` tag. [`SECURITY.md`](SECURITY.md#verify-a-bundle) explains how to verify a file you downloaded.
 
 ### Plain page
 
@@ -212,7 +216,23 @@ The script starts tracking as soon as it loads. Its listeners sit on `document`,
 
 ### Drupal
 
-Drupal sites install frontend libraries with Composer, and [Asset Packagist](https://asset-packagist.org) offers npm packages as Composer packages. The npm package `@drevops/axel` is `npm-asset/drevops--axel` there. To install it into `web/libraries`:
+To load the bundle from jsDelivr, define a library in your module or theme that points at the CDN, with the bundle's hash:
+
+```yaml
+axel:
+  js:
+    https://cdn.jsdelivr.net/npm/@drevops/axel@VERSION/dist/axel.drupal.gtm.min.js:
+      type: external
+      minified: true
+      attributes:
+        integrity: sha384-HASH
+        crossorigin: anonymous
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+```
+
+To serve the bundle from your own site instead, install it with Composer. [Asset Packagist](https://asset-packagist.org) offers npm packages as Composer packages, and `@drevops/axel` is `npm-asset/drevops--axel` there. To install it into `web/libraries`:
 
 1. Add Asset Packagist as a repository and require the package:
 
@@ -233,22 +253,6 @@ Drupal sites install frontend libraries with Composer, and [Asset Packagist](htt
         - core/drupal
         - core/drupalSettings
     ```
-
-To load the bundle from jsDelivr instead, point the library at the CDN and add the bundle's hash:
-
-```yaml
-axel:
-  js:
-    https://cdn.jsdelivr.net/npm/@drevops/axel@VERSION/dist/axel.drupal.gtm.min.js:
-      type: external
-      minified: true
-      attributes:
-        integrity: sha384-HASH
-        crossorigin: anonymous
-  dependencies:
-    - core/drupal
-    - core/drupalSettings
-```
 
 The bundle registers the `axel` behavior. The behavior starts tracking when it first attaches and reads its settings from `drupalSettings.axel`. Later attaches, such as after an AJAX request, change nothing.
 
