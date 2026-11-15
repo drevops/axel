@@ -27,9 +27,11 @@ describe('form_start', () => {
     expect(window.dataLayer).toHaveLength(0);
   });
 
-  it('starts a form again once it is replaced', () => {
+  it('starts a form again after the instance is initialized again', () => {
     document.querySelector('#form-start-phone').focus();
-    document.querySelector('#form-start-callback').outerHTML = '<form id="form-start-callback" data-axel-form="callback"><input id="form-start-phone"></form>';
+    document.querySelector('#form-start-phone').blur();
+    axel.destroy();
+    axel.init();
     document.querySelector('#form-start-phone').focus();
 
     expect(window.dataLayer).toHaveLength(2);

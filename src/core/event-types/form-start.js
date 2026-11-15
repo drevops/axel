@@ -1,6 +1,6 @@
 /**
  * @file
- * The 'form_start' event for the first focus inside a marked form.
+ * The 'form_start' event for the first focus inside each named form.
  */
 
 import { formParams, isSkipped, listen } from '../dom.js';
@@ -8,20 +8,24 @@ import { formParams, isSkipped, listen } from '../dom.js';
 /**
  * Track the first focus inside each marked form.
  *
+ * Forms are told apart by name, so a form an AJAX response redraws as a new
+ * element doesn't start again.
+ *
  * @param {import('../core.js').Axel} axel - The instance.
  * @return {Function} A function that stops tracking.
  */
 export function formStart(axel) {
-  const started = new WeakSet();
+  const started = new Set();
 
   return listen('focusin', (event) => {
     const form = event.target instanceof Element ? event.target.closest('[data-axel-form]') : null;
+    const name = form?.getAttribute('data-axel-form');
 
-    if (!form || started.has(form) || isSkipped(event.target)) {
+    if (!form || started.has(name) || isSkipped(event.target)) {
       return;
     }
 
-    started.add(form);
+    started.add(name);
     axel.track('form_start', form, formParams(form, axel.settings.fullUrls));
   });
 }

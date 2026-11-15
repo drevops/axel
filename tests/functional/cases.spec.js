@@ -24,6 +24,8 @@ const ACTIONS = {
   },
   insert: (page, target, value) =>
     page.evaluate(([to, from]) => document.querySelector(to).append(document.querySelector(from).content.cloneNode(true)), [target, value]),
+  replace: (page, target, value) =>
+    page.evaluate(([to, from]) => document.querySelector(to).replaceWith(document.querySelector(from).content.cloneNode(true)), [target, value]),
   hook: (page, target, value) => page.evaluate(([name, params]) => window.axel.formSubmitted(name, JSON.parse(params)), [target, value]),
 };
 
