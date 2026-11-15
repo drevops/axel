@@ -49,6 +49,7 @@ const ACTIONS = {
     element.dispatchEvent(new Event('change', { bubbles: true }));
   },
   insert: (element, value) => element.append(document.querySelector(value).content.cloneNode(true)),
+  replace: (element, value) => element.replaceWith(document.querySelector(value).content.cloneNode(true)),
 };
 
 /**
