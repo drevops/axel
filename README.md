@@ -332,11 +332,11 @@ The following table lists every event type and the parameters the script derives
 | Type             | Sent when                                                                          | Event name                    | Derived parameters                                           |
 |------------------|------------------------------------------------------------------------------------|-------------------------------|--------------------------------------------------------------|
 | `click`          | A link or button inside `data-axel-event` gets a click or a middle click           | The `data-axel-event` value   | `link_text` and `click_type`, `link_url` for links and submit buttons, and `group_title` and `subgroup_title` inside groups |
-| `form_start`     | Focus first enters a marked form, once per form name per page                      | `form_start`                  | `form_name`, plus `form_id` and `form_destination` when known |
+| `form_start`     | Focus first enters a marked form, once per form name until it's submitted          | `form_start`                  | `form_name`, plus `form_id` and `form_destination` when known |
 | `field_complete` | A field inside a marked form fires `change`, every time it does                    | `field_complete`              | The `form_start` parameters, `field_name` when the field has a `name`, and `field_label` |
 | `form_submit`    | A `data-axel-form-submitted` element is on the page or is added to it later        | `form_submit`                 | `form_name`                                                  |
 
-A form that an AJAX response redraws, such as a Drupal Webform with validation errors, keeps its `data-axel-form` name, so Axel still sends 1 `form_start` for it. Forms that share a name send 1 `form_start` between them.
+A form that an AJAX response redraws, such as a Drupal Webform with validation errors, keeps its `data-axel-form` name, so Axel still sends 1 `form_start` for it. Forms that share a name send 1 `form_start` between them. A `form_submit` for the name ends the attempt, so the next focus in that form sends a new `form_start`.
 
 A `data-axel-param-*` attribute overrides a derived parameter of the same name. For example, `data-axel-param-link-text="Custom text"` replaces the text of the link.
 

@@ -70,6 +70,7 @@ export class Axel {
     });
 
     this.cleanups = null;
+    this.sendHandlers = new Set();
   }
 
   /**
@@ -182,6 +183,19 @@ export class Axel {
     }
 
     this.adapter.send(name, event, { debug, settings: this.settings });
+    this.sendHandlers.forEach((handler) => handler(name, event));
+  }
+
+  /**
+   * Call a function after every event is sent to the adapter.
+   *
+   * @param {Function} handler - Called with the event name and parameters.
+   * @return {Function} A function that removes the handler.
+   */
+  onSend(handler) {
+    this.sendHandlers.add(handler);
+
+    return () => this.sendHandlers.delete(handler);
   }
 
   /**

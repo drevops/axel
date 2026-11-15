@@ -108,7 +108,7 @@ sequenceDiagram
 Each event type decides whether an interaction counts and derives its own parameters:
 
 - `click` takes the closest `clickSelector` match of the target, needs an ancestor with `data-axel-event` for the name and derives `link_text`, `click_type` and `link_url`. `getSubmitDestination()` gives a submit button its `formaction` or its form's `action` as `link_url`. Inside the closest `data-axel-group` or `data-axel-subgroup`, `getGroupTitle()` adds `group_title` or `subgroup_title`. It searches the group, or the ancestor its `-scope` selector matches, with `findTitle()`: the last match that precedes the element in document order, isn't its ancestor and isn't skipped. A `data-axel-group-title` marker is tried before `groupTitleSelector`. It handles `auxclick` only for the middle button.
-- `form_start` takes the closest `data-axel-form` and records its name in a `Set`, so each form name starts once, even after an AJAX response replaces the form element.
+- `form_start` takes the closest `data-axel-form` and records its name in a `Set`, so each form name starts once, even after an AJAX response replaces the form element. It registers an `onSend()` handler that removes the name when a `form_submit` for it goes out, so the next attempt starts again.
 - `field_complete` sends on every `change` inside a marked form, with the form parameters, `field_name` and a `field_label` that never reads a value. A radio never reports its own label.
 - `form_submit` records each marker in a `WeakSet` and sends its `form_name`. `formSubmitted()` sends the same event directly, whatever the configured types.
 

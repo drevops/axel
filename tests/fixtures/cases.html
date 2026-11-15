@@ -441,6 +441,30 @@
   <pre class="expected">[{ "event": "form_start", "form_name": "webform:contact", "form_id": "form-start-ajax" }]</pre>
 </section>
 
+<section class="case" id="case-form-start-resubmitted" data-steps='focus #form-start-feedback-name; replace #form-start-feedback = #form-start-feedback-redraw; focus #form-start-feedback-name; focus #form-start-feedback-submit; hook feedback = {}; focus #form-start-feedback-name'>
+  <h3>A submission ends the attempt, so the next focus starts the form again; a redraw before it doesn't</h3>
+  <p>
+    <button type="button" data-replace="#form-start-feedback" data-with="#form-start-feedback-redraw">Redraw the form</button>
+    <button type="button" data-hook="feedback" data-hook-params="{}">Submit the form</button>
+  </p>
+  <form id="form-start-feedback" data-axel-form="feedback">
+    <input id="form-start-feedback-name" type="text" name="name">
+    <button id="form-start-feedback-submit">Send</button>
+  </form>
+  <template id="form-start-feedback-redraw">
+    <form id="form-start-feedback" data-axel-form="feedback">
+      <p>Name field is required.</p>
+      <input id="form-start-feedback-name" type="text" name="name">
+      <button id="form-start-feedback-submit">Send</button>
+    </form>
+  </template>
+  <pre class="expected">[
+  { "event": "form_start", "form_name": "feedback", "form_id": "form-start-feedback" },
+  { "event": "form_submit", "form_name": "feedback" },
+  { "event": "form_start", "form_name": "feedback", "form_id": "form-start-feedback" }
+]</pre>
+</section>
+
 <section class="case" id="case-form-start-same-name" data-steps="focus #form-start-header-email; focus #form-start-footer-email">
   <h3>Forms with the same name start once between them</h3>
   <form id="form-start-header" data-axel-form="subscribe">
