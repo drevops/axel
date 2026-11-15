@@ -3,7 +3,7 @@
  * The 'form_start' event for the first focus inside each named form.
  */
 
-import { formParams, isSkipped, listen } from '../dom.js';
+import { collectParams, formParams, isSkipped, listen } from '../dom.js';
 
 /**
  * Track the first focus inside each marked form.
@@ -20,14 +20,20 @@ export function formStart(axel) {
 
   const stopListening = listen('focusin', (event) => {
     const form = event.target instanceof Element ? event.target.closest('[data-axel-form]') : null;
-    const name = form?.getAttribute('data-axel-form');
+    if (!form || isSkipped(event.target)) {
+      return;
+    }
 
-    if (!form || started.has(name) || isSkipped(event.target)) {
+    const params = formParams(form, axel.settings.fullUrls);
+    // Key on the sent name, so a 'form_submit' under the same name matches.
+    const name = collectParams(form).form_name ?? params.form_name;
+
+    if (started.has(name)) {
       return;
     }
 
     started.add(name);
-    axel.track('form_start', form, formParams(form, axel.settings.fullUrls));
+    axel.track('form_start', form, params);
   });
 
   const stopWatching = axel.onSend((name, params) => {

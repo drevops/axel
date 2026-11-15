@@ -54,6 +54,17 @@ describe('form_start', () => {
     expect(window.dataLayer.map((event) => event.event)).toEqual(expected);
   });
 
+  it('starts a form again after a submission under its overridden name', () => {
+    document.querySelector('#form-start-callback').setAttribute('data-axel-param-form-name', 'lead');
+
+    document.querySelector('#form-start-phone').focus();
+    document.querySelector('#form-start-phone').blur();
+    axel.formSubmitted('lead');
+    document.querySelector('#form-start-phone').focus();
+
+    expect(window.dataLayer.map((event) => `${event.event}:${event.form_name}`)).toEqual(['form_start:lead', 'form_submit:lead', 'form_start:lead']);
+  });
+
   it('stops watching for submissions once destroyed', () => {
     axel.destroy();
 
