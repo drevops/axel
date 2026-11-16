@@ -180,19 +180,23 @@ export function resolveUrl(element, attribute, { fullUrls = false, keepUrlCreden
 /**
  * Get the parameters that describe a marked form.
  *
- * @param {Element} form    - The element with 'data-axel-form'.
- * @param {object}  options - The URL settings resolveUrl() takes.
+ * The form ID is the first non-empty value of the attributes in
+ * 'formIdAttributes'.
+ *
+ * @param {Element} form     - The element with 'data-axel-form'.
+ * @param {object}  settings - The 'formIdAttributes' setting and the URL
+ *   settings resolveUrl() takes.
  * @return {object} The form name, and the form ID and destination when known.
  */
-export function formParams(form, options = {}) {
+export function formParams(form, settings) {
   const params = { form_name: form.getAttribute('data-axel-form') };
-  const id = form.getAttribute('id');
+  const id = settings.formIdAttributes.map((attribute) => form.getAttribute(attribute)).find(Boolean);
 
   if (id) {
     params.form_id = id;
   }
 
-  const destination = form instanceof HTMLFormElement && form.hasAttribute('action') ? resolveUrl(form, 'action', options) : undefined;
+  const destination = form instanceof HTMLFormElement && form.hasAttribute('action') ? resolveUrl(form, 'action', settings) : undefined;
 
   if (destination !== undefined) {
     params.form_destination = destination;

@@ -52,6 +52,16 @@ describe('field_complete', () => {
     expect(labelFilter).toHaveBeenCalledWith('Suburb (required)', document.querySelector('#field-hidden-suffix'));
   });
 
+  it('sends the form ID from the first listed attribute with a value', () => {
+    axel.destroy();
+    axel = new Axel({ adapter: gtm, types: ['field_complete'], formIdAttributes: ['data-drupal-selector', 'id'] }).init();
+    document.body.innerHTML = '<form id="contact--a1B2" data-drupal-selector="contact" data-axel-form="contact"><input id="field" name="name"></form>';
+
+    document.querySelector('#field').dispatchEvent(new Event('change', { bubbles: true }));
+
+    expect(window.dataLayer).toEqual([{ event: 'field_complete', form_name: 'contact', form_id: 'contact', field_name: 'name', field_label: '' }]);
+  });
+
   it('stops sending events once destroyed', () => {
     axel.destroy();
     document.querySelector('#field-name').dispatchEvent(new Event('change', { bubbles: true }));
