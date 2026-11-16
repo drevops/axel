@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { gtm } from '../../../src/adapters/gtm.js';
 import { Axel } from '../../../src/core/core.js';
-import { loadFixture } from '../../helpers.js';
+import { loadFixture, runStep } from '../../helpers.js';
 
 // The behavior of each kind of element is covered by the cases in
 // tests/fixtures/cases.html; these tests cover what the page can't express.
@@ -75,11 +75,24 @@ describe('click', () => {
   });
 
   it.each([
-    [{}, ['https://example.com/blog/post', 'https://example.com/subscribe', 'https://example.com/apply']],
-    [{ fullUrls: true }, ['https://example.com/blog/post?page=2', 'https://example.com/subscribe?list=news', 'https://example.com/apply?ref=jane']],
+    [{}, ['https://example.com/blog/post', 'https://example.com/subscribe', 'https://example.com/apply', 'https://example.com/apply']],
+    [
+      { fullUrls: true },
+      [
+        'https://example.com/blog/post?page=2',
+        'https://example.com/subscribe?list=news',
+        'https://example.com/apply?ref=jane',
+        'https://example.com/apply?ref=jane',
+      ],
+    ],
     [
       { keepUrlCredentials: true },
-      ['https://jane:secret@example.com/blog/post', 'https://jane:secret@example.com/subscribe', 'https://jane:secret@example.com/apply'],
+      [
+        'https://jane:secret@example.com/blog/post',
+        'https://jane:secret@example.com/subscribe',
+        'https://jane:secret@example.com/apply',
+        'https://jane:secret@example.com/apply',
+      ],
     ],
   ])('resolves relative URLs against a base URL with credentials with %j', (settings, expected) => {
     const base = document.createElement('base');
@@ -91,12 +104,12 @@ describe('click', () => {
     document.querySelector('#privacy-url-form').setAttribute('action', 'apply?ref=jane');
 
     axel.destroy();
-    axel = new Axel({ adapter: gtm, types: ['click', 'form_start'], ...settings }).init();
+    axel = new Axel({ adapter: gtm, types: ['click', 'form_start', 'field_complete'], ...settings }).init();
 
     try {
       document.querySelector('#privacy-url-query').click();
       document.querySelector('#privacy-url-submit').click();
-      document.querySelector('#privacy-url-field').focus();
+      runStep({ action: 'fill', target: '#privacy-url-field', value: 'Jane' });
     } finally {
       base.remove();
     }

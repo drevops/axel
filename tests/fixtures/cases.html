@@ -704,7 +704,7 @@
 ]</pre>
 </section>
 
-<section class="case" id="case-privacy-url-credentials" data-steps="click #privacy-credentials-link; click #privacy-credentials-submit; click #privacy-credentials-formaction; focus #privacy-credentials-field">
+<section class="case" id="case-privacy-url-credentials" data-steps="click #privacy-credentials-link; click #privacy-credentials-submit; click #privacy-credentials-formaction; fill #privacy-credentials-field = Jane">
   <h3>URLs are sent without their username and password</h3>
   <div data-axel-event="privacy_click">
     <a id="privacy-credentials-link" href="https://jane:secret@example.com/blog/post">Read the post</a>
@@ -720,7 +720,8 @@
   { "event": "privacy_click", "link_text": "Read the post", "click_type": "link", "link_url": "https://example.com/blog/post" },
   { "event": "privacy_click", "link_text": "Subscribe", "click_type": "button", "link_url": "https://example.com/subscribe" },
   { "event": "privacy_click", "link_text": "Unsubscribe", "click_type": "button", "link_url": "https://example.com/unsubscribe" },
-  { "event": "form_start", "form_name": "credentials", "form_id": "privacy-credentials-form", "form_destination": "https://example.com/contact" }
+  { "event": "form_start", "form_name": "credentials", "form_id": "privacy-credentials-form", "form_destination": "https://example.com/contact" },
+  { "event": "field_complete", "form_name": "credentials", "form_id": "privacy-credentials-form", "form_destination": "https://example.com/contact", "field_name": "name", "field_label": "Name" }
 ]</pre>
 </section>
 
