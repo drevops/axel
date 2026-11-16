@@ -27,6 +27,17 @@ describe('field_complete', () => {
     expect(window.dataLayer).toHaveLength(0);
   });
 
+  it('leaves text matching the hidden text selector out of the label, then falls back to aria-label and the full text', () => {
+    axel.destroy();
+    axel = new Axel({ adapter: gtm, types: ['field_complete'], hiddenTextSelector: '.visually-hidden' }).init();
+
+    ['#field-hidden-suffix', '#field-hidden-label', '#field-hidden-aria'].forEach((selector) =>
+      document.querySelector(selector).dispatchEvent(new Event('change', { bubbles: true })),
+    );
+
+    expect(window.dataLayer.map((event) => event.field_label)).toEqual(['Suburb', 'Search', 'Postal code']);
+  });
+
   it('stops sending events once destroyed', () => {
     axel.destroy();
     document.querySelector('#field-name').dispatchEvent(new Event('change', { bubbles: true }));

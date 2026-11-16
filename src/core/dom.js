@@ -26,10 +26,12 @@ export function listen(type, handler) {
  *
  * Form controls contribute no text, so a field value never ends up in a label.
  *
- * @param {Node} node - The node.
+ * @param {Node}   node           - The node.
+ * @param {string} hiddenSelector - Elements whose text is skipped as well, or
+ *   an empty string to skip none.
  * @return {string} The text of the node and its descendants.
  */
-export function getText(node) {
+export function getText(node, hiddenSelector = '') {
   if (node.nodeType === Node.TEXT_NODE) {
     return node.textContent;
   }
@@ -38,22 +40,40 @@ export function getText(node) {
     return '';
   }
 
-  return [...node.childNodes].map(getText).join('');
+  if (hiddenSelector && node.matches(hiddenSelector)) {
+    return '';
+  }
+
+  return [...node.childNodes].map((child) => getText(child, hiddenSelector)).join('');
+}
+
+/**
+ * Collapse runs of whitespace into single spaces and trim the ends.
+ *
+ * @param {string} text - The text.
+ * @return {string} The collapsed text.
+ */
+export function collapseWhitespace(text) {
+  return text.replace(/\s+/g, ' ').trim();
 }
 
 /**
  * Get the text that names an element in the reports.
  *
- * @param {Element} element - The element.
+ * @param {Element} element        - The element.
+ * @param {string}  hiddenSelector - Elements whose text is left out, or an
+ *   empty string to keep all text.
  * @return {string} The text with whitespace collapsed, or the element's label
  *   when it has no text.
  */
-export function getLabel(element) {
+export function getLabel(element, hiddenSelector = '') {
   // Only a button input's value is its label; any other input value is typed.
   const isButton = element instanceof HTMLInputElement && ['submit', 'button', 'reset'].includes(element.type);
-  const value = isButton ? element.value : getText(element);
+  const text = (selector) => collapseWhitespace(isButton ? element.value : getText(element, selector));
 
-  return value.replace(/\s+/g, ' ').trim() || element.getAttribute('aria-label') || element.getAttribute('title') || '';
+  // The full text comes last, so an element named only by hidden text keeps
+  // that text as its label.
+  return text(hiddenSelector) || element.getAttribute('aria-label') || element.getAttribute('title') || text('');
 }
 
 /**

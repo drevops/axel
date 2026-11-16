@@ -251,6 +251,26 @@
 ]</pre>
 </section>
 
+<section class="case" id="case-click-hidden-text" data-steps="click #hidden-text-suffix; click #hidden-text-title; click #hidden-text-label; click #hidden-text-only">
+  <h3>Visually hidden text stays in link text and titles unless the hiddenTextSelector setting leaves it out</h3>
+  <div data-axel-event="component_click" data-axel-group>
+    <h2>Resources<span class="visually-hidden"> for partners</span></h2>
+    <div data-axel-subgroup>
+      <span data-axel-subgroup-title>Guides<span class="visually-hidden"> and manuals</span></span>
+      <a id="hidden-text-suffix" href="https://example.com/docs">Docs<span class="visually-hidden">(Opens in a new tab)</span></a>
+      <a id="hidden-text-title" href="https://github.com/" title="GitHub"><svg aria-hidden="true" width="20" height="20"></svg><span class="visually-hidden">(Opens in a new tab)</span></a>
+      <a id="hidden-text-label" href="https://www.linkedin.com/" aria-label="LinkedIn"><svg aria-hidden="true" width="20" height="20"></svg><span class="visually-hidden">(Opens in a new tab)</span></a>
+      <button id="hidden-text-only" type="button"><svg aria-hidden="true" width="20" height="20"></svg><span class="visually-hidden">Close</span></button>
+    </div>
+  </div>
+  <pre class="expected">[
+  { "event": "component_click", "link_text": "Docs(Opens in a new tab)", "click_type": "link", "link_url": "https://example.com/docs", "group_title": "Resources for partners", "subgroup_title": "Guides and manuals" },
+  { "event": "component_click", "link_text": "(Opens in a new tab)", "click_type": "link", "link_url": "https://github.com/", "group_title": "Resources for partners", "subgroup_title": "Guides and manuals" },
+  { "event": "component_click", "link_text": "(Opens in a new tab)", "click_type": "link", "link_url": "https://www.linkedin.com/", "group_title": "Resources for partners", "subgroup_title": "Guides and manuals" },
+  { "event": "component_click", "link_text": "Close", "click_type": "button", "group_title": "Resources for partners", "subgroup_title": "Guides and manuals" }
+]</pre>
+</section>
+
 <h2>Groups</h2>
 
 <section class="case" id="case-group-heading" data-steps="click #group-heading-sibling; click #group-heading-nested; click #group-heading-before">
@@ -556,6 +576,23 @@
   { "event": "field_complete", "form_name": "apply", "form_id": "field-fallbacks-form", "field_name": "reference", "field_label": "Reference number" },
   { "event": "field_complete", "form_name": "apply", "form_id": "field-fallbacks-form", "field_label": "Custom label" },
   { "event": "field_complete", "form_name": "apply", "form_id": "field-fallbacks-form", "field_label": "" }
+]</pre>
+</section>
+
+<section class="case" id="case-field-hidden-text" data-steps="change #field-hidden-suffix; change #field-hidden-label; change #field-hidden-aria">
+  <h3>Visually hidden text stays in a field label unless the hiddenTextSelector setting leaves it out</h3>
+  <form id="field-hidden-text-form" data-axel-form="apply">
+    <label for="field-hidden-suffix">Suburb<span class="visually-hidden"> (required)</span></label>
+    <input id="field-hidden-suffix" type="text" name="suburb">
+    <label for="field-hidden-label" class="visually-hidden">Search</label>
+    <input id="field-hidden-label" type="search" name="keys">
+    <label for="field-hidden-aria" class="visually-hidden">Postcode</label>
+    <input id="field-hidden-aria" type="text" name="postcode" aria-label="Postal code">
+  </form>
+  <pre class="expected">[
+  { "event": "field_complete", "form_name": "apply", "form_id": "field-hidden-text-form", "field_name": "suburb", "field_label": "Suburb (required)" },
+  { "event": "field_complete", "form_name": "apply", "form_id": "field-hidden-text-form", "field_name": "keys", "field_label": "Search" },
+  { "event": "field_complete", "form_name": "apply", "form_id": "field-hidden-text-form", "field_name": "postcode", "field_label": "Postcode" }
 ]</pre>
 </section>
 

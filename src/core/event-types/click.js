@@ -26,14 +26,16 @@ function findTitle(element, scope, selector) {
 /**
  * Get the title of the closest group or subgroup around an element.
  *
- * @param {Element}  element   - The element.
- * @param {string}   kind      - 'group' or 'subgroup'.
- * @param {string[]} selectors - The CSS selectors of the titles, in order of
- *   priority.
+ * @param {Element}  element        - The element.
+ * @param {string}   kind           - 'group' or 'subgroup'.
+ * @param {string[]} selectors      - The CSS selectors of the titles, in order
+ *   of priority.
+ * @param {string}   hiddenSelector - Elements whose text is left out of the
+ *   title, or an empty string to keep all text.
  * @return {string|undefined} The title, an empty string when none matches, or
  *   undefined outside any group of the kind.
  */
-function getGroupTitle(element, kind, selectors) {
+function getGroupTitle(element, kind, selectors, hiddenSelector) {
   const group = element.closest(`[data-axel-${kind}]`);
 
   if (!group) {
@@ -47,7 +49,7 @@ function getGroupTitle(element, kind, selectors) {
     const title = findTitle(element, scope, selector);
 
     if (title) {
-      return getLabel(title);
+      return getLabel(title, hiddenSelector);
     }
   }
 
@@ -95,20 +97,21 @@ export function click(axel) {
     }
 
     const isLink = element instanceof HTMLAnchorElement;
-    const params = { link_text: getLabel(element), click_type: isLink ? 'link' : 'button' };
+    const { groupTitleSelector, hiddenTextSelector } = axel.settings;
+    const params = { link_text: getLabel(element, hiddenTextSelector), click_type: isLink ? 'link' : 'button' };
     const linkUrl = isLink ? resolveUrl(element, 'href', axel.settings) : getSubmitDestination(element, axel.settings);
 
     if (linkUrl !== undefined) {
       params.link_url = linkUrl;
     }
 
-    const groupTitle = getGroupTitle(element, 'group', ['[data-axel-group-title]', axel.settings.groupTitleSelector]);
+    const groupTitle = getGroupTitle(element, 'group', ['[data-axel-group-title]', groupTitleSelector], hiddenTextSelector);
 
     if (groupTitle !== undefined) {
       params.group_title = groupTitle;
     }
 
-    const subgroupTitle = getGroupTitle(element, 'subgroup', ['[data-axel-subgroup-title]']);
+    const subgroupTitle = getGroupTitle(element, 'subgroup', ['[data-axel-subgroup-title]'], hiddenTextSelector);
 
     if (subgroupTitle !== undefined) {
       params.subgroup_title = subgroupTitle;

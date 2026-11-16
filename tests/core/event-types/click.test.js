@@ -57,6 +57,30 @@ describe('click', () => {
     expect(window.dataLayer.map((event) => event.group_title)).toEqual(['Not a title', 'Latest news']);
   });
 
+  it('leaves text matching the hidden text selector out of link text and titles, then falls back to the full text', () => {
+    axel.destroy();
+    axel = new Axel({ adapter: gtm, hiddenTextSelector: '.visually-hidden' }).init();
+
+    ['#hidden-text-suffix', '#hidden-text-title', '#hidden-text-label', '#hidden-text-only'].forEach((selector) => document.querySelector(selector).click());
+
+    expect(window.dataLayer.map((event) => ({ link_text: event.link_text, group_title: event.group_title, subgroup_title: event.subgroup_title }))).toEqual([
+      { link_text: 'Docs', group_title: 'Resources', subgroup_title: 'Guides' },
+      { link_text: 'GitHub', group_title: 'Resources', subgroup_title: 'Guides' },
+      { link_text: 'LinkedIn', group_title: 'Resources', subgroup_title: 'Guides' },
+      { link_text: 'Close', group_title: 'Resources', subgroup_title: 'Guides' },
+    ]);
+  });
+
+  it('keeps the full text of a title that matches the hidden text selector as a whole', () => {
+    document.querySelector('#hidden-text-suffix').insertAdjacentHTML('beforebegin', '<h3 class="visually-hidden">Hidden heading</h3>');
+    axel.destroy();
+    axel = new Axel({ adapter: gtm, hiddenTextSelector: '.visually-hidden' }).init();
+
+    document.querySelector('#hidden-text-suffix').click();
+
+    expect(window.dataLayer[0].group_title).toBe('Hidden heading');
+  });
+
   it('keeps query strings and contact addresses with the full URLs setting', () => {
     axel.destroy();
     axel = new Axel({ adapter: gtm, types: ['click', 'form_start'], fullUrls: true }).init();

@@ -32,6 +32,8 @@ export const DEFAULT_SETTINGS = {
   clickSelector: 'a[href], button, input[type="submit"], input[type="button"], input[type="reset"]',
   // Headings that title a data-axel-group when it has no marker.
   groupTitleSelector: 'h2, h3, h4',
+  // Elements whose text labels leave out, such as visually hidden text.
+  hiddenTextSelector: '',
   // Functions named by data-axel-collector, as name => function.
   collectors: {},
   // Keep query strings and contact addresses in link_url and form_destination.

@@ -17,7 +17,7 @@ flowchart TB
     subgraph core[src/core - shared by every bundle]
         coreJs[core.js<br>Axel, TYPES, init]
         eventTypes[event-types/<br>click, form-start, field-complete, form-submit]
-        dom[dom.js<br>listen, getText, getLabel, collectParams, isSkipped, resolveUrl, formParams]
+        dom[dom.js<br>listen, getText, collapseWhitespace, getLabel, collectParams, isSkipped, resolveUrl, formParams]
     end
     subgraph adapters[src/adapters - where events go]
         gtm[gtm.js]
@@ -111,6 +111,8 @@ Each event type decides whether an interaction counts and derives its own parame
 - `form_start` takes the closest `data-axel-form` and records its name in a `Set`, so each form name starts once, even after an AJAX response replaces the form element. It registers an `onSend()` handler that removes the name when a `form_submit` for it goes out, so the next attempt starts again.
 - `field_complete` sends on every `change` inside a marked form, with the form parameters, `field_name` and a `field_label` that never reads a value. A radio never reports its own label.
 - `form_submit` records each marker in a `WeakSet` and sends its `form_name`. `formSubmitted()` sends the same event directly, whatever the configured types.
+
+`getLabel()` builds `link_text`, `group_title` and `subgroup_title`, and `getFieldLabel()` builds `field_label`. Both read text through `getText()`, which skips `aria-hidden="true"` elements, `select` and `textarea` and the `hiddenTextSelector` matches, then collapse it with `collapseWhitespace()`. When that text is empty, they fall back to `aria-label`, then `title` for `getLabel()`, then the text with the `hiddenTextSelector` matches kept, so the setting never empties a label that had text.
 
 `track()` lets `data-axel-param-*` values override derived parameters, then merges what `collect()` returns over both. `collect()` looks the closest `data-axel-collector` name up with `Object.hasOwn()`, so a name such as `toString` can't reach the prototype. An unknown name, a throw or a non-object result logs `console.error` and adds nothing, so the event still goes out. `send()` puts the `properties` setting underneath everything. `isDebug()` reads the debug hash and `sessionStorage` on every send, so debug mode survives navigation within a tab and falls back to the hash when storage is blocked.
 
