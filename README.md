@@ -399,6 +399,8 @@ Field events never carry what a visitor typed or chose: `field_complete` reports
 
 URLs can hold personal information too, such as the token in `/reset?token=abc`. So `link_url` and `form_destination` send each URL without its query string. A `mailto:`, `tel:` or `sms:` URL sends only its scheme, such as `tel:`. The fragment stays, so a link to `#contact` still shows which section it opens. To send every URL as it is, set `fullUrls` to `true` after you've checked your URLs for personal information.
 
+`link_url` and `form_destination` also drop the username and password from each URL, such as `user:pass@` in `https://user:pass@example.com/`. Visitors can open a site behind HTTP basic auth, such as a staging environment, with the credentials in the address. The browser then resolves every relative link and form action on the page with those credentials. Setting `fullUrls` to `true` still drops them. To send them too, set `keepUrlCredentials` to `true`.
+
 Parameters you render yourself are sent as they are. Keep personal information out of `data-axel-param-*` values and out of your own adapters and collectors.
 
 ### Adapters
@@ -498,6 +500,7 @@ The following table lists every setting:
 | `groupTitleSelector` | `'h2, h3, h4'`                                                | Headings that title a group without a `data-axel-group-title` marker.               |
 | `collectors`      | `{}`                                                             | [Collectors](#collectors) by name.                                                  |
 | `fullUrls`        | `false`                                                          | If true, `link_url` and `form_destination` keep the query string and the address of a `mailto:`, `tel:` or `sms:` URL. See [Privacy](#privacy). |
+| `keepUrlCredentials` | `false`                                                       | If true, `link_url` and `form_destination` keep the username and password of a URL. See [Privacy](#privacy). |
 | `debugHash`       | `'#axel-debug'`                                                  | URL hash that turns on debug mode.                                                  |
 | `debugStorageKey` | `'axelDebug'`                                                    | `sessionStorage` key that keeps debug mode on until the tab closes.                 |
 | `autoInit`        | `true`                                                           | If true, a plain-page bundle starts tracking when it loads. If false, call `window.axel.init()` yourself. Drupal bundles always start in the behavior. |

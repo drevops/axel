@@ -36,6 +36,8 @@ export const DEFAULT_SETTINGS = {
   collectors: {},
   // Keep query strings and contact addresses in link_url and form_destination.
   fullUrls: false,
+  // Keep the username and password in link_url and form_destination.
+  keepUrlCredentials: false,
   debugHash: '#axel-debug',
   debugStorageKey: 'axelDebug',
   // Used by the standalone integration only.

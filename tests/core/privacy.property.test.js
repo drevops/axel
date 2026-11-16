@@ -28,6 +28,21 @@ const urlWithQuery = fc
   })
   .map(({ base, query, fragment }) => `${base}?token=${MARKER}&${query}${fragment}`);
 
+const urlWithCredentials = fc
+  .record({
+    base: fc.webUrl({ authoritySettings: { withIPv4: true, withIPv6: true, withPort: true }, withQueryParameters: true, withFragments: true }),
+    username: secret,
+    password: fc.option(secret, { nil: '' }),
+  })
+  .map(({ base, username, password }) => {
+    const url = new URL(base);
+
+    url.username = username;
+    url.password = password;
+
+    return url.href;
+  });
+
 const contactUrl = fc
   .record({
     scheme: fc.mixedCase(fc.constantFrom(...CONTACT_SCHEMES)),
@@ -85,12 +100,12 @@ function record(settings, interaction) {
  * Point the link, the submit button's form and the marked form of the URL
  * privacy case at the same URL, then click and focus them.
  *
- * @param {string}  url      - The URL.
- * @param {boolean} fullUrls - The 'fullUrls' setting.
+ * @param {string} url      - The URL.
+ * @param {object} settings - Overrides for DEFAULT_SETTINGS.
  * @return {Array<string|undefined>} The 'link_url' of the link and the button,
  *   then the 'form_destination' of the form.
  */
-function sendUrl(url, fullUrls = false) {
+function sendUrl(url, settings = {}) {
   const link = document.querySelector('#privacy-url-query');
   const button = document.querySelector('#privacy-url-submit');
   const field = document.querySelector('#privacy-url-field');
@@ -99,7 +114,7 @@ function sendUrl(url, fullUrls = false) {
   button.form.setAttribute('action', url);
   field.form.setAttribute('action', url);
 
-  const events = record({ types: ALL_TYPES, fullUrls }, () => {
+  const events = record({ types: ALL_TYPES, ...settings }, () => {
     link.click();
     button.click();
     field.focus();
@@ -224,7 +239,37 @@ describe('privacy properties', () => {
       fc.property(fc.oneof(urlWithQuery, contactUrl), (url) => {
         const expected = parse(url)?.href;
 
-        expect(sendUrl(url, true)).toEqual([expected, expected, expected]);
+        expect(sendUrl(url, { fullUrls: true })).toEqual([expected, expected, expected]);
+      }),
+    );
+  });
+
+  it('sends URLs without their username and password', () => {
+    fc.assert(
+      fc.property(urlWithCredentials, fc.boolean(), (url, fullUrls) => {
+        const expected = parse(url);
+
+        expected.username = '';
+        expected.password = '';
+
+        if (!fullUrls) {
+          expected.search = '';
+        }
+
+        sendUrl(url, { fullUrls }).forEach((sent) => {
+          expect(sent).not.toContain(MARKER);
+          expect(sent).toBe(expected.href);
+        });
+      }),
+    );
+  });
+
+  it('sends the username and password with the keep URL credentials setting', () => {
+    fc.assert(
+      fc.property(urlWithCredentials, (url) => {
+        const expected = parse(url).href;
+
+        expect(sendUrl(url, { fullUrls: true, keepUrlCredentials: true })).toEqual([expected, expected, expected]);
       }),
     );
   });
@@ -236,7 +281,7 @@ describe('privacy properties', () => {
       fc.property(attributeValue, (value) => {
         link.setAttribute('href', value);
 
-        expect(() => resolveUrl(link, 'href', true)).not.toThrow();
+        expect(() => resolveUrl(link, 'href', { fullUrls: true, keepUrlCredentials: true })).not.toThrow();
 
         const expected = parse(value);
         const events = record({}, () => link.click());
