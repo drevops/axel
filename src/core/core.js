@@ -32,6 +32,10 @@ export const DEFAULT_SETTINGS = {
   clickSelector: 'a[href], button, input[type="submit"], input[type="button"], input[type="reset"]',
   // Headings that title a data-axel-group when it has no marker.
   groupTitleSelector: 'h2, h3, h4',
+  // Elements whose text labels leave out, such as visually hidden text.
+  hiddenTextSelector: '',
+  // A function(label, element) that returns the label to send.
+  labelFilter: null,
   // Functions named by data-axel-collector, as name => function.
   collectors: {},
   // Keep query strings and contact addresses in link_url and form_destination.
@@ -71,6 +75,13 @@ export class Axel {
       }
     });
 
+    const { labelFilter } = this.settings;
+
+    if (labelFilter !== null && labelFilter !== undefined && typeof labelFilter !== 'function') {
+      throw new Error('The analytics label filter must be a function.');
+    }
+
+    this.labelOptions = { hiddenSelector: this.settings.hiddenTextSelector, filter: (label, element) => this.filterLabel(label, element) };
     this.cleanups = null;
     this.sendHandlers = new Set();
   }
@@ -156,6 +167,38 @@ export class Axel {
       console.error(`[axel] ${error.message}`);
 
       return {};
+    }
+  }
+
+  /**
+   * Run the 'labelFilter' setting on a label.
+   *
+   * A failing filter keeps the label as it is, so the event is still sent.
+   *
+   * @param {string}  label   - The label with whitespace collapsed.
+   * @param {Element} element - The element the label names.
+   * @return {string} The label to send.
+   */
+  filterLabel(label, element) {
+    const { labelFilter } = this.settings;
+
+    if (!labelFilter) {
+      return label;
+    }
+
+    try {
+      const filtered = labelFilter(label, element);
+
+      if (typeof filtered !== 'string') {
+        throw new Error('The analytics label filter must return a string.');
+      }
+
+      return filtered;
+    } catch (error) {
+      // A site's filter can throw a value that isn't an Error, such as null.
+      console.error(`[axel] ${error?.message ?? error}`);
+
+      return label;
     }
   }
 

@@ -3,7 +3,7 @@
  * The 'field_complete' event for a changed field inside a marked form.
  */
 
-import { formParams, getText, isSkipped, listen } from '../dom.js';
+import { formParams, getTextLabel, isSkipped, listen } from '../dom.js';
 
 /**
  * Get the label of a field without its value.
@@ -11,14 +11,16 @@ import { formParams, getText, isSkipped, listen } from '../dom.js';
  * An option's label is the answer, so radios and checkboxes in a fieldset are
  * named by the fieldset legend, and a radio never by its own label.
  *
- * @param {Element} field - The field.
+ * @param {Element} field   - The field.
+ * @param {object}  options - The options of getTextLabel().
  * @return {string} The label, or an empty string.
  */
-function getFieldLabel(field) {
+function getFieldLabel(field, options) {
   const legend = ['checkbox', 'radio'].includes(field.type) ? field.closest('fieldset')?.querySelector(':scope > legend') : null;
   const label = legend || (field.type === 'radio' ? null : field.labels?.[0]);
+  const fallback = field.getAttribute('aria-label') || '';
 
-  return (label ? getText(label).replace(/\s+/g, ' ').trim() : '') || field.getAttribute('aria-label') || '';
+  return label ? getTextLabel(label, field, fallback, options) : fallback;
 }
 
 /**
@@ -42,7 +44,7 @@ export function fieldComplete(axel) {
       params.field_name = field.name;
     }
 
-    params.field_label = getFieldLabel(field);
+    params.field_label = getFieldLabel(field, axel.labelOptions);
 
     axel.track('field_complete', field, params);
   });

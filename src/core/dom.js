@@ -26,10 +26,12 @@ export function listen(type, handler) {
  *
  * Form controls contribute no text, so a field value never ends up in a label.
  *
- * @param {Node} node - The node.
+ * @param {Node}   node           - The node.
+ * @param {string} hiddenSelector - Elements whose text is skipped as well, or
+ *   an empty string to skip none.
  * @return {string} The text of the node and its descendants.
  */
-export function getText(node) {
+export function getText(node, hiddenSelector) {
   if (node.nodeType === Node.TEXT_NODE) {
     return node.textContent;
   }
@@ -38,22 +40,60 @@ export function getText(node) {
     return '';
   }
 
-  return [...node.childNodes].map(getText).join('');
+  if (hiddenSelector && node.matches(hiddenSelector)) {
+    return '';
+  }
+
+  return [...node.childNodes].map((child) => getText(child, hiddenSelector)).join('');
+}
+
+/**
+ * Collapse runs of whitespace into single spaces and trim the ends.
+ *
+ * @param {string} text - The text.
+ * @return {string} The collapsed text.
+ */
+export function collapseWhitespace(text) {
+  return text.replace(/\s+/g, ' ').trim();
+}
+
+/**
+ * Get the text of a node as a label, or a fallback when it has none.
+ *
+ * Text that matches 'hiddenSelector' is left out and the rest goes through
+ * 'filter'. The full text comes after the fallback, so a node named only by
+ * hidden text keeps that text as its label.
+ *
+ * @param {Node}    node     - The node that holds the text.
+ * @param {Element} element  - The element the label names, passed to 'filter'.
+ * @param {string}  fallback - The label to use when the text is empty.
+ * @param {object}  options  - 'hiddenSelector', a CSS selector or an empty
+ *   string, and 'filter(label, element)', which returns the label to send.
+ * @return {string} The label.
+ */
+export function getTextLabel(node, element, fallback, { hiddenSelector, filter }) {
+  const text = (selector) => filter(collapseWhitespace(getText(node, selector)), element);
+
+  return text(hiddenSelector) || fallback || (hiddenSelector ? text('') : '');
 }
 
 /**
  * Get the text that names an element in the reports.
  *
  * @param {Element} element - The element.
- * @return {string} The text with whitespace collapsed, or the element's label
- *   when it has no text.
+ * @param {object}  options - The options of getTextLabel().
+ * @return {string} The text with whitespace collapsed, or the element's
+ *   'aria-label' or 'title' when it has no text.
  */
-export function getLabel(element) {
-  // Only a button input's value is its label; any other input value is typed.
-  const isButton = element instanceof HTMLInputElement && ['submit', 'button', 'reset'].includes(element.type);
-  const value = isButton ? element.value : getText(element);
+export function getLabel(element, options) {
+  const fallback = element.getAttribute('aria-label') || element.getAttribute('title') || '';
 
-  return value.replace(/\s+/g, ' ').trim() || element.getAttribute('aria-label') || element.getAttribute('title') || '';
+  // Only a button input's value is its label; any other input value is typed.
+  if (element instanceof HTMLInputElement && ['submit', 'button', 'reset'].includes(element.type)) {
+    return options.filter(collapseWhitespace(element.value), element) || fallback;
+  }
+
+  return getTextLabel(element, element, fallback, options);
 }
 
 /**

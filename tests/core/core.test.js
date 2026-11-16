@@ -97,6 +97,7 @@ describe('Axel', () => {
       { adapter: vi.fn(), collectors: { position: 'position' } },
       'The analytics collector "position" must be a function.',
     ],
+    ['a label filter that is not a function', { adapter: vi.fn(), labelFilter: 'trim' }, 'The analytics label filter must be a function.'],
   ])('throws on %s', (_description, settings, message) => {
     expect(() => new Axel(settings)).toThrow(message);
   });
@@ -170,6 +171,49 @@ describe('Axel', () => {
 
       expect(sent()).toEqual([['cta_click', PARAMS]]);
       expect(error.mock.calls.map(([message]) => message)).toEqual(errors);
+    });
+  });
+
+  describe('label filter', () => {
+    let error;
+
+    beforeEach(() => {
+      error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    });
+
+    it('sends the label the filter returns and passes it the element the label names', () => {
+      const labelFilter = vi.fn((label) => `${label}!`);
+
+      axel = new Axel({ adapter, labelFilter }).init();
+      document.querySelector('#link').click();
+
+      expect(labelFilter).toHaveBeenCalledWith('Go', document.querySelector('#link'));
+      expect(sent()).toEqual([['cta_click', { ...PARAMS, link_text: 'Go!' }]]);
+    });
+
+    it.each([
+      [
+        'a filter that throws',
+        () => {
+          throw new Error('Broken.');
+        },
+        '[axel] Broken.',
+      ],
+      [
+        'a filter that throws null',
+        () => {
+          throw null;
+        },
+        '[axel] null',
+      ],
+      ['a filter that returns a number', () => 1, '[axel] The analytics label filter must return a string.'],
+      ['a filter that returns nothing', () => undefined, '[axel] The analytics label filter must return a string.'],
+    ])('keeps the label for %s', (_description, labelFilter, message) => {
+      axel = new Axel({ adapter, labelFilter }).init();
+      document.querySelector('#link').click();
+
+      expect(sent()).toEqual([['cta_click', PARAMS]]);
+      expect(error.mock.calls.map(([logged]) => logged)).toEqual([message]);
     });
   });
 

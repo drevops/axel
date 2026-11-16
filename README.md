@@ -342,11 +342,11 @@ A `data-axel-param-*` attribute overrides a derived parameter of the same name. 
 
 The script derives each parameter as follows:
 
-- `link_text` is the visible text of the link or button with whitespace collapsed. It skips `aria-hidden="true"` content and falls back to `aria-label`, then `title`. For an input button, it's the button's `value`.
+- `link_text` is the text of the link or button with whitespace collapsed. It skips `aria-hidden="true"` content and the elements that match the `hiddenTextSelector` setting. A [label filter](#label-filter) rewrites the text next. When that leaves no text, `link_text` falls back to `aria-label`, then `title`, then the text of the matching elements. For an input button, it's the button's `value`.
 - `click_type` is `link` for a link and `button` for every other element.
 - `link_url` is the absolute address of the link, without the parts [Privacy](#privacy) describes. For a submit button, it's the button's `formaction`, or the `action` of its form. A submit button with neither sends no `link_url`, and neither does an address that isn't a valid URL.
 - `form_id` is the `id` of the marked element. `form_destination` is the absolute `action` address, when the marked element is a `<form>` with an `action` attribute that holds a valid URL.
-- `field_label` is the text of the field's `<label>`, or its `aria-label`. For a radio button or checkbox inside a `<fieldset>`, it's the fieldset's `<legend>`, because the option's own label is the visitor's answer. A radio button outside a fieldset reports only its `aria-label`.
+- `field_label` is the text of the field's `<label>`, without the elements that match `hiddenTextSelector` and rewritten by a label filter. When that leaves no text, `field_label` falls back to the field's `aria-label`, then the text of the matching elements. For a radio button or checkbox inside a `<fieldset>`, it's the fieldset's `<legend>`, because the option's own label is the visitor's answer. A radio button outside a fieldset reports only its `aria-label`.
 
 Only the server knows that a submission succeeded, so `form_submit` waits for a confirmation it renders. Render `data-axel-form-submitted` into the confirmation message:
 
@@ -387,7 +387,7 @@ The script searches the elements that come before the clicked element inside the
 
 A card heading inside the group also matches `groupTitleSelector`, so a click in a card titled by an `<h3>` sends the card's title as `group_title`. To send the section heading, mark it with `data-axel-group-title`.
 
-Titles inside `data-axel-skip` never count. A group with no match sends an empty `group_title`, and a click outside every group sends none.
+A title's text follows the same rules as `link_text`, including `hiddenTextSelector` and the label filter. Titles inside `data-axel-skip` never count. A group with no match sends an empty `group_title`, and a click outside every group sends none.
 
 The closest group bounds the search, so a nested group takes no title from its parent. When the heading sits outside the markup you render, set `data-axel-group-scope` on the group to a selector for an ancestor that holds the heading. A selector that matches no ancestor keeps the search inside the group.
 
@@ -473,6 +473,20 @@ An unknown name, a collector that throws or a result that isn't an object logs a
 
 With `axel.esm.js`, pass the same object as the `collectors` setting. The bundles add `window.axelCollectors` to that setting, which suits Drupal because `drupalSettings` can't hold functions.
 
+### Label filter
+
+A label filter is a function that rewrites `link_text`, `group_title`, `subgroup_title` and `field_label` before they're sent. It receives the label with whitespace collapsed and the element the label names, and returns the label to send. To drop a suffix that a theme adds to every external link, define `window.axelLabelFilter` before the bundle starts:
+
+```html
+<script>
+  window.axelLabelFilter = (label) => label.replace(/\s*\(Opens in a new tab\/window\)$/, '');
+</script>
+```
+
+When the filter returns an empty string, the label falls back to the attributes that [Event types](#event-types) lists, such as `title`. So 3 icon-only links that end in the same suffix send their own titles. A filter that throws or returns something other than a string logs an error to the console. The event still goes out, with the label unchanged.
+
+To drop whole elements, such as screen-reader-only text, set `hiddenTextSelector` instead. With `axel.esm.js`, pass the function as the `labelFilter` setting. On a plain page, a `labelFilter` in `window.axelSettings` wins over `window.axelLabelFilter`.
+
 ### Settings
 
 To change the defaults on a plain page, define `window.axelSettings` before the bundle loads:
@@ -498,6 +512,8 @@ The following table lists every setting:
 | `properties`      | `{}`                                                             | Static parameters added to every event. Every other parameter overrides them.       |
 | `clickSelector`   | `'a[href], button, input[type="submit"], input[type="button"], input[type="reset"]'` | Elements whose clicks the `click` type tracks.                  |
 | `groupTitleSelector` | `'h2, h3, h4'`                                                | Headings that title a group without a `data-axel-group-title` marker.               |
+| `hiddenTextSelector` | `''`                                                          | Elements whose text `link_text`, `group_title`, `subgroup_title` and `field_label` leave out, such as `'.visually-hidden, .sr-only'` for screen-reader-only text. An empty string keeps all text. See [Event types](#event-types). |
+| `labelFilter`     | `null`                                                           | A function that rewrites each label before it's sent. See [Label filter](#label-filter). |
 | `collectors`      | `{}`                                                             | [Collectors](#collectors) by name.                                                  |
 | `fullUrls`        | `false`                                                          | If true, `link_url` and `form_destination` keep the query string and the address of a `mailto:`, `tel:` or `sms:` URL. See [Privacy](#privacy). |
 | `keepUrlCredentials` | `false`                                                       | If true, `link_url` and `form_destination` keep the username and password of a URL. See [Privacy](#privacy). |
@@ -506,7 +522,7 @@ The following table lists every setting:
 | `autoInit`        | `true`                                                           | If true, a plain-page bundle starts tracking when it loads. If false, call `window.axel.init()` yourself. Drupal bundles always start in the behavior. |
 | `dataLayerName`   | `'dataLayer'`                                                    | Name of the data layer array on `window`. Only the `gtm` and `gtag` adapters read it. |
 
-A missing adapter, an unknown event type or a collector that isn't a function throws an error when the instance is created, so a typo fails before any event is lost.
+The instance throws an error when it's created if the adapter is missing, an event type is unknown, or a collector or the label filter isn't a function. So a typo fails before any event is lost.
 
 Every bundle except `axel.esm.js` exposes the class as `window.Axel` and the shared instance as `window.axel`. Call `destroy()` on an instance to stop tracking, and `init()` to start again with the same settings.
 
@@ -538,7 +554,7 @@ Axel runs on every page that loads it. Here's what a bundle does on the page:
 
 `tests/bundles.test.js` fails when a built bundle contains a network, storage or code-evaluation API, such as `fetch()`, `document.cookie` or `eval()`.
 
-Axel trusts the page that loads it. `window.axelSettings`, `window.axelAdapter` and `window.axelCollectors` carry the same trust as the page's own scripts, because any script on the page can set them. Load the bundle only on pages whose scripts you control.
+Axel trusts the page that loads it. `window.axelSettings`, `window.axelAdapter`, `window.axelCollectors` and `window.axelLabelFilter` carry the same trust as the page's own scripts, because any script on the page can set them. Load the bundle only on pages whose scripts you control.
 
 Anyone can add `#axel-debug` to a URL. Debug mode logs events to that visitor's own console. The `gtm` and `gtag` adapters also add `debug_mode: true` to that visitor's events, so Google Analytics lists them in DebugView.
 
