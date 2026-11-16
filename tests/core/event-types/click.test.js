@@ -77,7 +77,10 @@ describe('click', () => {
   it.each([
     [{}, ['https://example.com/blog/post', 'https://example.com/subscribe', 'https://example.com/apply']],
     [{ fullUrls: true }, ['https://example.com/blog/post?page=2', 'https://example.com/subscribe?list=news', 'https://example.com/apply?ref=jane']],
-    [{ keepUrlCredentials: true }, ['https://jane:secret@example.com/blog/post', 'https://jane:secret@example.com/subscribe', 'https://jane:secret@example.com/apply']],
+    [
+      { keepUrlCredentials: true },
+      ['https://jane:secret@example.com/blog/post', 'https://jane:secret@example.com/subscribe', 'https://jane:secret@example.com/apply'],
+    ],
   ])('resolves relative URLs against a base URL with credentials with %j', (settings, expected) => {
     const base = document.createElement('base');
 
