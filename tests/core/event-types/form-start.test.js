@@ -66,9 +66,19 @@ describe('form_start', () => {
   });
 
   it.each([
-    ['sends the first listed attribute with a value as form_id', ['data-drupal-selector', 'id'], { 'data-drupal-selector': 'contact', id: 'contact--a1B2' }, { form_id: 'contact' }],
+    [
+      'sends the first listed attribute with a value as form_id',
+      ['data-drupal-selector', 'id'],
+      { 'data-drupal-selector': 'contact', id: 'contact--a1B2' },
+      { form_id: 'contact' },
+    ],
     ['falls back to the next attribute when the first is missing', ['data-drupal-selector', 'id'], { id: 'contact' }, { form_id: 'contact' }],
-    ['falls back to the next attribute when the first is empty', ['data-drupal-selector', 'id'], { 'data-drupal-selector': '', id: 'contact' }, { form_id: 'contact' }],
+    [
+      'falls back to the next attribute when the first is empty',
+      ['data-drupal-selector', 'id'],
+      { 'data-drupal-selector': '', id: 'contact' },
+      { form_id: 'contact' },
+    ],
     ['sends no form_id when no listed attribute has a value', ['data-drupal-selector'], { id: 'contact' }, {}],
     ['sends no form_id when the list is empty', [], { id: 'contact' }, {}],
   ])('%s', (_title, formIdAttributes, attributes, expected) => {
