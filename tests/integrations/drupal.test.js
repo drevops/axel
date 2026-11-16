@@ -79,6 +79,41 @@ describe('Drupal integration', () => {
     expect(adapter.send).toHaveBeenCalledWith('cta_click', expect.objectContaining({ link_text: 'Shnk' }), expect.any(Object));
   });
 
+  it('reads the form ID from data-drupal-selector, then id, by default', () => {
+    start(adapter);
+    attach();
+
+    expect(window.axel.settings.formIdAttributes).toEqual(['data-drupal-selector', 'id']);
+  });
+
+  it('reads the form ID from the attributes in drupalSettings', () => {
+    window.drupalSettings.axel = { formIdAttributes: ['id'] };
+
+    start(adapter);
+    attach();
+
+    expect(window.axel.settings.formIdAttributes).toEqual(['id']);
+  });
+
+  it('sends the same form ID after an AJAX response redraws the form with a new id', () => {
+    const form = (id) => `<form id="${id}" data-drupal-selector="contact-form" data-axel-form="contact"><input id="field" name="name"></form>`;
+
+    window.drupalSettings.axel = { types: ['form_start', 'field_complete'] };
+    document.body.innerHTML = form('contact-form');
+
+    start(adapter);
+    attach();
+    document.querySelector('#field').focus();
+    document.querySelector('#contact-form').outerHTML = form('contact-form--sKry3dUurl4');
+    attach(document.body);
+    document.querySelector('#field').dispatchEvent(new Event('change', { bubbles: true }));
+
+    expect(adapter.send.mock.calls.map(([name, params]) => [name, params.form_id])).toEqual([
+      ['form_start', 'contact-form'],
+      ['field_complete', 'contact-form'],
+    ]);
+  });
+
   it('uses the page adapter defined before the behavior attaches', () => {
     start();
     window.axelAdapter = adapter;

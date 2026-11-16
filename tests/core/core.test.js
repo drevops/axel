@@ -98,6 +98,16 @@ describe('Axel', () => {
       'The analytics collector "position" must be a function.',
     ],
     ['a label filter that is not a function', { adapter: vi.fn(), labelFilter: 'trim' }, 'The analytics label filter must be a function.'],
+    [
+      'form ID attributes that are not an array',
+      { adapter: vi.fn(), formIdAttributes: 'id' },
+      'The formIdAttributes setting must be an array of attribute names.',
+    ],
+    [
+      'form ID attributes that hold a non-string',
+      { adapter: vi.fn(), formIdAttributes: ['id', null] },
+      'The formIdAttributes setting must be an array of attribute names.',
+    ],
   ])('throws on %s', (_description, settings, message) => {
     expect(() => new Axel(settings)).toThrow(message);
   });

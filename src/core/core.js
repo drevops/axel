@@ -42,6 +42,8 @@ export const DEFAULT_SETTINGS = {
   fullUrls: false,
   // Keep the username and password in link_url and form_destination.
   keepUrlCredentials: false,
+  // Attributes of the marked form that form_id is read from, in order.
+  formIdAttributes: ['id'],
   debugHash: '#axel-debug',
   debugStorageKey: 'axelDebug',
   // Used by the standalone integration only.
@@ -75,10 +77,14 @@ export class Axel {
       }
     });
 
-    const { labelFilter } = this.settings;
+    const { labelFilter, formIdAttributes } = this.settings;
 
     if (labelFilter !== null && labelFilter !== undefined && typeof labelFilter !== 'function') {
       throw new Error('The analytics label filter must be a function.');
+    }
+
+    if (!Array.isArray(formIdAttributes) || !formIdAttributes.every((attribute) => typeof attribute === 'string')) {
+      throw new Error('The formIdAttributes setting must be an array of attribute names.');
     }
 
     this.labelOptions = { hiddenSelector: this.settings.hiddenTextSelector, filter: (label, element) => this.filterLabel(label, element) };
