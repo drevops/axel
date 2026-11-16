@@ -199,6 +199,13 @@ describe('Axel', () => {
         },
         '[axel] Broken.',
       ],
+      [
+        'a filter that throws null',
+        () => {
+          throw null;
+        },
+        '[axel] null',
+      ],
       ['a filter that returns a number', () => 1, '[axel] The analytics label filter must return a string.'],
       ['a filter that returns nothing', () => undefined, '[axel] The analytics label filter must return a string.'],
     ])('keeps the label for %s', (_description, labelFilter, message) => {

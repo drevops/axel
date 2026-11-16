@@ -195,7 +195,8 @@ export class Axel {
 
       return filtered;
     } catch (error) {
-      console.error(`[axel] ${error.message}`);
+      // A site's filter can throw a value that isn't an Error, such as null.
+      console.error(`[axel] ${error?.message ?? error}`);
 
       return label;
     }
