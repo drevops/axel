@@ -704,6 +704,26 @@
 ]</pre>
 </section>
 
+<section class="case" id="case-privacy-url-credentials" data-steps="click #privacy-credentials-link; click #privacy-credentials-submit; click #privacy-credentials-formaction; focus #privacy-credentials-field">
+  <h3>URLs are sent without their username and password</h3>
+  <div data-axel-event="privacy_click">
+    <a id="privacy-credentials-link" href="https://jane:secret@example.com/blog/post">Read the post</a>
+    <form action="https://jane:secret@example.com/subscribe">
+      <button id="privacy-credentials-submit">Subscribe</button>
+      <button id="privacy-credentials-formaction" formaction="https://jane@example.com/unsubscribe">Unsubscribe</button>
+    </form>
+  </div>
+  <form id="privacy-credentials-form" data-axel-form="credentials" action="https://jane:secret@example.com/contact">
+    <input id="privacy-credentials-field" type="text" name="name" aria-label="Name">
+  </form>
+  <pre class="expected">[
+  { "event": "privacy_click", "link_text": "Read the post", "click_type": "link", "link_url": "https://example.com/blog/post" },
+  { "event": "privacy_click", "link_text": "Subscribe", "click_type": "button", "link_url": "https://example.com/subscribe" },
+  { "event": "privacy_click", "link_text": "Unsubscribe", "click_type": "button", "link_url": "https://example.com/unsubscribe" },
+  { "event": "form_start", "form_name": "credentials", "form_id": "privacy-credentials-form", "form_destination": "https://example.com/contact" }
+]</pre>
+</section>
+
 <script>
   window.axelSettings = { types: ['click', 'form_start', 'field_complete', 'form_submit'] };
 

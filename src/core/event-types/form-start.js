@@ -24,7 +24,7 @@ export function formStart(axel) {
       return;
     }
 
-    const params = formParams(form, axel.settings.fullUrls);
+    const params = formParams(form, axel.settings);
     // Key on the sent name, so a 'form_submit' under the same name matches.
     const name = collectParams(form).form_name ?? params.form_name;
 

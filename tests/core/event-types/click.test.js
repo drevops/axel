@@ -74,6 +74,33 @@ describe('click', () => {
     ]);
   });
 
+  it.each([
+    [{}, ['https://example.com/blog/post', 'https://example.com/subscribe', 'https://example.com/apply']],
+    [{ fullUrls: true }, ['https://example.com/blog/post?page=2', 'https://example.com/subscribe?list=news', 'https://example.com/apply?ref=jane']],
+    [{ keepUrlCredentials: true }, ['https://jane:secret@example.com/blog/post', 'https://jane:secret@example.com/subscribe', 'https://jane:secret@example.com/apply']],
+  ])('resolves relative URLs against a base URL with credentials with %j', (settings, expected) => {
+    const base = document.createElement('base');
+
+    base.href = 'https://jane:secret@example.com/';
+    document.head.append(base);
+    document.querySelector('#privacy-url-query').setAttribute('href', 'blog/post?page=2');
+    document.querySelector('#privacy-url-submit').form.setAttribute('action', 'subscribe?list=news');
+    document.querySelector('#privacy-url-form').setAttribute('action', 'apply?ref=jane');
+
+    axel.destroy();
+    axel = new Axel({ adapter: gtm, types: ['click', 'form_start'], ...settings }).init();
+
+    try {
+      document.querySelector('#privacy-url-query').click();
+      document.querySelector('#privacy-url-submit').click();
+      document.querySelector('#privacy-url-field').focus();
+    } finally {
+      base.remove();
+    }
+
+    expect(window.dataLayer.map((event) => event.link_url || event.form_destination)).toEqual(expected);
+  });
+
   it('stops sending events once destroyed', () => {
     axel.destroy();
     document.querySelector('#click-link').click();

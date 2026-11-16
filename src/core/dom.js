@@ -96,17 +96,21 @@ export function isSkipped(element) {
  * The attribute is read directly because a form field named like a form
  * property, such as 'action' or 'id', shadows that property on the form.
  *
- * Unless 'fullUrl' is set, the query string is dropped and a 'mailto:', 'tel:'
+ * Unless 'keepUrlCredentials' is set, the username and password are dropped.
+ * A relative URL inherits them from a page opened as 'https://user:pass@host/'.
+ *
+ * Unless 'fullUrls' is set, the query string is dropped and a 'mailto:', 'tel:'
  * or 'sms:' URL is reduced to its scheme, because both often hold personal
  * information.
  *
  * @param {Element} element   - The element.
  * @param {string}  attribute - The attribute name.
- * @param {boolean} fullUrl   - Whether to keep the URL as it is.
+ * @param {object}  options   - The 'fullUrls' and 'keepUrlCredentials'
+ *   settings.
  * @return {string|undefined} The absolute URL, or undefined when the value
  *   isn't a valid URL.
  */
-export function resolveUrl(element, attribute, fullUrl = false) {
+export function resolveUrl(element, attribute, { fullUrls = false, keepUrlCredentials = false } = {}) {
   let url;
 
   try {
@@ -115,7 +119,12 @@ export function resolveUrl(element, attribute, fullUrl = false) {
     return undefined;
   }
 
-  if (fullUrl) {
+  if (!keepUrlCredentials) {
+    url.username = '';
+    url.password = '';
+  }
+
+  if (fullUrls) {
     return url.href;
   }
 
@@ -132,10 +141,10 @@ export function resolveUrl(element, attribute, fullUrl = false) {
  * Get the parameters that describe a marked form.
  *
  * @param {Element} form    - The element with 'data-axel-form'.
- * @param {boolean} fullUrl - Whether to keep the destination URL as it is.
+ * @param {object}  options - The URL settings resolveUrl() takes.
  * @return {object} The form name, and the form ID and destination when known.
  */
-export function formParams(form, fullUrl = false) {
+export function formParams(form, options = {}) {
   const params = { form_name: form.getAttribute('data-axel-form') };
   const id = form.getAttribute('id');
 
@@ -143,7 +152,7 @@ export function formParams(form, fullUrl = false) {
     params.form_id = id;
   }
 
-  const destination = form instanceof HTMLFormElement && form.hasAttribute('action') ? resolveUrl(form, 'action', fullUrl) : undefined;
+  const destination = form instanceof HTMLFormElement && form.hasAttribute('action') ? resolveUrl(form, 'action', options) : undefined;
 
   if (destination !== undefined) {
     params.form_destination = destination;
