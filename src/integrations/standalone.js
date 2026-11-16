@@ -10,14 +10,16 @@ import { Axel, init } from '../core/core.js';
  * the class and the instance on 'window'.
  *
  * The collectors in 'window.axelCollectors' are added to the collectors in the
- * settings.
+ * settings, and 'window.axelLabelFilter' is used when the settings have no
+ * label filter.
  *
  * @param {object} [adapter] - The adapter. Defaults to 'window.axelAdapter'.
  */
 export function start(adapter) {
   const pageSettings = window.axelSettings;
   const collectors = { ...window.axelCollectors, ...pageSettings?.collectors };
-  const settings = { ...pageSettings, collectors, adapter: adapter || window.axelAdapter };
+  const labelFilter = pageSettings?.labelFilter ?? window.axelLabelFilter;
+  const settings = { ...pageSettings, collectors, labelFilter, adapter: adapter || window.axelAdapter };
 
   window.Axel = Axel;
 

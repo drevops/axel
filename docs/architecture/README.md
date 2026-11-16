@@ -17,7 +17,7 @@ flowchart TB
     subgraph core[src/core - shared by every bundle]
         coreJs[core.js<br>Axel, TYPES, init]
         eventTypes[event-types/<br>click, form-start, field-complete, form-submit]
-        dom[dom.js<br>listen, getText, collapseWhitespace, getLabel, collectParams, isSkipped, resolveUrl, formParams]
+        dom[dom.js<br>listen, getText, collapseWhitespace, getTextLabel, getLabel, collectParams, isSkipped, resolveUrl, formParams]
     end
     subgraph adapters[src/adapters - where events go]
         gtm[gtm.js]
@@ -41,7 +41,7 @@ The source splits into 3 layers, and no layer imports another layer's siblings:
 - `src/adapters/` delivers events. An adapter is an object with `send(name, params, context)` and an optional `validate(name, params)`, or a function used as `send()`. `gtm.js` and `gtag.js` share `ga4.js`, which adds `debug_mode` in debug mode, checks the GA4 limits and finds the data layer by `dataLayerName`.
 - `src/integrations/` starts the core. Each exports `start(adapter)`, which falls back to `window.axelAdapter` when no adapter is passed.
 
-The constructor in `core.js` merges the settings over `DEFAULT_SETTINGS`, wraps a function adapter as `{ send }` and throws on a missing adapter, a type name missing from `TYPES` or a `collectors` entry that isn't a function.
+The constructor in `core.js` merges the settings over `DEFAULT_SETTINGS`, wraps a function adapter as `{ send }` and throws on a missing adapter, a type name missing from `TYPES`, a `collectors` entry that isn't a function or a `labelFilter` that isn't a function. It also builds `labelOptions`, the selector and filter every label helper uses.
 
 
 ## Bundles
@@ -68,7 +68,7 @@ The standalone `start()` reads `window.axelSettings`, exposes the class as `wind
 
 The Drupal `start()` exposes the class and registers `Drupal.behaviors.axel`. Its `attach()` calls `init()` with `drupalSettings.axel` and the adapter. `init()` creates the shared instance on the first call and returns it on later calls, so AJAX attaches change nothing.
 
-Both integrations override any `adapter` key in the settings with their own adapter. Both also merge `window.axelCollectors` under the `collectors` setting, because `drupalSettings` is JSON and can't carry functions.
+Both integrations override any `adapter` key in the settings with their own adapter. Both also merge `window.axelCollectors` under the `collectors` setting and read `window.axelLabelFilter` as the `labelFilter` setting, because `drupalSettings` is JSON and can't carry functions. The standalone integration prefers a `labelFilter` already in `window.axelSettings`.
 
 
 ## Lifecycle
@@ -112,7 +112,7 @@ Each event type decides whether an interaction counts and derives its own parame
 - `field_complete` sends on every `change` inside a marked form, with the form parameters, `field_name` and a `field_label` that never reads a value. A radio never reports its own label.
 - `form_submit` records each marker in a `WeakSet` and sends its `form_name`. `formSubmitted()` sends the same event directly, whatever the configured types.
 
-`getLabel()` builds `link_text`, `group_title` and `subgroup_title`, and `getFieldLabel()` builds `field_label`. Both read text through `getText()`, which skips `aria-hidden="true"` elements, `select` and `textarea` and the `hiddenTextSelector` matches, then collapse it with `collapseWhitespace()`. When that text is empty, they fall back to `aria-label`, then `title` for `getLabel()`, then the text with the `hiddenTextSelector` matches kept, so the setting never empties a label that had text.
+`getLabel()` builds `link_text`, `group_title` and `subgroup_title`, and `getFieldLabel()` builds `field_label`. Both go through `getTextLabel()` with the instance's `labelOptions`. It reads text with `getText()`, which skips `aria-hidden="true"` elements, `select` and `textarea` and the `hiddenTextSelector` matches. It then collapses the text with `collapseWhitespace()` and passes it to `filterLabel()`, which runs the `labelFilter` setting and keeps the label when the filter throws or returns a non-string. When the result is empty, it falls back to `aria-label`, then `title` for `getLabel()`, then the filtered text with the `hiddenTextSelector` matches kept, so the selector never empties a label that had text.
 
 `track()` lets `data-axel-param-*` values override derived parameters, then merges what `collect()` returns over both. `collect()` looks the closest `data-axel-collector` name up with `Object.hasOwn()`, so a name such as `toString` can't reach the prototype. An unknown name, a throw or a non-object result logs `console.error` and adds nothing, so the event still goes out. `send()` puts the `properties` setting underneath everything. `isDebug()` reads the debug hash and `sessionStorage` on every send, so debug mode survives navigation within a tab and falls back to the hash when storage is blocked.
 

@@ -19,6 +19,7 @@ describe('standalone integration', () => {
     delete window.axelSettings;
     delete window.axelAdapter;
     delete window.axelCollectors;
+    delete window.axelLabelFilter;
     delete window.axel;
     delete window.Axel;
   });
@@ -66,6 +67,19 @@ describe('standalone integration', () => {
     start(adapter);
 
     expect(window.axel.settings.collectors).toEqual({ page, own });
+  });
+
+  it.each([
+    { name: 'the page label filter when the settings have none', settings: {}, expected: 'page' },
+    { name: 'the label filter in the settings over the page label filter', settings: { labelFilter: () => 'settings' }, expected: 'settings' },
+  ])('uses $name', ({ settings, expected }) => {
+    window.axelLabelFilter = () => 'page';
+    window.axelSettings = settings;
+
+    start(adapter);
+    document.querySelector('#link').click();
+
+    expect(adapter.send).toHaveBeenCalledWith('cta_click', expect.objectContaining({ link_text: expected }), expect.any(Object));
   });
 
   it('throws when no adapter is built in or defined by the page', () => {

@@ -22,6 +22,7 @@ describe('Drupal integration', () => {
     delete window.drupalSettings;
     delete window.axelAdapter;
     delete window.axelCollectors;
+    delete window.axelLabelFilter;
     delete window.axel;
     delete window.Axel;
   });
@@ -67,6 +68,15 @@ describe('Drupal integration', () => {
     attach();
 
     expect(window.axel.settings.collectors).toEqual({ page });
+  });
+
+  it('uses the page label filter defined before the behavior attaches', () => {
+    start(adapter);
+    window.axelLabelFilter = (label) => label.replace(/^Li/, 'Sh');
+    attach();
+    document.querySelector('#link').click();
+
+    expect(adapter.send).toHaveBeenCalledWith('cta_click', expect.objectContaining({ link_text: 'Shnk' }), expect.any(Object));
   });
 
   it('uses the page adapter defined before the behavior attaches', () => {
